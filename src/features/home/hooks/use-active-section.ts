@@ -1,21 +1,30 @@
 import { useEffect, useState } from 'react'
 
 /**
- * Tracks which in-page section is currently under the header,
- * used to highlight the matching navigation link.
+ * Highlights the nav item for the section currently under the sticky header.
+ * Uses document position (not nav order) so consecutive sections don't collide.
  */
-export function useActiveSection(sectionIds: readonly string[], offset = 160): string {
+export function useActiveSection(sectionIds: readonly string[], offset = 120): string {
   const [activeId, setActiveId] = useState<string>(sectionIds[0] ?? '')
 
   useEffect(() => {
     const resolveActiveSection = () => {
-      let current = sectionIds[0] ?? ''
+      const header = document.querySelector('[data-site-header]')
+      const headerOffset =
+        header instanceof HTMLElement ? header.getBoundingClientRect().height + 16 : offset
 
-      for (const id of sectionIds) {
-        const element = document.getElementById(id)
-        if (element && element.getBoundingClientRect().top <= offset) {
-          current = id
-        }
+      const measured = sectionIds
+        .map((id) => {
+          const element = document.getElementById(id)
+          if (!element) return null
+          return { id, top: element.getBoundingClientRect().top }
+        })
+        .filter((item): item is { id: string; top: number } => item !== null)
+        .sort((a, b) => a.top - b.top)
+
+      let current = measured[0]?.id ?? ''
+      for (const item of measured) {
+        if (item.top <= headerOffset) current = item.id
       }
 
       setActiveId(current)

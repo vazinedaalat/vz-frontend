@@ -28,6 +28,7 @@ export function SiteHeader() {
 
   return (
     <header
+      data-site-header
       className={cn(
         'sticky top-0 z-50 border-b transition-all duration-300',
         scrolled

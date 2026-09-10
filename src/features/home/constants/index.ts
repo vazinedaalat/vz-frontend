@@ -51,8 +51,8 @@ export const SECTION_IDS = {
 
 export const NAV_LINKS: readonly NavLink[] = [
   { label: 'خانه', href: `#${SECTION_IDS.home}` },
-  { label: 'خدمات', href: `#${SECTION_IDS.services}` },
   { label: 'درباره ما', href: `#${SECTION_IDS.about}` },
+  { label: 'خدمات', href: `#${SECTION_IDS.services}` },
   { label: 'تماس', href: `#${SECTION_IDS.contact}` },
 ]
 
