@@ -4,6 +4,7 @@ import { Container } from '@/components/shared/container'
 import { Reveal } from '@/components/animated/reveal'
 import { scrollToSection } from '@/utils/scroll'
 import { BRAND, CONTACT_INFO, HERO_PROMISES, SECTION_IDS } from '../constants'
+import { HeroBackdrop } from './hero-backdrop'
 import { HeroVisual } from './hero-visual'
 import { ServiceSelector } from './service-selector'
 import type { ServiceId } from '../types'
@@ -16,10 +17,9 @@ interface HeroSectionProps {
 export function HeroSection({ activeServiceId, onSelectService }: HeroSectionProps) {
   return (
     <section id={SECTION_IDS.home} className="relative overflow-hidden pt-10 pb-16 lg:pt-16 lg:pb-24">
-      <div className="bg-dot-grid pointer-events-none absolute inset-0 opacity-50" />
-      <div className="from-navy-50 pointer-events-none absolute inset-0 bg-linear-to-b to-transparent" />
+      <HeroBackdrop />
 
-      <Container className="relative">
+      <Container className="relative z-10">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-20">
           <div className="flex flex-col items-start">
             <Reveal>
@@ -62,7 +62,7 @@ export function HeroSection({ activeServiceId, onSelectService }: HeroSectionPro
                 {HERO_PROMISES.map((item) => (
                   <li
                     key={item}
-                    className="rounded-full border border-navy-200 bg-white px-3 py-1 text-xs font-medium text-navy-700"
+                    className="rounded-full border border-navy-200 bg-white/90 px-3 py-1 text-xs font-medium text-navy-700 backdrop-blur-sm"
                   >
                     {item}
                   </li>
