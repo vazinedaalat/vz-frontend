@@ -1,9 +1,9 @@
-import { ArrowUpLeft, Phone } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { LogIn, Phone } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { Container } from '@/components/shared/container'
 import { Reveal } from '@/components/animated/reveal'
-import { scrollToSection } from '@/utils/scroll'
-import { BRAND, CONTACT_INFO, HERO_PROMISES, SECTION_IDS } from '../constants'
+import { BRAND, CONTACT_INFO, CTA, HERO_PROMISES, LOGIN_PATH, SECTION_IDS } from '../constants'
 import { HeroBackdrop } from './hero-backdrop'
 import { HeroVisual } from './hero-visual'
 import { ServiceSelector } from './service-selector'
@@ -42,19 +42,16 @@ export function HeroSection({ activeServiceId, onSelectService }: HeroSectionPro
 
             <Reveal delay={0.24}>
               <div className="mt-10 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-                <Button
-                  variant="accent"
-                  size="xl"
-                  className="w-full sm:w-auto"
-                  onClick={() => scrollToSection(SECTION_IDS.contact)}
-                >
-                  شروع مشاوره آنلاین
-                  <ArrowUpLeft />
+                <Button variant="accent" size="xl" className="w-full sm:w-auto" asChild>
+                  <Link to={LOGIN_PATH}>
+                    <LogIn />
+                    {CTA.login}
+                  </Link>
                 </Button>
                 <Button variant="outline" size="xl" className="w-full sm:w-auto" asChild>
                   <a href={CONTACT_INFO.phoneHref}>
                     <Phone />
-                    تماس مستقیم
+                    {CTA.contact}
                   </a>
                 </Button>
               </div>

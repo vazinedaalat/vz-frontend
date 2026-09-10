@@ -59,6 +59,13 @@ export const NAV_SECTION_IDS: readonly string[] = NAV_LINKS.map((link) => link.h
 
 export const LOGIN_PATH = '/login' as const
 
+/** Site-wide CTA copy — every primary action is either app login or contact. */
+export const CTA = {
+  login: 'ورود به اپ',
+  contact: 'تماس با ما',
+  contactShort: 'تماس',
+} as const
+
 export const HERO_PROMISES = ['کاملاً آنلاین', 'بدون حضور در دفتر', 'سریع و دقیق'] as const
 
 /** Six core services powering the quick selector at the top of the page. */

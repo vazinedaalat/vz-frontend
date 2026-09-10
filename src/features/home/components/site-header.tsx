@@ -6,7 +6,7 @@ import { Button } from '@/components/ui'
 import { Container } from '@/components/shared/container'
 import { cn } from '@/lib/utils'
 import { scrollToSection } from '@/utils/scroll'
-import { LOGIN_PATH, NAV_LINKS, NAV_SECTION_IDS, SECTION_IDS } from '../constants'
+import { LOGIN_PATH, CTA, NAV_LINKS, NAV_SECTION_IDS, SECTION_IDS, CONTACT_INFO } from '../constants'
 import { useActiveSection } from '../hooks/use-active-section'
 import { useScrolled } from '../hooks/use-scrolled'
 import { BrandMark } from './brand-mark'
@@ -75,14 +75,10 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <Button variant="outline" size="lg" asChild>
-            <Link to={LOGIN_PATH}>ورود</Link>
+            <Link to={LOGIN_PATH}>{CTA.login}</Link>
           </Button>
-          <Button
-            variant="accent"
-            size="lg"
-            onClick={() => scrollToSection(SECTION_IDS.services)}
-          >
-            خدمات آنلاین
+          <Button variant="accent" size="lg" asChild>
+            <a href={CONTACT_INFO.phoneHref}>{CTA.contact}</a>
           </Button>
         </div>
 
@@ -143,16 +139,13 @@ export function SiteHeader() {
               <div className="mt-auto flex flex-col gap-3">
                 <Button variant="outline" size="lg" className="w-full" asChild>
                   <Link to={LOGIN_PATH} onClick={() => setMenuOpen(false)}>
-                    ورود
+                    {CTA.login}
                   </Link>
                 </Button>
-                <Button
-                  variant="accent"
-                  size="lg"
-                  className="w-full"
-                  onClick={() => closeAndNavigate(`#${SECTION_IDS.services}`)}
-                >
-                  خدمات آنلاین
+                <Button variant="accent" size="lg" className="w-full" asChild>
+                  <a href={CONTACT_INFO.phoneHref} onClick={() => setMenuOpen(false)}>
+                    {CTA.contact}
+                  </a>
                 </Button>
               </div>
             </Dialog.Content>
