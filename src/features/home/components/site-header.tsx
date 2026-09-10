@@ -31,8 +31,8 @@ export function SiteHeader() {
       className={cn(
         'sticky top-0 z-50 border-b transition-all duration-300',
         scrolled
-          ? 'border-border/80 bg-white/90 shadow-soft backdrop-blur-xl'
-          : 'border-transparent bg-navy-50/80 backdrop-blur-md'
+          ? 'border-navy-200/80 bg-white/95 shadow-soft backdrop-blur-xl'
+          : 'border-transparent bg-white/80 backdrop-blur-md'
       )}
     >
       <a
@@ -61,8 +61,8 @@ export function SiteHeader() {
                 className={cn(
                   'rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-200',
                   isActive
-                    ? 'bg-navy-50 text-navy-900'
-                    : 'text-navy-500 hover:bg-navy-50 hover:text-navy-900'
+                    ? 'bg-navy-900 text-white'
+                    : 'text-navy-600 hover:bg-navy-50 hover:text-navy-900'
                 )}
                 aria-current={isActive ? 'location' : undefined}
               >
@@ -74,14 +74,14 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <Button variant="outline" size="lg" asChild>
-            <Link to={LOGIN_PATH}>ورود کاربر</Link>
+            <Link to={LOGIN_PATH}>ورود</Link>
           </Button>
           <Button
             variant="accent"
             size="lg"
             onClick={() => scrollToSection(SECTION_IDS.services)}
           >
-            خدمات ما
+            خدمات آنلاین
           </Button>
         </div>
 
@@ -129,8 +129,8 @@ export function SiteHeader() {
                       className={cn(
                         'rounded-2xl px-4 py-3 text-base font-medium transition-colors',
                         isActive
-                          ? 'bg-navy-50 text-navy-900'
-                          : 'text-navy-500 hover:bg-navy-50 hover:text-navy-900'
+                          ? 'bg-navy-900 text-white'
+                          : 'text-navy-600 hover:bg-navy-50 hover:text-navy-900'
                       )}
                     >
                       {link.label}
@@ -142,7 +142,7 @@ export function SiteHeader() {
               <div className="mt-auto flex flex-col gap-3">
                 <Button variant="outline" size="lg" className="w-full" asChild>
                   <Link to={LOGIN_PATH} onClick={() => setMenuOpen(false)}>
-                    ورود کاربر
+                    ورود
                   </Link>
                 </Button>
                 <Button
@@ -151,7 +151,7 @@ export function SiteHeader() {
                   className="w-full"
                   onClick={() => closeAndNavigate(`#${SECTION_IDS.services}`)}
                 >
-                  خدمات ما
+                  خدمات آنلاین
                 </Button>
               </div>
             </Dialog.Content>

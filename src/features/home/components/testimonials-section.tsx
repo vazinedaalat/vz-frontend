@@ -10,9 +10,9 @@ export function TestimonialsSection() {
       <Container>
         <Reveal>
           <SectionHeading
-            eyebrow="نظر موکلین"
-            title="اعتماد، بعد از نتیجه معنا پیدا می‌کند"
-            description="نقل‌قول‌های زیر از موکلین پرونده‌های مختومه گردآوری شده و هویت آن‌ها برای حفظ محرمانگی خلاصه شده است."
+            eyebrow="تجربه موکلین"
+            title="سریع رسیدند؛ دقیق پیش رفت"
+            description="نقل‌قول موکلینی که مسیر را آنلاین طی کردند. هویت برای حفظ محرمانگی خلاصه شده است."
           />
         </Reveal>
 
@@ -25,7 +25,7 @@ export function TestimonialsSection() {
                 <figcaption className="mt-8 flex items-center justify-between gap-4 border-t border-navy-100 pt-5">
                   <div>
                     <p className="font-display font-bold text-navy-900">{item.author}</p>
-                    <p className="mt-1 text-sm text-navy-500">{item.role}</p>
+                    <p className="mt-1 text-sm text-navy-600">{item.role}</p>
                   </div>
                   <span className="flex items-center gap-0.5 text-gold-500" aria-label={`${item.rating} از ۵`}>
                     {Array.from({ length: item.rating }, (_, starIndex) => (

@@ -16,16 +16,16 @@ export function HeroVisual() {
       </div>
 
       <div className="animate-float absolute top-10 right-4 rounded-2xl border border-border bg-white/90 px-4 py-3 shadow-soft backdrop-blur">
-        <p className="text-gold-700 text-[0.7rem] font-semibold">لایحه‌نویسی تخصصی</p>
-        <p className="font-display text-navy-900 text-sm font-bold">مستند به رویه قضایی</p>
+        <p className="text-[0.7rem] font-semibold text-gold-700">بدون حضور در دفتر</p>
+        <p className="font-display text-sm font-bold text-navy-900">خدمات کاملاً آنلاین</p>
       </div>
 
       <div
         className="animate-float absolute bottom-16 left-0 rounded-2xl border border-border bg-white/90 px-4 py-3 shadow-soft backdrop-blur"
         style={{ animationDelay: '1.4s' }}
       >
-        <p className="text-gold-700 text-[0.7rem] font-semibold">مشاوره اولیه</p>
-        <p className="font-display text-navy-900 text-sm font-bold">ارزیابی شفاف پرونده</p>
+        <p className="text-[0.7rem] font-semibold text-gold-700">سریع و دقیق</p>
+        <p className="font-display text-sm font-bold text-navy-900">پیگیری لحظه‌ای پرونده</p>
       </div>
 
       <div className="absolute top-1/3 left-4 size-2.5 rounded-full bg-gold-500" />

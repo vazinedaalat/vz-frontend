@@ -15,9 +15,9 @@ export function PracticeAreas({ activeServiceId }: PracticeAreasProps) {
       <Container>
         <Reveal>
           <SectionHeading
-            eyebrow="حوزه‌های فعالیت"
-            title="خدمات تخصصی حقوقی و قضایی"
-            description="هر خدمت توسط وکیلی ارائه می‌شود که سابقه و تمرکز حرفه‌ای‌اش با موضوع پرونده هم‌خوان است."
+            eyebrow="خدمات آنلاین"
+            title="هر خدمت حقوقی، بدون حضور و با دقت حرفه‌ای"
+            description="مشاوره، لایحه، دادخواست، قرارداد و پیگیری پرونده را سریع و کاملاً آنلاین دریافت کنید — با وکیل متخصص همان موضوع."
           />
         </Reveal>
 

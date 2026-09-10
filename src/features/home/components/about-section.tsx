@@ -6,10 +6,10 @@ import { BRAND, SECTION_IDS } from '../constants'
 import { SectionHeading } from './section-heading'
 
 const HIGHLIGHTS = [
-  'تیم وکلای پایه یک دادگستری با تخصص موضوعی',
-  'گزارش‌دهی منظم و شفاف در تمام مراحل پرونده',
-  'ارزیابی واقع‌بینانه پیش از پذیرش هر دعوا',
-  'تنظیم اسناد و لوایح مستند به قانون و رویه قضایی',
+  'خدمات کاملاً آنلاین؛ بدون نیاز به حضور در دفتر',
+  'پاسخ سریع و تنظیم دقیق اسناد و لوایح',
+  'گزارش‌دهی شفاف در تمام مراحل پرونده',
+  'وکیل متخصص همان موضوع، از راه دور در کنار شما',
 ] as const
 
 export function AboutSection() {
@@ -20,15 +20,15 @@ export function AboutSection() {
           <Reveal from="right">
             <SectionHeading
               align="start"
-              eyebrow="درباره مؤسسه"
+              eyebrow="درباره پلتفرم"
               title={
                 <>
-                  اعتماد، تخصص و نتیجه؛
+                  حرفه‌ای بودن حضوری؛
                   <br />
-                  سه اصل {BRAND.name}
+                  سرعت و دقت، آنلاین
                 </>
               }
-              description="ما پرونده را پروژه نمی‌دانیم؛ مسئولیت حرفه‌ای می‌دانیم. از نخستین جلسه مشاوره، مسیر حقوقی با زبانی روشن تبیین می‌شود تا موکل بداند در کجا ایستاده و به کجا می‌رود."
+              description="شعار ما ساده است: لذت خدمات قضایی سریع و دقیق — آنلاین و بدون حضور. همان اعتبار وکالت پایه یک، بدون صف دفتر و بدون اتلاف وقت."
             />
 
             <ul className="mt-10 grid gap-4">
@@ -44,13 +44,12 @@ export function AboutSection() {
           <Reveal from="left" delay={0.1}>
             <div className="relative overflow-hidden rounded-[2rem] border border-navy-800 bg-navy-900 p-8 text-white shadow-lift lg:p-12">
               <div className="bg-gold-500/20 absolute -top-16 -left-10 size-48 rounded-full blur-3xl" />
-              <p className="font-display text-gold-400 text-sm font-semibold">بیانیه مؤسسه</p>
+              <p className="font-display text-sm font-semibold text-gold-300">بیانیه {BRAND.name}</p>
               <blockquote className="font-display mt-6 text-2xl leading-relaxed font-bold text-balance text-white lg:text-[1.85rem]">
-                «هر پرونده شایسته وکیلی است که موضوع را بشناسد، ریسک را صادقانه بگوید و تا نتیجه کنار موکل بماند.»
+                «عدالت را حرفه‌ای پیگیری کنید؛ این‌بار سریع، دقیق و بدون حضور.»
               </blockquote>
-              <p className="text-navy-200 mt-8 text-sm leading-7">
-                فعالیت مستمر از سال {toPersianDigits(BRAND.establishedYear)} در مراجع قضایی تهران و شهرستان‌ها؛
-                با تمرکز بر دعاوی حقوقی، ملکی، تجاری و خدمات تنظیم اسناد.
+              <p className="mt-8 text-sm leading-7 text-white/80">
+                فعالیت مستمر از سال {toPersianDigits(BRAND.establishedYear)}؛ امروز همان تخصص، به‌صورت آنلاین و بدون حضور.
               </p>
             </div>
           </Reveal>

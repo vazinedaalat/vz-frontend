@@ -11,10 +11,10 @@ import {
   Lock,
   MessagesSquare,
   PenLine,
-  Receipt,
   Scale,
   ScrollText,
   Users,
+  Zap,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type {
@@ -32,7 +32,10 @@ export const BRAND = {
   name: 'وزین عدالت',
   nameLead: 'وزین',
   nameTrail: 'عدالت',
-  tagline: 'مؤسسه خدمات حقوقی و قضایی',
+  tagline: 'آنلاین، سریع، دقیق، بدون حضور',
+  slogan: 'عدالت را آنلاین، سریع و حرفه‌ای پیگیری کنید',
+  sloganSupport:
+    'لذت خدمات قضایی دقیق را بدون مراجعه حضوری تجربه کنید. از مشاوره تا لایحه و پیگیری پرونده، همه‌چیز آنلاین، شفاف و نتیجه‌محور پیش می‌رود.',
   establishedYear: 1390,
 } as const
 
@@ -58,6 +61,8 @@ export const NAV_SECTION_IDS: readonly string[] = NAV_LINKS.map((link) => link.h
 
 export const LOGIN_PATH = '/login' as const
 
+export const HERO_PROMISES = ['کاملاً آنلاین', 'بدون حضور در دفتر', 'سریع و دقیق'] as const
+
 /** Six core services powering the quick selector at the top of the page. */
 export const SERVICES: readonly ServiceItem[] = [
   {
@@ -65,7 +70,7 @@ export const SERVICES: readonly ServiceItem[] = [
     label: 'امور حقوقی',
     title: 'امور حقوقی',
     description:
-      'پذیرش، تحلیل و مدیریت کامل دعاوی حقوقی از نخستین جلسه مشاوره تا صدور و اجرای حکم قطعی.',
+      'پذیرش، تحلیل و مدیریت کامل دعاوی حقوقی — آنلاین، از نخستین جلسه تا صدور حکم.',
     icon: Scale,
   },
   {
@@ -73,7 +78,7 @@ export const SERVICES: readonly ServiceItem[] = [
     label: 'لایحه‌نویسی',
     title: 'لایحه‌نویسی',
     description:
-      'تدوین لوایح دفاعی مستند و منسجم با استناد به رویه قضایی و آرای وحدت رویه دیوان عالی کشور.',
+      'تدوین لوایح دفاعی مستند، سریع و دقیق؛ بدون نیاز به مراجعه حضوری.',
     icon: PenLine,
   },
   {
@@ -81,7 +86,7 @@ export const SERVICES: readonly ServiceItem[] = [
     label: 'دادخواست',
     title: 'تنظیم دادخواست',
     description:
-      'تنظیم دقیق دادخواست، شکواییه و اظهارنامه با رعایت کامل تشریفات آیین دادرسی و ثبت در سامانه ثنا.',
+      'تنظیم و ثبت دادخواست، شکواییه و اظهارنامه به‌صورت آنلاین در سامانه ثنا.',
     icon: ScrollText,
   },
   {
@@ -89,7 +94,7 @@ export const SERVICES: readonly ServiceItem[] = [
     label: 'مشاوره حقوقی',
     title: 'مشاوره حقوقی',
     description:
-      'ارزیابی واقع‌بینانه پرونده، تبیین ریسک‌ها و ارائه راهبرد حقوقی روشن پیش از هر اقدام قضایی.',
+      'مشاوره حقوقی آنلاین: ارزیابی پرونده، تبیین ریسک‌ها و راهبرد روشن — بدون حضور در دفتر.',
     icon: MessagesSquare,
   },
   {
@@ -97,7 +102,7 @@ export const SERVICES: readonly ServiceItem[] = [
     label: 'تنظیم قرارداد',
     title: 'تنظیم قرارداد',
     description:
-      'طراحی و بازبینی قراردادهای تجاری و ملکی با پیش‌بینی ضمانت اجراها و پوشش کامل ریسک‌های آتی.',
+      'طراحی و بازبینی قراردادها به‌صورت آنلاین، با پوشش ریسک و ضمانت اجرای دقیق.',
     icon: FileCheck2,
   },
   {
@@ -105,7 +110,7 @@ export const SERVICES: readonly ServiceItem[] = [
     label: 'پیگیری پرونده',
     title: 'پیگیری پرونده',
     description:
-      'پیگیری مستمر پرونده در مراجع قضایی و اداری همراه با گزارش‌دهی شفاف و منظم به موکل.',
+      'پیگیری پرونده از راه دور، با گزارش لحظه‌ای و بدون معطلی حضور در مراجع.',
     icon: FolderSearch,
   },
 ]
@@ -134,7 +139,7 @@ export const STATS: readonly Stat[] = [
     value: 14,
     suffix: '+',
     title: 'سال تجربه حقوقی',
-    description: 'حضور مستمر در مراجع قضایی از سال ۱۳۹۰ تا امروز.',
+    description: 'خدمات آنلاین از سال ۱۳۹۰؛ تجربه حضوری، سرعت دیجیتال.',
     icon: Clock,
   },
   {
@@ -158,7 +163,7 @@ export const STATS: readonly Stat[] = [
     value: 18,
     suffix: '',
     title: 'وکیل و کارشناس',
-    description: 'تیم تخصصی وکلای پایه یک و کارشناسان رسمی دادگستری.',
+    description: 'تیم تخصصی وکلای پایه یک؛ پرونده شما آنلاین به متخصص همان موضوع می‌رسد.',
     icon: Users,
   },
 ]
@@ -166,9 +171,9 @@ export const STATS: readonly Stat[] = [
 export const TRUST_POINTS: readonly TrustPoint[] = [
   {
     id: 'transparency',
-    title: 'شفافیت کامل در هزینه‌ها',
-    description: 'تعرفه خدمات پیش از پذیرش پرونده به‌صورت مکتوب اعلام می‌شود؛ بدون هزینه پنهان.',
-    icon: Receipt,
+    title: 'سریع، آنلاین، بدون حضور',
+    description: 'مشاوره، ارسال مدارک و پیگیری پرونده از هرجا؛ بدون صف دفتر و بدون مراجعه حضوری.',
+    icon: Zap,
   },
   {
     id: 'confidentiality',

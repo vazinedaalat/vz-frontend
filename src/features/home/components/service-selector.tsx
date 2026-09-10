@@ -38,7 +38,7 @@ export function ServiceSelector({ activeId, onSelect }: ServiceSelectorProps) {
                 className={cn(
                   'grid size-10 place-items-center rounded-xl transition-colors',
                   isActive
-                    ? 'bg-gold-500/15 text-gold-400'
+                    ? 'bg-gold-500/20 text-gold-300'
                     : 'bg-navy-50 text-navy-800 group-hover:bg-gold-100 group-hover:text-gold-700'
                 )}
               >

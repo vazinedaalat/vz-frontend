@@ -27,7 +27,7 @@ export function BrandMark({ tone = 'light', className, onClick, href = '#home' }
         className={cn(
           'grid size-11 place-items-center rounded-2xl transition-transform duration-500 group-hover:-rotate-6 lg:size-12',
           tone === 'dark'
-            ? 'bg-white/10 text-gold-400 ring-1 ring-white/15'
+            ? 'bg-white/10 text-gold-300 ring-1 ring-white/20'
             : 'bg-navy-900 text-gold-400 shadow-soft'
         )}
       >
@@ -42,14 +42,14 @@ export function BrandMark({ tone = 'light', className, onClick, href = '#home' }
           )}
         >
           {BRAND.nameLead}{' '}
-          <span className={tone === 'dark' ? 'text-gold-400' : 'text-gold-600'}>
+          <span className={tone === 'dark' ? 'text-gold-300' : 'text-gold-600'}>
             {BRAND.nameTrail}
           </span>
         </span>
         <span
           className={cn(
             'text-[0.7rem] leading-tight font-medium',
-            tone === 'dark' ? 'text-navy-200' : 'text-navy-500'
+            tone === 'dark' ? 'text-white/70' : 'text-navy-600'
           )}
         >
           {BRAND.tagline}

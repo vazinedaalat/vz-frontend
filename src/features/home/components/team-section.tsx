@@ -11,8 +11,8 @@ export function TeamSection() {
         <Reveal>
           <SectionHeading
             eyebrow="تیم وکلا"
-            title="وکیل متخصص، برای هر موضوع"
-            description="پرونده به وکیلی سپرده می‌شود که تمرکز حرفه‌ای‌اش دقیقاً با دعوا منطبق است — نه به نزدیک‌ترین فرد در دفتر."
+            title="وکیل متخصص، کنار شما — حتی از راه دور"
+            description="پرونده آنلاین به وکیلی می‌رسد که تمرکز حرفه‌ای‌اش دقیقاً با موضوع دعوا منطبق است."
           />
         </Reveal>
 
@@ -38,7 +38,7 @@ export function TeamSection() {
                 </div>
                 <div className="flex flex-1 flex-col gap-1 bg-white p-6">
                   <p className="text-sm font-medium text-navy-900">{member.expertise}</p>
-                  <p className="text-sm text-navy-500">
+                  <p className="text-sm text-navy-600">
                     {toPersianDigits(member.experienceYears)} سال سابقه حرفه‌ای
                   </p>
                 </div>

@@ -53,7 +53,7 @@ export function SectionHeading({
         <p
           className={cn(
             'max-w-2xl text-base leading-8 lg:text-lg',
-            tone === 'dark' ? 'text-navy-200' : 'text-navy-500'
+            tone === 'dark' ? 'text-white/80' : 'text-navy-600'
           )}
         >
           {description}

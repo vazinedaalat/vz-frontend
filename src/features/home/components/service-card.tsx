@@ -32,7 +32,7 @@ export function ServiceCard({ id, title, description, icon: Icon, highlighted = 
       </span>
       <div className="flex flex-col gap-3">
         <h3 className="font-display text-xl font-bold text-navy-900">{title}</h3>
-        <p className="text-sm leading-7 text-navy-500">{description}</p>
+        <p className="text-sm leading-7 text-navy-600">{description}</p>
       </div>
     </article>
   )

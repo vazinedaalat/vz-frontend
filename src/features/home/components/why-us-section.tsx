@@ -11,8 +11,8 @@ export function WhyUsSection() {
         <Reveal>
           <SectionHeading
             eyebrow="چرا وزین عدالت؟"
-            title="اعتماد، وقتی با عدد و رویه ثابت شود"
-            description="سال‌ها حضور در مراجع قضایی، پرونده‌های مختومه و تیمی که هر موضوع را به متخصص همان حوزه می‌سپارد."
+            title="حرفه‌ای مثل دفتر حقوقی؛ سریع مثل یک استارتاپ"
+            description="همان دقت لایحه‌نویسی و وکالت پایه یک، با تجربه آنلاین: بدون حضور، بدون صف، با پیگیری لحظه‌ای."
           />
         </Reveal>
 
@@ -33,7 +33,7 @@ export function WhyUsSection() {
                   </p>
                   <div>
                     <h3 className="font-display text-lg font-bold text-navy-900">{stat.title}</h3>
-                    <p className="mt-2 text-sm leading-7 text-navy-500">{stat.description}</p>
+                    <p className="mt-2 text-sm leading-7 text-navy-600">{stat.description}</p>
                   </div>
                 </article>
               </Reveal>
@@ -47,12 +47,12 @@ export function WhyUsSection() {
             return (
               <Reveal key={point.id} delay={0.1 + index * 0.06}>
                 <article className="flex h-full gap-4 rounded-[1.5rem] border border-navy-800/90 bg-navy-900 p-7 text-white">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/8 text-gold-400">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/10 text-gold-300">
                     <Icon className="size-5" strokeWidth={1.6} />
                   </span>
                   <div>
                     <h3 className="font-display text-lg font-bold text-white">{point.title}</h3>
-                    <p className="mt-2 text-sm leading-7 text-navy-200">{point.description}</p>
+                    <p className="mt-2 text-sm leading-7 text-white/80">{point.description}</p>
                   </div>
                 </article>
               </Reveal>
