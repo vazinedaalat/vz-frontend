@@ -1,3 +1,11 @@
-/* Theme extensions and custom properties can be added here.
-   Keep design tokens centralized in globals.css and tailwind.config.js.
+/* Persian typefaces — self-hosted through @fontsource (no external CDN at runtime).
+   Vazirmatn: body text · Estedad: headings & display.
+   Keep design tokens centralized in globals.css.
 */
+@import '@fontsource/vazirmatn/400.css';
+@import '@fontsource/vazirmatn/500.css';
+@import '@fontsource/vazirmatn/600.css';
+@import '@fontsource/vazirmatn/700.css';
+@import '@fontsource/estedad/500.css';
+@import '@fontsource/estedad/700.css';
+@import '@fontsource/estedad/800.css';

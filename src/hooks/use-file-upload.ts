@@ -21,27 +21,30 @@ const DEFAULT_OPTIONS: Required<FileValidationOptions> = {
 }
 
 export function useFileUpload(options: FileValidationOptions = {}) {
-  const opts = { ...DEFAULT_OPTIONS, ...options }
+  const maxSizeMB = options.maxSizeMB ?? DEFAULT_OPTIONS.maxSizeMB
+  const allowedMimeTypes = options.allowedMimeTypes ?? DEFAULT_OPTIONS.allowedMimeTypes
+  const maxFiles = options.maxFiles ?? DEFAULT_OPTIONS.maxFiles
+
   const [files, setFiles] = useState<UploadedFile[]>([])
 
   const validate = useCallback(
     (file: File): string | null => {
-      if (file.size > opts.maxSizeMB * 1024 * 1024) {
-        return `File size exceeds ${opts.maxSizeMB}MB`
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        return `File size exceeds ${maxSizeMB}MB`
       }
-      if (opts.allowedMimeTypes.length > 0 && !opts.allowedMimeTypes.includes(file.type)) {
+      if (allowedMimeTypes.length > 0 && !allowedMimeTypes.includes(file.type)) {
         return `File type ${file.type} is not allowed`
       }
       return null
     },
-    [opts]
+    [allowedMimeTypes, maxSizeMB]
   )
 
   const addFiles = useCallback(
     (incoming: FileList | File[]) => {
       const list = Array.from(incoming)
       setFiles((prev) => {
-        const remaining = opts.maxFiles - prev.length
+        const remaining = maxFiles - prev.length
         if (remaining <= 0) return prev
 
         const next = list.slice(0, remaining).map((file) => {
@@ -57,7 +60,7 @@ export function useFileUpload(options: FileValidationOptions = {}) {
         return [...prev, ...next]
       })
     },
-    [opts.maxFiles, validate]
+    [maxFiles, validate]
   )
 
   const removeFile = useCallback((id: string) => {

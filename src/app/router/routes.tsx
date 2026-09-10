@@ -2,19 +2,21 @@ import { lazy, Suspense } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { ProtectedRoute } from './protected-route'
 
-// Lazy load pages - keep pages minimal for infrastructure
 const HomePage = lazy(() => import('@/features/home/pages/home-page'))
+const LoginPage = lazy(() => import('@/features/home/pages/login-page'))
 const NotFoundPage = lazy(() => import('@/features/home/pages/not-found-page'))
 
 function PageLoader() {
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+    <div className="flex h-screen items-center justify-center bg-navy-50">
+      <div
+        className="size-10 animate-spin rounded-full border-2 border-gold-500 border-t-transparent"
+        aria-label="در حال بارگذاری"
+      />
     </div>
   )
 }
 
-// Simple auth check placeholder - replace with real auth when needed
 const isAuthenticated = false
 
 const router = createBrowserRouter([
@@ -23,6 +25,14 @@ const router = createBrowserRouter([
     element: (
       <Suspense fallback={<PageLoader />}>
         <HomePage />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/login',
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <LoginPage />
       </Suspense>
     ),
   },

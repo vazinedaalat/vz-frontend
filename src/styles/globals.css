@@ -1,59 +1,228 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import './theme.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------
+   Design tokens (Tailwind v4 CSS-first configuration)
+   Never hardcode hex/rgb values inside components.
+--------------------------------------------------------------- */
+@theme {
+  --font-sans: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Estedad', 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand: Deep Navy */
+  --color-navy-50: #f2f5f8;
+  --color-navy-100: #e2e8ef;
+  --color-navy-200: #c3cfdc;
+  --color-navy-300: #93a7bd;
+  --color-navy-400: #4a6480;
+  --color-navy-500: #33506b;
+  --color-navy-600: #22384e;
+  --color-navy-700: #17293c;
+  --color-navy-800: #0f172a;
+  --color-navy-900: #0b1c2c;
+  --color-navy-950: #060d17;
+
+  /* Brand: Soft Gold / Champagne */
+  --color-gold-100: #faf4e7;
+  --color-gold-200: #f2e7cf;
+  --color-gold-300: #e7d5ae;
+  --color-gold-400: #d8bf8c;
+  --color-gold-500: #c9a86c;
+  --color-gold-600: #a9853f;
+  --color-gold-700: #8a6a2f;
+
+  /* Elevation: soft & subtle */
+  --shadow-soft: 0 1px 2px rgb(11 28 44 / 0.04), 0 14px 34px -18px rgb(11 28 44 / 0.14);
+  --shadow-lift: 0 2px 4px rgb(11 28 44 / 0.04), 0 28px 60px -24px rgb(11 28 44 / 0.24);
+  --shadow-gold: 0 18px 44px -20px rgb(169 133 63 / 0.45);
+
+  /* Layout */
+  --container-page: 95rem; /* 1520px */
+
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.25s ease-out;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* Semantic tokens consumed by UI primitives */
+:root {
+  --background: #f8f9fa;
+  --foreground: #0b1c2c;
+  --card: #ffffff;
+  --card-foreground: #0b1c2c;
+  --popover: #ffffff;
+  --popover-foreground: #0b1c2c;
+  --primary: #0b1c2c;
+  --primary-foreground: #f8f9fa;
+  --secondary: #eef1f5;
+  --secondary-foreground: #0f172a;
+  --muted: #f2f5f8;
+  --muted-foreground: #4a6480;
+  --accent: #eef2f7;
+  --accent-foreground: #0f172a;
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+  --border: #e4e8ee;
+  --input: #dde3ea;
+  --ring: #c9a86c;
+  --radius: 1rem;
+}
+
+/* Public pages are a light luxury brand. Keep semantic tokens on the
+   navy/off-white palette even if a leftover `.dark` class is present. */
+.dark {
+  --background: #f8f9fa;
+  --foreground: #0b1c2c;
+  --card: #ffffff;
+  --card-foreground: #0b1c2c;
+  --popover: #ffffff;
+  --popover-foreground: #0b1c2c;
+  --primary: #0b1c2c;
+  --primary-foreground: #f8f9fa;
+  --secondary: #eef1f5;
+  --secondary-foreground: #0f172a;
+  --muted: #f2f5f8;
+  --muted-foreground: #4a6480;
+  --accent: #eef2f7;
+  --accent-foreground: #0f172a;
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+  --border: #e4e8ee;
+  --input: #dde3ea;
+  --ring: #c9a86c;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
-
   * {
-    @apply border-border;
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    color-scheme: light;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: var(--color-background);
+    color: var(--color-navy-900);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Persian typography rhythm: display font for headings */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background-color: var(--color-gold-300);
+    color: var(--color-navy-900);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold-500);
+    outline-offset: 2px;
+  }
+
+  section[id] {
+    scroll-margin-top: 7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Decorative utilities (keep visual primitives out of components)
+--------------------------------------------------------------- */
+@utility bg-dot-grid {
+  background-image: radial-gradient(var(--color-navy-200) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+@utility bg-line-grid {
+  background-image:
+    linear-gradient(to left, var(--color-navy-100) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-navy-100) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+@utility text-gradient-gold {
+  color: var(--color-gold-600);
+  background-image: linear-gradient(
+    to left,
+    var(--color-gold-700),
+    var(--color-gold-500),
+    var(--color-gold-700)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@supports not (background-clip: text) {
+  .text-gradient-gold {
+    color: var(--color-gold-600);
+    -webkit-text-fill-color: currentColor;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
