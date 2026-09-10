@@ -24,7 +24,6 @@ import type {
   ServiceItem,
   Stat,
   TeamMember,
-  Testimonial,
   TrustPoint,
 } from '../types'
 
@@ -45,7 +44,6 @@ export const SECTION_IDS = {
   services: 'services',
   whyUs: 'why-us',
   team: 'team',
-  testimonials: 'testimonials',
   contact: 'contact',
 } as const
 
@@ -221,33 +219,6 @@ export const TEAM: readonly TeamMember[] = [
     role: 'مشاور ارشد حقوقی',
     expertise: 'دعاوی کیفری',
     experienceYears: 9,
-  },
-]
-
-export const TESTIMONIALS: readonly Testimonial[] = [
-  {
-    id: 'testimonial-1',
-    quote:
-      'پرونده ملکی ما سه سال بی‌نتیجه مانده بود. تیم وزین عدالت با تنظیم دقیق لایحه و پیگیری منظم، پرونده را در کمتر از یک سال به نتیجه رساند.',
-    author: 'محمدرضا ط.',
-    role: 'مالک مجتمع تجاری، تهران',
-    rating: 5,
-  },
-  {
-    id: 'testimonial-2',
-    quote:
-      'قراردادهای شرکت ما پیش از همکاری، ریسک‌های جدی داشت. بازبینی حقوقی و بازنویسی قراردادها، ما را از چند دعوای پرهزینه نجات داد.',
-    author: 'شرکت آرمان صنعت',
-    role: 'مدیر امور قراردادها',
-    rating: 5,
-  },
-  {
-    id: 'testimonial-3',
-    quote:
-      'از همان جلسه اول، وضعیت پرونده و احتمال موفقیت را صادقانه توضیح دادند. این شفافیت و گزارش‌دهی مرحله‌به‌مرحله، اعتماد کامل ایجاد کرد.',
-    author: 'نگار ا.',
-    role: 'موکل پرونده خانواده',
-    rating: 5,
   },
 ]
 

@@ -5,7 +5,6 @@ import { AboutSection } from '../components/about-section'
 import { PracticeAreas } from '../components/practice-areas'
 import { WhyUsSection } from '../components/why-us-section'
 import { TeamSection } from '../components/team-section'
-import { TestimonialsSection } from '../components/testimonials-section'
 import { CtaSection } from '../components/cta-section'
 import { SiteFooter } from '../components/site-footer'
 import { scrollToSection } from '@/utils/scroll'
@@ -30,7 +29,6 @@ export default function HomePage() {
         <PracticeAreas activeServiceId={activeServiceId} />
         <WhyUsSection />
         <TeamSection />
-        <TestimonialsSection />
         <CtaSection />
       </main>
       <SiteFooter />

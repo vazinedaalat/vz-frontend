@@ -57,14 +57,6 @@ export interface TeamMember {
   experienceYears: number
 }
 
-export interface Testimonial {
-  id: string
-  quote: string
-  author: string
-  role: string
-  rating: number
-}
-
 export interface ContactInfo {
   phone: string
   phoneHref: string
