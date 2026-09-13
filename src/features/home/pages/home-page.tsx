@@ -3,6 +3,7 @@ import { SiteHeader } from '../components/site-header'
 import { HeroSection } from '../components/hero-section'
 import { AboutSection } from '../components/about-section'
 import { PracticeAreas } from '../components/practice-areas'
+import { ProcessSection } from '../components/process-section'
 import { WhyUsSection } from '../components/why-us-section'
 import { TeamSection } from '../components/team-section'
 import { CtaSection } from '../components/cta-section'
@@ -27,6 +28,7 @@ export default function HomePage() {
         <HeroSection activeServiceId={activeServiceId} onSelectService={handleSelectService} />
         <AboutSection />
         <PracticeAreas activeServiceId={activeServiceId} />
+        <ProcessSection />
         <WhyUsSection />
         <TeamSection />
         <CtaSection />

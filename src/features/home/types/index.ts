@@ -57,6 +57,14 @@ export interface TeamMember {
   experienceYears: number
 }
 
+export interface ProcessStep {
+  id: string
+  step: number
+  title: string
+  description: string
+  icon: LucideIcon
+}
+
 export interface ContactInfo {
   phone: string
   phoneHref: string

@@ -1,18 +1,24 @@
 import {
   Award,
   BadgeCheck,
+  BellRing,
   Briefcase,
   Building2,
+  ClipboardList,
   Clock,
   FileCheck2,
+  FolderPlus,
   FolderSearch,
   Gavel,
   Landmark,
   Lock,
+  MessageCircle,
   MessagesSquare,
   PenLine,
+  PhoneCall,
   Scale,
   ScrollText,
+  UserRoundPlus,
   Users,
   Zap,
 } from 'lucide-react'
@@ -21,6 +27,7 @@ import type {
   ContactInfo,
   NavLink,
   PracticeArea,
+  ProcessStep,
   ServiceItem,
   Stat,
   TeamMember,
@@ -42,6 +49,7 @@ export const SECTION_IDS = {
   home: 'home',
   about: 'about',
   services: 'services',
+  process: 'process',
   whyUs: 'why-us',
   team: 'team',
   contact: 'contact',
@@ -51,6 +59,7 @@ export const NAV_LINKS: readonly NavLink[] = [
   { label: 'خانه', href: `#${SECTION_IDS.home}` },
   { label: 'درباره ما', href: `#${SECTION_IDS.about}` },
   { label: 'خدمات', href: `#${SECTION_IDS.services}` },
+  { label: 'مراحل کار', href: `#${SECTION_IDS.process}` },
   { label: 'تماس', href: `#${SECTION_IDS.contact}` },
 ]
 
@@ -135,6 +144,52 @@ export const PRACTICE_AREAS: readonly PracticeArea[] = [
     title: 'امور شرکت‌ها و تجاری',
     description: 'ثبت و تغییرات شرکت‌ها، دعاوی تجاری، مطالبه وجه اسناد تجاری و امور ورشکستگی.',
     icon: Briefcase,
+  },
+]
+
+/** End-to-end online workflow shown on the homepage. */
+export const PROCESS_STEPS: readonly ProcessStep[] = [
+  {
+    id: 'signup',
+    step: 1,
+    title: 'ثبت‌نام',
+    description: 'در کمتر از یک دقیقه حساب کاربری بسازید و وارد فضای امن اپ شوید.',
+    icon: UserRoundPlus,
+  },
+  {
+    id: 'consult',
+    step: 2,
+    title: 'مشاوره یا چت آنلاین',
+    description: 'موضوع را مطرح کنید؛ وکیل متخصص همان حوزه به‌صورت آنلاین پاسخ می‌دهد.',
+    icon: MessageCircle,
+  },
+  {
+    id: 'create-case',
+    step: 3,
+    title: 'ایجاد پرونده آنلاین',
+    description: 'پرونده را بدون حضور در دفتر تشکیل دهید و مدارک را دیجیتال بارگذاری کنید.',
+    icon: FolderPlus,
+  },
+  {
+    id: 'status',
+    step: 4,
+    title: 'مشاهده وضعیت پرونده',
+    description: 'در هر لحظه ببینید پرونده در چه مرحله‌ای است و چه اقدامی انجام شده.',
+    icon: ClipboardList,
+  },
+  {
+    id: 'follow-up',
+    step: 5,
+    title: 'تماس برای پیگیری',
+    description: 'در صورت نیاز، با یک تماس مستقیم وضعیت را شفاف و سریع هماهنگ کنید.',
+    icon: PhoneCall,
+  },
+  {
+    id: 'notify',
+    step: 6,
+    title: 'اطلاع‌رسانی پرونده',
+    description: 'هر به‌روزرسانی مهم به‌صورت خودکار به شما اعلام می‌شود؛ بدون پیگیری دستی.',
+    icon: BellRing,
   },
 ]
 
