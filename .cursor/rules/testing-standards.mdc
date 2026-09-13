@@ -1,0 +1,35 @@
+---
+description: Testing conventions for Vitest/Testing Library and when to add coverage
+globs: "{src,tests}/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Testing Standards
+
+Stack: **Vitest + Testing Library** (`skills/testing.md`).
+
+## What must get tests
+
+- Pure utilities (`lib/format`, `lib/utils`, error helpers)
+- Schemas / parsers with branching
+- Hooks with non-trivial logic
+- Critical guards (e.g. protected routes) when changed
+
+## What usually skips unit tests
+
+- Pure presentational layout sections (validate via quality gate + responsive QA)
+- Static marketing copy
+
+## Patterns
+
+```ts
+// Prefer behavior over implementation details
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+```
+
+- Use accessible queries (`getByRole`, `getByLabelText`) first
+- Keep tests deterministic; no network without mocks
+- Run `npm run test` as part of the quality gate after logic changes
+
+E2E (`test:e2e`) is a placeholder until Playwright/Cypress is configured — do not invent a second test runner without asking.

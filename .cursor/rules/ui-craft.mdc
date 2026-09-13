@@ -1,0 +1,52 @@
+---
+description: Professional non-machine UI craft for every new homepage/section — RTL, brand tokens, anti-generic AI look
+alwaysApply: true
+---
+
+# UI Craft — وزین عدالت
+
+Whenever the user asks to build or redesign a **section / page / component**, ship **premium legal-tech UI**, not generic AI layouts.
+
+## Brand & Direction
+
+- Brand: **وزین عدالت** — luxury legal + online startup speed
+- Language: **Persian**, layout **RTL** (`dir="rtl"`)
+- Fonts: Vazirmatn (body), Estedad (headings) — already wired in `src/styles/theme.css`
+- Palette tokens live in `src/styles/globals.css` (`navy-*`, `gold-*`, semantic colors)
+- **Never hardcode hex/rgb inside components** — use token classes (`bg-navy-900`, `text-gold-600`, `shadow-soft`)
+- CTAs site-wide: prefer `CTA.login` / `CTA.contact` from `src/features/home/constants`
+
+## Anti–“AI website” look (required)
+
+Avoid these defaults unless the user explicitly asks:
+
+- Purple / indigo gradients, neon glow, glassmorphism stacks
+- Generic Inter/Roboto/system stacks as primary fonts
+- Card grids with identical icon-in-circle + 3 lines of lorem
+- Pill badge clusters, fake stat strips, emoji decoration
+- Overcrowded heroes (stats + schedule + address + CTAs all in first viewport)
+- Floating stickers / promo chips on hero media
+- Dense “dashboard” composition on marketing pages
+
+Prefer:
+
+- Strong hierarchy (one job per section)
+- Generous whitespace on desktop (`max-w-(--container-page)`, large padding)
+- Soft elevation (`shadow-soft` / `shadow-lift`), thin borders, `rounded-2xl`
+- Real contrast: light text on navy, navy text on off-white — never same-tone text/background
+- Motion with purpose (2–3 intentional motions max per section); respect `prefers-reduced-motion`
+
+## Section delivery pattern
+
+For each new section:
+
+1. Add types in `features/.../types` and data in `constants` when content is reusable
+2. Build a focused component under `features/[name]/components/`
+3. Compose in the page; keep sections importable and ordered
+4. Use shared primitives: `Container`, `SectionHeading`, `Button`, `Reveal`
+5. Mobile-first Tailwind; full-width primary CTAs on small screens where appropriate
+6. Accessible focus, labels, and semantic landmarks (`section`, `nav`, headings)
+
+Canonical examples: `src/features/home/components/hero-section.tsx`, `process-section.tsx`, `why-us-section.tsx`
+
+Also follow: `skills/ui-system.md`, `skills/components.md`

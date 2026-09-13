@@ -1,0 +1,41 @@
+---
+description: Responsive UI QA matrix — verify mobile/tablet/desktop layouts, overflow, sticky header, touch targets, and RTL
+alwaysApply: true
+---
+
+# Responsive UI QA
+
+After building or changing UI, validate layouts deliberately — not only at one desktop width.
+
+## Viewport matrix (CSS px)
+
+| Width | Intent |
+| --- | --- |
+| **320** | Smallest phones — no overflow, stacked layout |
+| **375–390** | Mainstream phones — nav + CTAs usable |
+| **768** | Tablet — grids collapse correctly |
+| **1024** | Small laptop / landscape tablet |
+| **1280–1520** | Desktop — breathing space, max content width |
+
+Also check **just below / above** each layout change (`md`, `lg`).
+
+## Must pass
+
+- No unintended **horizontal scroll** at 320px (WCAG reflow spirit)
+- Sticky header never permanently covers section titles (`scroll-margin` / scroll helpers)
+- Nav: hamburger usable on mobile; desktop links readable; drawer closes after navigate
+- Touch targets comfortable (~44px where practical; WCAG minimum 24×24 with spacing)
+- Long Persian titles wrap cleanly — no clipped text or broken badges
+- Images / abstract visuals scale; decorative layers use `pointer-events-none`
+- Forms and dialogs fit the viewport; keyboard focus remains visible
+- Desktop feels spacious; mobile stays single-column and thumb-friendly
+
+## Tailwind notes
+
+- Mobile-first: unprefixed utilities apply to all sizes; `sm:`/`md:`/`lg:` mean **min-width**
+- Prefer fluid containers and grids (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`) over fixed pixel layouts
+- Test RTL: start/end spacing (`ms-`/`me-`, logical properties) instead of assuming LTR `ml`/`mr`
+
+## Reporting
+
+When UI work finishes, briefly confirm which widths were considered and any known residual risk.

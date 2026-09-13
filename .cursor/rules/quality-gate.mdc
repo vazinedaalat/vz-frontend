@@ -1,0 +1,32 @@
+---
+description: Mandatory quality gate — typecheck, lint, test, and production build after code/UI changes
+alwaysApply: true
+---
+
+# Quality Gate (Required)
+
+After any meaningful code or UI change, **do not stop** until these pass:
+
+```bash
+npm run typecheck
+npm run lint
+npm run test
+npm run build
+```
+
+## Rules
+
+- Fix every failure before claiming the task is done.
+- If a change is UI-only, still run the full gate (build catches CSS/Tailwind and chunk errors).
+- Add or update Vitest coverage for new pure logic (`lib/`, `utils/`, schemas, hooks with branching).
+- Do not weaken ESLint (`max-warnings 0`) or skip TypeScript to “make it pass”.
+- Do not commit secrets, `.env`, or generated emit files (`*.js` next to `vite.config.ts`).
+
+## Definition of Done
+
+1. Feature works in `npm run dev`
+2. Gate commands above are green
+3. For UI work: responsive checklist in `responsive-ui-qa` is satisfied
+4. No unused imports, dead props, or leftover console noise
+
+Canonical testing notes: `skills/testing.md`

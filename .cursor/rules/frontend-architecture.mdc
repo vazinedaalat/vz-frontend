@@ -1,0 +1,55 @@
+---
+description: Clean, extensible React/TypeScript architecture for Vazinedalat frontend
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend Architecture & Clean Code
+
+Follow feature-based modular architecture (`skills/architecture.md`).
+
+## Structure
+
+```
+src/features/[feature]/
+  components/   # feature UI only
+  hooks/
+  constants/    # copy & sample data
+  types/
+  pages/
+  index.ts      # public API
+```
+
+- Features must **not** import other features directly
+- Shared UI: `components/ui`, `components/shared`, `components/animated`
+- Pure helpers: `lib/` · app shell: `app/`
+
+## TypeScript
+
+- Strict types; no `any` unless unavoidable and justified
+- Prefer `interface` for object shapes; export domain types from `types/`
+- Discriminated unions over boolean soup for UI states
+- Keep `noUnusedLocals` / `noUnusedParameters` clean
+
+## Components
+
+- Small, composable, presentational by default
+- Props typed; avoid prop drilling when a feature-local hook/store fits
+- No data-fetching inside dumb UI primitives (`components/ui`)
+- Prefer extending `Button` / `Container` / `SectionHeading` over one-off styled copies
+- Name files `kebab-case.tsx`; components `PascalCase`
+
+## State & data
+
+- Server state → TanStack Query (when APIs exist)
+- Client UI state → Zustand only for cross-cutting UI (`app/store`)
+- Form validation → Zod + React Hook Form when forms appear
+
+## Extensibility checklist
+
+- New section = new component + constants entry + page composition
+- Copy/CTA centralized (`constants`) so marketing edits stay one-file
+- Motion isolated (`Reveal`, backdrop components) so pages stay readable
+- No drive-by refactors outside the requested scope
+
+Canonical references: `skills/components.md`, `skills/development.md`
