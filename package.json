@@ -13,9 +13,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "echo \"E2E tests placeholder - configure Playwright/Cypress as needed\"",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "test:e2e": "echo \"E2E tests placeholder - configure Playwright/Cypress as needed\""
   },
   "dependencies": {
     "@fontsource/estedad": "^5.3.0",
@@ -36,7 +34,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^13.2.0",
-    "gh-pages": "^6.3.0",
     "lucide-react": "^0.469.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
