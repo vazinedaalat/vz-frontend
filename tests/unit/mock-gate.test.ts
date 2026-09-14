@@ -42,12 +42,23 @@ describe('Iranian legal form schemas', () => {
 
   it('validates create-case payload', () => {
     const parsed = createCaseSchema.parse({
+      clientRole: 'خواهان',
+      clientFullName: 'علی رضایی',
+      clientFatherName: 'محمد',
+      clientNationalId: '0012345678',
+      clientPhone: '09121234567',
+      clientAddress: 'تهران، خیابان ولیعصر، پلاک ۱۲',
       title: 'مطالبه وجه چک',
+      claimType: 'مطالبه وجه / خسارت',
       category: 'تجاری',
+      proceedingType: 'حقوقی',
       summary: 'چک به شماره ۱۲۳ برگشت خورده و مطالبه وجه آن درخواست می‌شود.',
+      legalBasis: 'چک صیادی و قانون صدور چک',
       opponentName: 'رضا محمدی',
       city: 'تهران',
       urgency: 'فوری',
+      hasThanaAccount: 'بله',
+      acceptFileRules: true,
     })
     expect(parsed.category).toBe('تجاری')
   })

@@ -44,13 +44,56 @@ export const consultationRequestSchema = z
     }
   })
 
-export const createCaseSchema = z.object({
-  title: z.string().min(5, 'عنوان پرونده را کامل‌تر بنویسید'),
+const createCaseIntakeFields = {
+  clientRole: z.enum(
+    ['خواهان', 'خوانده', 'شاکی', 'مشتکی‌عنه', 'متقاضی', 'وکیل / نماینده', 'سایر'],
+    { required_error: 'سمت خود را مشخص کنید' },
+  ),
+  clientFullName: z.string().min(3, 'نام و نام خانوادگی را کامل وارد کنید'),
+  clientFatherName: z.string().min(2, 'نام پدر را وارد کنید'),
+  clientNationalId: z.string().regex(/^\d{10}$/, 'کد ملی باید ۱۰ رقم باشد'),
+  clientPhone: iranianMobileSchema,
+  clientAddress: z.string().min(15, 'اقامتگاه را کامل بنویسید (شهر، خیابان، پلاک)'),
+  title: z.string().min(5, 'عنوان / خواسته پرونده را کامل‌تر بنویسید'),
+  claimType: z.enum(
+    [
+      'الزام به ایفای تعهد',
+      'مطالبه وجه / خسارت',
+      'خلع ید / تصرف عدوانی',
+      'تنظیم سند رسمی',
+      'طلاق / حضانت / نفقه',
+      'شکایت کیفری',
+      'اعتراض به رای / تجدیدنظر',
+      'سایر',
+    ],
+    { required_error: 'نوع خواسته را انتخاب کنید' },
+  ),
   category: z.enum(['ملکی', 'خانواده', 'تجاری', 'کیفری', 'سایر']),
-  summary: z.string().min(30, 'شرح خلاصه پرونده حداقل ۳۰ نویسه باشد'),
+  proceedingType: z.enum(
+    ['حقوقی', 'کیفری', 'خانواده', 'اجرای احکام', 'دیوان عدالت اداری', 'سایر'],
+    { required_error: 'نوع رسیدگی را مشخص کنید' },
+  ),
+  summary: z.string().min(40, 'شرح وقایع حداقل ۴۰ نویسه باشد'),
+  legalBasis: z
+    .string()
+    .min(15, 'مبنای حقوقی یا قرارداد را مختصر توضیح دهید')
+    .describe('مثلاً قرارداد اجاره، چک، تعهد شفاهی مستند، ماده قانونی مرتبط'),
   opponentName: z.string().min(2, 'نام طرف مقابل را وارد کنید'),
-  city: z.string().min(2, 'شهر را وارد کنید'),
+  opponentAddress: z.string().optional(),
+  city: z.string().min(2, 'شهر اقامتگاه یا محل وقوع را وارد کنید'),
+  courtHint: z.string().optional(),
   urgency: z.enum(['عادی', 'فوری', 'خیلی فوری']),
+  hasThanaAccount: z.enum(['بله', 'خیر', 'نامشخص']),
+  priorCaseNumber: z.string().optional(),
+}
+
+/** Step 1 — intake form only (file rules validated on upload step). */
+export const createCaseIntakeSchema = z.object(createCaseIntakeFields)
+
+export const createCaseSchema = createCaseIntakeSchema.extend({
+  acceptFileRules: z.boolean().refine((value) => value === true, {
+    message: 'پذیرش قوانین ارسال فایل الزامی است',
+  }),
 })
 
 /**
@@ -86,6 +129,7 @@ export const chatMessageSchema = z.object({
 })
 
 export type ConsultationRequestValues = z.infer<typeof consultationRequestSchema>
+export type CreateCaseIntakeValues = z.infer<typeof createCaseIntakeSchema>
 export type CreateCaseValues = z.infer<typeof createCaseSchema>
 export type DocumentRequestValues = z.infer<typeof documentRequestSchema>
 export type TicketValues = z.infer<typeof ticketSchema>

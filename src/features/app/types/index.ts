@@ -29,6 +29,44 @@ export type DocumentRequestType =
 
 export type TicketStatus = 'open' | 'pending' | 'answered' | 'closed'
 
+export type CreateCaseWizardStep = 'intake' | 'upload' | 'prepayment' | 'completed'
+
+export interface CaseFileMeta {
+  id: string
+  name: string
+  size: number
+  type: string
+}
+
+export interface CaseFileRuleSection {
+  id: string
+  title: string
+  body: string[]
+}
+
+export interface CaseDeliveryMethod {
+  id: string
+  title: string
+  description: string
+  recommended?: boolean
+}
+
+export interface CasePrepaymentItem {
+  label: string
+  amount: number
+}
+
+export interface CasePrepaymentInvoice {
+  id: string
+  title: string
+  description: string
+  amount: number
+  currencyLabel: string
+  issuedAtLabel: string
+  dueLabel: string
+  items: CasePrepaymentItem[]
+}
+
 export interface AppUser {
   id: string
   fullName: string

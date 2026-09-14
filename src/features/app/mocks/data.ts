@@ -5,6 +5,7 @@ import type {
   AppUser,
   BlogCard,
   CaseNotification,
+  CasePrepaymentInvoice,
   ConsultationAvailability,
   ConsultationSlot,
   DiscountCode,
@@ -12,6 +13,7 @@ import type {
   SpecialOffer,
   SupportTicket,
 } from '../types'
+import { MOCK_CASE_PREPAYMENT } from '../constants/case-intake'
 
 const MOCK_USER: AppUser = {
   id: 'usr-1001',
@@ -357,4 +359,9 @@ export function getTickets(): SupportTicket[] {
 
 export function getTicketById(id: string): SupportTicket | undefined {
   return getTickets().find((item) => item.id === id)
+}
+
+/** Prepayment invoice after case file upload — mock in development only. */
+export function getCasePrepaymentInvoice(): CasePrepaymentInvoice | null {
+  return withMockData(() => MOCK_CASE_PREPAYMENT, null)
 }
