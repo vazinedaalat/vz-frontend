@@ -4,6 +4,7 @@ import { slotKey } from '../lib/consultation-availability'
 import type {
   AppUser,
   BlogCard,
+  CaseChatThread,
   CaseNotification,
   CasePrepaymentInvoice,
   ConsultationAvailability,
@@ -106,6 +107,7 @@ const MOCK_CASES: LegalCase[] = [
     lawyerName: 'دکتر سیاوش وزیری',
     updatedAt: '۱۴۰۴/۰۶/۱۸ · ۱۴:۲۰',
     nextAction: 'تکمیل پیوست مبایعه‌نامه و رسیدهای پرداخت',
+    chatId: 'chat-case-901',
     stages: [
       { id: 's1', title: 'پذیرش', description: 'پرونده ثبت و مدارک اولیه دریافت شد', completed: true, at: '۱۴۰۴/۰۵/۰۲' },
       { id: 's2', title: 'مشاوره', description: 'راهبرد دعوا مشخص شد', completed: true, at: '۱۴۰۴/۰۵/۰۵' },
@@ -126,6 +128,7 @@ const MOCK_CASES: LegalCase[] = [
     lawyerName: 'امیرحسین کاظمی',
     updatedAt: '۱۴۰۴/۰۶/۱۷ · ۱۰:۰۵',
     nextAction: 'منتظر ابلاغ وقت رسیدگی',
+    chatId: 'chat-case-874',
     stages: [
       { id: 's1', title: 'پذیرش', description: 'پرونده پذیرش شد', completed: true, at: '۱۴۰۴/۰۴/۱۲' },
       { id: 's2', title: 'مشاوره', description: 'ارزیابی ریسک انجام شد', completed: true, at: '۱۴۰۴/۰۴/۱۳' },
@@ -146,6 +149,7 @@ const MOCK_CASES: LegalCase[] = [
     lawyerName: 'مریم رادمنش',
     updatedAt: '۱۴۰۴/۰۶/۱۵ · ۱۹:۴۰',
     nextAction: 'جلسه مشاوره آنلاین فردا ساعت ۱۱',
+    chatId: 'chat-case-812',
     stages: [
       { id: 's1', title: 'پذیرش', description: 'درخواست ثبت شد', completed: true, at: '۱۴۰۴/۰۶/۱۰' },
       { id: 's2', title: 'مشاوره', description: 'زمان مشاوره رزرو شده است', completed: false },
@@ -153,6 +157,85 @@ const MOCK_CASES: LegalCase[] = [
       { id: 's4', title: 'بررسی و تنظیم', description: '—', completed: false },
       { id: 's5', title: 'پیگیری', description: '—', completed: false },
       { id: 's6', title: 'اطلاع‌رسانی', description: '—', completed: false },
+    ],
+  },
+]
+
+/** One follow-up chat thread per case — created with the case. */
+const MOCK_CASE_CHATS: CaseChatThread[] = [
+  {
+    id: 'chat-case-901',
+    caseId: 'case-901',
+    caseTitle: 'الزام به تنظیم سند رسمی ملک',
+    caseNumber: 'VZ-۱۴۰۴-۰۹۰۱',
+    lawyerName: 'دکتر سیاوش وزیری',
+    updatedAt: '۱۴۰۴/۰۶/۱۸ · ۱۴:۲۰',
+    unreadCount: 1,
+    messages: [
+      {
+        id: 'cm-901-1',
+        sender: 'system',
+        body: 'چت پیگیری این پرونده فعال شد. می‌توانید سوالات و مدارک تکمیلی را اینجا ارسال کنید.',
+        createdAt: '۱۴۰۴/۰۵/۰۸ · ۱۰:۰۰',
+      },
+      {
+        id: 'cm-901-2',
+        sender: 'admin',
+        body: 'سلام؛ پیش‌نویس دادخواست آماده است. لطفاً تصویر مبایعه‌نامه و رسیدهای بانکی را ارسال کنید.',
+        createdAt: '۱۴۰۴/۰۶/۱۸ · ۱۴:۲۰',
+      },
+    ],
+  },
+  {
+    id: 'chat-case-874',
+    caseId: 'case-874',
+    caseTitle: 'مطالبه وجه چک برگشتی',
+    caseNumber: 'VZ-۱۴۰۴-۰۸۷۴',
+    lawyerName: 'امیرحسین کاظمی',
+    updatedAt: '۱۴۰۴/۰۶/۱۷ · ۱۰:۰۵',
+    unreadCount: 0,
+    messages: [
+      {
+        id: 'cm-874-1',
+        sender: 'system',
+        body: 'چت پیگیری پرونده مطالبه وجه چک فعال شد.',
+        createdAt: '۱۴۰۴/۰۴/۱۵ · ۱۱:۳۰',
+      },
+      {
+        id: 'cm-874-2',
+        sender: 'user',
+        body: 'آیا وقت رسیدگی ابلاغ شده است؟',
+        createdAt: '۱۴۰۴/۰۶/۱۶ · ۰۹:۱۰',
+      },
+      {
+        id: 'cm-874-3',
+        sender: 'admin',
+        body: 'هنوز ابلاغ نرسیده؛ به‌محض وصول در همین گفتگو اعلام می‌کنیم.',
+        createdAt: '۱۴۰۴/۰۶/۱۷ · ۱۰:۰۵',
+      },
+    ],
+  },
+  {
+    id: 'chat-case-812',
+    caseId: 'case-812',
+    caseTitle: 'طلاق توافقی و حضانت',
+    caseNumber: 'VZ-۱۴۰۴-۰۸۱۲',
+    lawyerName: 'مریم رادمنش',
+    updatedAt: '۱۴۰۴/۰۶/۱۵ · ۱۹:۴۰',
+    unreadCount: 1,
+    messages: [
+      {
+        id: 'cm-812-1',
+        sender: 'system',
+        body: 'چت پیگیری پرونده خانواده فعال شد.',
+        createdAt: '۱۴۰۴/۰۶/۱۰ · ۱۲:۰۰',
+      },
+      {
+        id: 'cm-812-2',
+        sender: 'admin',
+        body: 'یادآوری: جلسه مشاوره فردا ساعت ۱۱ برگزار می‌شود. لینک ورود پیامک خواهد شد.',
+        createdAt: '۱۴۰۴/۰۶/۱۵ · ۱۹:۴۰',
+      },
     ],
   },
 ]
@@ -331,6 +414,18 @@ export function getCases(): LegalCase[] {
 
 export function getCaseById(id: string): LegalCase | undefined {
   return getCases().find((item) => item.id === id)
+}
+
+export function getCaseChats(): CaseChatThread[] {
+  return withMockData(() => MOCK_CASE_CHATS, [])
+}
+
+export function getCaseChatByCaseId(caseId: string): CaseChatThread | undefined {
+  return getCaseChats().find((item) => item.caseId === caseId)
+}
+
+export function getCaseChatById(chatId: string): CaseChatThread | undefined {
+  return getCaseChats().find((item) => item.id === chatId)
 }
 
 export function getConsultations(): ConsultationSlot[] {

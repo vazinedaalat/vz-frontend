@@ -1,15 +1,21 @@
+import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { toPersianDigits, formatFaNumber } from '@/lib/format'
-import { getCaseById, getNotifications } from '../mocks/data'
+import { getCaseById, getCaseChatByCaseId, getNotifications } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
+import { ChatThreadPanel } from '../components/chat-thread-panel'
 import { PageHeader } from '../components/page-header'
+import type { CaseChatThread, ChatMessage } from '../types'
 
 export default function CaseDetailPage() {
   const { caseId = '' } = useParams()
   const item = getCaseById(caseId)
   const notes = getNotifications().filter((n) => n.caseId === caseId)
+  const initialChat = useMemo(() => getCaseChatByCaseId(caseId), [caseId])
+  const [thread, setThread] = useState<CaseChatThread | null>(initialChat ?? null)
 
   if (!item) {
     return (
@@ -25,6 +31,20 @@ export default function CaseDetailPage() {
     )
   }
 
+  const onSend = (body: string) => {
+    const message: ChatMessage = {
+      id: `cm-${Date.now()}`,
+      sender: 'user',
+      body,
+      createdAt: 'اکنون',
+    }
+    setThread((prev) =>
+      prev
+        ? { ...prev, updatedAt: 'اکنون', unreadCount: 0, messages: [...prev.messages, message] }
+        : prev,
+    )
+  }
+
   return (
     <div className="space-y-8">
       <PageHeader
@@ -32,13 +52,21 @@ export default function CaseDetailPage() {
         title={item.title}
         description={`${item.category} · وکیل مسئول: ${item.lawyerName}`}
         action={
-          <Button variant="outline" asChild>
-            <Link to="/app/cases">همه پرونده‌ها</Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="accent" asChild>
+              <Link to={`/app/cases/${item.id}/chat`}>
+                <MessageCircle className="size-4" aria-hidden />
+                چت پیگیری
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/app/cases">همه پرونده‌ها</Link>
+            </Button>
+          </div>
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <section className="rounded-[1.5rem] border border-navy-200 bg-white p-6 shadow-soft">
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-display text-lg font-bold">فرآیند پرونده</h2>
@@ -64,7 +92,7 @@ export default function CaseDetailPage() {
                   <span
                     className={cn(
                       'absolute top-8 right-[0.95rem] h-[calc(100%-1.5rem)] w-px',
-                      stage.completed ? 'bg-gold-400' : 'bg-navy-200'
+                      stage.completed ? 'bg-gold-400' : 'bg-navy-200',
                     )}
                     aria-hidden
                   />
@@ -74,7 +102,7 @@ export default function CaseDetailPage() {
                     'relative z-10 mt-0.5 grid size-8 shrink-0 place-items-center rounded-full border text-xs font-bold',
                     stage.completed
                       ? 'border-gold-500 bg-gold-500 text-navy-900'
-                      : 'border-navy-200 bg-white text-navy-400'
+                      : 'border-navy-200 bg-white text-navy-400',
                   )}
                 >
                   {toPersianDigits(index + 1)}
@@ -94,6 +122,12 @@ export default function CaseDetailPage() {
             <h2 className="font-display text-lg font-bold">اقدام بعدی</h2>
             <p className="mt-3 text-sm leading-7 text-white/80">{item.nextAction}</p>
             <p className="mt-4 text-xs text-white/50">آخرین به‌روزرسانی: {item.updatedAt}</p>
+            <Button asChild variant="accent" className="mt-5 w-full" size="lg">
+              <Link to={`/app/cases/${item.id}/chat`}>
+                <MessageCircle className="size-4" aria-hidden />
+                پیام به وکیل پرونده
+              </Link>
+            </Button>
           </section>
 
           <section className="rounded-[1.5rem] border border-navy-200 bg-white p-6 shadow-soft">
@@ -119,6 +153,27 @@ export default function CaseDetailPage() {
           </section>
         </div>
       </div>
+
+      {thread ? (
+        <div className="space-y-3">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <h2 className="font-display text-lg font-bold text-navy-900">چت پیگیری پرونده</h2>
+              <p className="mt-1 text-sm text-navy-600">هر پرونده کانال اختصاصی پیام با وکیل مسئول دارد.</p>
+            </div>
+            <Button variant="outline" size="sm" className="hidden sm:inline-flex" asChild>
+              <Link to={`/app/cases/${item.id}/chat`}>نمای تمام‌صفحه</Link>
+            </Button>
+          </div>
+          <ChatThreadPanel
+            title={item.title}
+            subtitle={`${item.caseNumber} · ${item.lawyerName}`}
+            messages={thread.messages}
+            onSend={onSend}
+            className="min-h-[24rem]"
+          />
+        </div>
+      ) : null}
     </div>
   )
 }

@@ -13,6 +13,7 @@ const ConsultationPage = lazy(() => import('@/features/app/pages/consultation-pa
 const CasesPage = lazy(() => import('@/features/app/pages/cases-page'))
 const CreateCasePage = lazy(() => import('@/features/app/pages/create-case-page'))
 const CaseDetailPage = lazy(() => import('@/features/app/pages/case-detail-page'))
+const CaseChatPage = lazy(() => import('@/features/app/pages/case-chat-page'))
 const DocumentRequestPage = lazy(() => import('@/features/app/pages/document-request-page'))
 const NotificationsPage = lazy(() => import('@/features/app/pages/notifications-page'))
 const DiscountsPage = lazy(() => import('@/features/app/pages/discounts-page'))
@@ -70,6 +71,7 @@ const router = createBrowserRouter([
           { path: 'cases', element: <CasesPage /> },
           { path: 'cases/new', element: <CreateCasePage /> },
           { path: 'cases/:caseId', element: <CaseDetailPage /> },
+          { path: 'cases/:caseId/chat', element: <CaseChatPage /> },
           { path: 'documents', element: <DocumentRequestPage /> },
           { path: 'notifications', element: <NotificationsPage /> },
           { path: 'discounts', element: <DiscountsPage /> },

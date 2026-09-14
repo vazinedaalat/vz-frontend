@@ -13,7 +13,7 @@ export default function CasesPage() {
       <PageHeader
         eyebrow="پرونده‌ها"
         title="وضعیت پرونده‌های من"
-        description="هر پرونده را مرحله‌به‌مرحله ببینید؛ از پذیرش تا اطلاع‌رسانی."
+        description="هر پرونده را مرحله‌به‌مرحله ببینید و از چت اختصاصی آن پیگیری کنید."
         action={
           <Button variant="accent" asChild>
             <Link to="/app/cases/new">ایجاد پرونده</Link>

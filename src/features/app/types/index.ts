@@ -118,6 +118,19 @@ export interface LegalCase {
   updatedAt: string
   nextAction: string
   stages: CaseStage[]
+  /** Every formed case has a dedicated follow-up chat thread. */
+  chatId: string
+}
+
+export interface CaseChatThread {
+  id: string
+  caseId: string
+  caseTitle: string
+  caseNumber: string
+  lawyerName: string
+  updatedAt: string
+  unreadCount: number
+  messages: ChatMessage[]
 }
 
 export interface ConsultationPlan {
