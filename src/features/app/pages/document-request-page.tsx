@@ -44,6 +44,7 @@ export default function DocumentRequestPage() {
       plaintiffAddress: '',
       defendantName: '',
       defendantAddress: '',
+      defendantPhone: '',
       claimTitle: '',
       claimAmount: '',
       claimBasis: '',
@@ -93,6 +94,7 @@ export default function DocumentRequestPage() {
         plaintiffAddress: '',
         defendantName: '',
         defendantAddress: '',
+        defendantPhone: '',
         claimTitle: '',
         claimAmount: '',
         claimBasis: '',
@@ -218,10 +220,26 @@ export default function DocumentRequestPage() {
               <Input id="defendantName" {...register('defendantName')} />
             </Field>
             <Field
+              label="موبایل خوانده (اختیاری)"
+              htmlFor="defendantPhone"
+              error={errors.defendantPhone?.message}
+              hint="در صورت دسترسی، برای هماهنگی سریع‌تر وارد کنید."
+            >
+              <Input
+                id="defendantPhone"
+                inputMode="tel"
+                placeholder="0912…"
+                dir="ltr"
+                className="text-left"
+                {...register('defendantPhone')}
+              />
+            </Field>
+            <Field
               label="اقامتگاه طرف مقابل"
               htmlFor="defendantAddress"
               required
               error={errors.defendantAddress?.message}
+              className="sm:col-span-2"
             >
               <Input id="defendantAddress" {...register('defendantAddress')} />
             </Field>

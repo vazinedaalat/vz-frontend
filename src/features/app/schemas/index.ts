@@ -110,6 +110,13 @@ export const documentRequestFieldsSchema = z.object({
   plaintiffAddress: z.string().min(15, 'اقامتگاه را کامل بنویسید (شهر، خیابان، پلاک)'),
   defendantName: z.string().min(2, 'نام خوانده / مخاطب الزامی است'),
   defendantAddress: z.string().min(10, 'اقامتگاه طرف مقابل را وارد کنید'),
+  defendantPhone: z
+    .string()
+    .trim()
+    .optional()
+    .refine((value) => !value || /^09\d{9}$/.test(value), {
+      message: 'شماره موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد',
+    }),
   claimTitle: z.string().min(5, 'خواسته را مشخص کنید'),
   claimAmount: z.string().optional(),
   claimBasis: z.string().min(20, 'مبنای استحقاق / تعهد را توضیح دهید'),
