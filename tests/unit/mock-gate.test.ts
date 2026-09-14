@@ -36,6 +36,7 @@ describe('Iranian legal form schemas', () => {
       claimBasis: 'به موجب مبایعه‌نامه مورخ ۱۴۰۲ خواهان مستحق انتقال رسمی است.',
       courtRequest: 'صدور حکم بر الزام خوانده به تنظیم سند رسمی',
       evidenceSummary: 'مبایعه‌نامه، رسیدهای بانکی، گواهی عدم حضور',
+      acceptFileRules: true,
     })
     expect(parsed.documentType).toBe('petition')
   })

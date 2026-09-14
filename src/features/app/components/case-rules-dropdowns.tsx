@@ -1,20 +1,33 @@
 import { ChevronDown } from 'lucide-react'
 import { CASE_DELIVERY_METHODS, CASE_FILE_RULE_SECTIONS } from '../constants/case-intake'
+import type { CaseDeliveryMethod, CaseFileRuleSection } from '../types'
+
+interface CaseRulesDropdownsProps {
+  rulesTitle?: string
+  deliveryTitle?: string
+  rules?: readonly CaseFileRuleSection[]
+  deliveryMethods?: readonly CaseDeliveryMethod[]
+}
 
 /** Expandable guidance for file rules and delivery methods. */
-export function CaseRulesDropdowns() {
+export function CaseRulesDropdowns({
+  rulesTitle = 'قوانین ارسال فایل',
+  deliveryTitle = 'روش‌های ارسال مدارک',
+  rules = CASE_FILE_RULE_SECTIONS,
+  deliveryMethods = CASE_DELIVERY_METHODS,
+}: CaseRulesDropdownsProps) {
   return (
     <div className="space-y-3">
       <details className="group rounded-2xl border border-navy-200 bg-white shadow-soft open:shadow-lift">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-semibold text-navy-900 marker:content-none [&::-webkit-details-marker]:hidden">
-          <span>قوانین ارسال فایل</span>
+          <span>{rulesTitle}</span>
           <ChevronDown
             className="size-4 shrink-0 text-navy-500 transition-transform duration-200 group-open:rotate-180"
             aria-hidden
           />
         </summary>
         <div className="space-y-4 border-t border-navy-100 px-4 py-4">
-          {CASE_FILE_RULE_SECTIONS.map((section) => (
+          {rules.map((section) => (
             <div key={section.id}>
               <h3 className="text-sm font-semibold text-navy-900">{section.title}</h3>
               <ul className="mt-2 space-y-1.5">
@@ -32,14 +45,14 @@ export function CaseRulesDropdowns() {
 
       <details className="group rounded-2xl border border-navy-200 bg-white shadow-soft open:shadow-lift">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-semibold text-navy-900 marker:content-none [&::-webkit-details-marker]:hidden">
-          <span>روش‌های ارسال مدارک</span>
+          <span>{deliveryTitle}</span>
           <ChevronDown
             className="size-4 shrink-0 text-navy-500 transition-transform duration-200 group-open:rotate-180"
             aria-hidden
           />
         </summary>
         <div className="space-y-3 border-t border-navy-100 px-4 py-4">
-          {CASE_DELIVERY_METHODS.map((method) => (
+          {deliveryMethods.map((method) => (
             <article
               key={method.id}
               className="rounded-xl border border-navy-100 bg-navy-50/60 px-3.5 py-3"

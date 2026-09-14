@@ -100,7 +100,7 @@ export const createCaseSchema = createCaseIntakeSchema.extend({
  * Fields inspired by Art. 51 Civil Procedure Code (دادخواست)
  * and practical اظهارنامه requirements before litigation.
  */
-export const documentRequestSchema = z.object({
+export const documentRequestFieldsSchema = z.object({
   documentType: z.enum(['petition', 'declaration', 'complaint', 'brief', 'power-of-attorney']),
   plaintiffName: z.string().min(3, 'نام خواهان / اظهارکننده الزامی است'),
   plaintiffFatherName: z.string().min(2, 'نام پدر را وارد کنید'),
@@ -118,6 +118,12 @@ export const documentRequestSchema = z.object({
   notes: z.string().optional(),
 })
 
+export const documentRequestSchema = documentRequestFieldsSchema.extend({
+  acceptFileRules: z.boolean().refine((value) => value === true, {
+    message: 'پذیرش قوانین ارسال فایل الزامی است',
+  }),
+})
+
 export const ticketSchema = z.object({
   subject: z.string().min(5, 'موضوع تیکت را وارد کنید'),
   category: z.enum(['عمومی', 'مالی', 'فنی', 'پرونده']),
@@ -131,5 +137,6 @@ export const chatMessageSchema = z.object({
 export type ConsultationRequestValues = z.infer<typeof consultationRequestSchema>
 export type CreateCaseIntakeValues = z.infer<typeof createCaseIntakeSchema>
 export type CreateCaseValues = z.infer<typeof createCaseSchema>
+export type DocumentRequestFieldsValues = z.infer<typeof documentRequestFieldsSchema>
 export type DocumentRequestValues = z.infer<typeof documentRequestSchema>
 export type TicketValues = z.infer<typeof ticketSchema>
