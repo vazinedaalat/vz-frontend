@@ -41,7 +41,14 @@ function AuthGate() {
   )
 }
 
-const router = createBrowserRouter([
+const routerBasename = (() => {
+  const base = import.meta.env.BASE_URL
+  if (!base || base === '/') return '/'
+  return base.endsWith('/') ? base.slice(0, -1) : base
+})()
+
+const router = createBrowserRouter(
+  [
   {
     path: '/',
     element: (
@@ -87,7 +94,9 @@ const router = createBrowserRouter([
       </Suspense>
     ),
   },
-])
+  ],
+  { basename: routerBasename },
+)
 
 export function AppRouter() {
   return <RouterProvider router={router} />
