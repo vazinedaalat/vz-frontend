@@ -37,16 +37,16 @@ export function CaseCard({ item }: CaseCardProps) {
         <p className="mt-3 text-xs text-navy-500">{item.lawyerName}</p>
       </Link>
 
-      <div className="mt-auto flex flex-col gap-2 border-t border-navy-100 pt-4 sm:flex-row">
-        <Button variant="outline" size="sm" className="w-full flex-1" asChild>
+      <div className="mt-auto grid grid-cols-1 gap-2 border-t border-navy-100 pt-4 sm:grid-cols-2">
+        <Button variant="outline" size="default" className="h-11 w-full min-w-0 px-3 text-sm sm:h-10" asChild>
           <Link to={`/app/cases/${item.id}`}>
             جزئیات
-            <ArrowLeft className="size-3.5" aria-hidden />
+            <ArrowLeft className="size-4 shrink-0" aria-hidden />
           </Link>
         </Button>
-        <Button variant="accent" size="sm" className="w-full flex-1" asChild>
+        <Button variant="accent" size="default" className="h-11 w-full min-w-0 px-3 text-sm sm:h-10" asChild>
           <Link to={`/app/cases/${item.id}/chat`}>
-            <MessageCircle className="size-3.5" aria-hidden />
+            <MessageCircle className="size-4 shrink-0" aria-hidden />
             چت پیگیری
           </Link>
         </Button>
