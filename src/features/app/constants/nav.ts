@@ -21,6 +21,22 @@ export const APP_NAV: readonly NavItem[] = [
   { label: 'پیشنهادها', to: '/app/offers', icon: Sparkles },
 ] as const
 
+/** Primary bottom-bar destinations on small screens (includes chat). */
+export const APP_MOBILE_PRIMARY_NAV: readonly NavItem[] = [
+  APP_NAV[0]!,
+  APP_NAV[1]!,
+  APP_NAV[2]!,
+  APP_NAV[4]!,
+] as const
+
+/** Overflow destinations opened from «بیشتر» on mobile. */
+export const APP_MOBILE_MORE_NAV: readonly NavItem[] = [
+  APP_NAV[3]!,
+  APP_NAV[5]!,
+  APP_NAV[6]!,
+  APP_NAV[7]!,
+] as const
+
 export const DOCUMENT_TYPE_OPTIONS = [
   { value: 'petition', label: 'دادخواست' },
   { value: 'declaration', label: 'اظهارنامه' },
