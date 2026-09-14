@@ -9,7 +9,16 @@ export type CaseStatus =
   | 'notified'
   | 'closed'
 
-export type ConsultationMode = 'video' | 'voice' | 'chat' | 'in-person-online'
+export type ConsultationMode = 'video' | 'voice' | 'chat' | 'in-person'
+
+/** Four client-panel consultation products. */
+export type ConsultationPlanId =
+  | 'free-online'
+  | 'specialist-online'
+  | 'in-person'
+  | 'dargahi-premium'
+
+export type ConsultationChannel = 'online' | 'in-person'
 
 export type DocumentRequestType =
   | 'petition'
@@ -73,9 +82,36 @@ export interface LegalCase {
   stages: CaseStage[]
 }
 
+export interface ConsultationPlan {
+  id: ConsultationPlanId
+  title: string
+  subtitle: string
+  channel: ConsultationChannel
+  channelLabel: string
+  /** Online plans: day only. In-person plans: day + time. */
+  requiresTime: boolean
+  isFree: boolean
+  requiresPayment: boolean
+  price: number
+  durationMinutes: number
+  lawyerName: string
+  highlights: string[]
+  badge?: string
+}
+
+export interface ConsultationAvailability {
+  /** Fully reserved calendar days (`YYYY-MM-DD`) — not bookable. */
+  bookedDates: string[]
+  /** Reserved in-person slots as `YYYY-MM-DDTHH:mm`. */
+  bookedSlots: string[]
+  /** Bookable clock times for in-person plans (`HH:mm`). */
+  timeSlots: string[]
+}
+
 export interface ConsultationSlot {
   id: string
   topic: string
+  planId?: ConsultationPlanId
   mode: ConsultationMode
   modeLabel: string
   lawyerName: string

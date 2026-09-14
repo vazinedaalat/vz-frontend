@@ -20,13 +20,29 @@ export const smsLoginOtpSchema = z.object({
   code: otpSchema,
 })
 
-export const consultationRequestSchema = z.object({
-  topic: z.string().min(3, 'موضوع مشاوره را وارد کنید'),
-  mode: z.enum(['video', 'voice', 'chat']),
-  description: z.string().min(20, 'حداقل ۲۰ نویسه توضیح دهید'),
-  preferredTime: z.string().min(3, 'زمان پیشنهادی را مشخص کنید'),
-  discountCode: z.string().optional(),
-})
+export const consultationRequestSchema = z
+  .object({
+    planId: z.enum(['free-online', 'specialist-online', 'in-person', 'dargahi-premium'], {
+      required_error: 'طرح مشاوره را انتخاب کنید',
+    }),
+    topic: z.string().min(3, 'موضوع مشاوره را وارد کنید'),
+    description: z.string().min(20, 'حداقل ۲۰ نویسه توضیح دهید'),
+    dateKey: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'تاریخ رزرو را از تقویم انتخاب کنید'),
+    time: z.string().optional(),
+    discountCode: z.string().optional(),
+  })
+  .superRefine((values, ctx) => {
+    const needsTime = values.planId === 'in-person' || values.planId === 'dargahi-premium'
+    if (needsTime && !values.time) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'ساعت جلسه را انتخاب کنید',
+        path: ['time'],
+      })
+    }
+  })
 
 export const createCaseSchema = z.object({
   title: z.string().min(5, 'عنوان پرونده را کامل‌تر بنویسید'),

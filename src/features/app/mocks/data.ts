@@ -1,8 +1,11 @@
 import { withMockData } from '@/lib/mock'
+import { addDays, startOfLocalDay, toDateKey } from '@/lib/jalali'
+import { slotKey } from '../lib/consultation-availability'
 import type {
   AppUser,
   BlogCard,
   CaseNotification,
+  ConsultationAvailability,
   ConsultationSlot,
   DiscountCode,
   LegalCase,
@@ -156,39 +159,56 @@ const MOCK_CONSULTATIONS: ConsultationSlot[] = [
   {
     id: 'con-1',
     topic: 'مشاوره دعاوی ملکی',
+    planId: 'specialist-online',
     mode: 'video',
-    modeLabel: 'ویدیویی',
-    lawyerName: 'دکتر سیاوش وزیری',
-    startsAt: 'سه‌شنبه ۲۱ شهریور · ۱۷:۰۰',
+    modeLabel: 'آنلاین تخصصی',
+    lawyerName: 'وکیل پایه یک دادگستری',
+    startsAt: 'سه‌شنبه ۲۱ شهریور',
     durationMinutes: 30,
     price: 890000,
     discountedPrice: 534000,
-    status: 'available',
+    status: 'booked',
   },
   {
     id: 'con-2',
     topic: 'مشاوره قرارداد تجاری',
+    planId: 'free-online',
     mode: 'chat',
-    modeLabel: 'چت آنلاین',
-    lawyerName: 'امیرحسین کاظمی',
-    startsAt: 'چهارشنبه ۲۲ شهریور · ۱۲:۳۰',
-    durationMinutes: 20,
-    price: 490000,
-    status: 'available',
+    modeLabel: 'آنلاین رایگان',
+    lawyerName: 'تیم مشاوران وزین عدالت',
+    startsAt: 'چهارشنبه ۲۲ شهریور',
+    durationMinutes: 15,
+    price: 0,
+    status: 'booked',
   },
   {
     id: 'con-3',
-    topic: 'مشاوره خانواده',
-    mode: 'voice',
-    modeLabel: 'تلفنی',
-    lawyerName: 'مریم رادمنش',
+    topic: 'مشاوره فوق‌تخصصی',
+    planId: 'dargahi-premium',
+    mode: 'in-person',
+    modeLabel: 'حضوری · آقای درگاهی',
+    lawyerName: 'آقای درگاهی',
     startsAt: 'پنجشنبه ۲۳ شهریور · ۱۰:۰۰',
-    durationMinutes: 25,
-    price: 650000,
-    discountedPrice: 520000,
+    durationMinutes: 60,
+    price: 3500000,
     status: 'booked',
   },
 ]
+
+function buildMockAvailability(today = startOfLocalDay()): ConsultationAvailability {
+  const d = (offset: number) => toDateKey(addDays(today, offset))
+  return {
+    bookedDates: [d(2), d(5), d(9)],
+    bookedSlots: [
+      slotKey(d(1), '10:00'),
+      slotKey(d(1), '14:00'),
+      slotKey(d(3), '11:00'),
+      slotKey(d(4), '16:00'),
+      slotKey(d(7), '09:00'),
+    ],
+    timeSlots: ['09:00', '10:00', '11:00', '12:00', '14:00', '16:00', '18:00'],
+  }
+}
 
 const MOCK_BLOGS: BlogCard[] = [
   {
@@ -313,6 +333,14 @@ export function getCaseById(id: string): LegalCase | undefined {
 
 export function getConsultations(): ConsultationSlot[] {
   return withMockData(() => MOCK_CONSULTATIONS, [])
+}
+
+/** Booked days/slots — mock in development; empty until API in production. */
+export function getConsultationAvailability(): ConsultationAvailability {
+  return withMockData(
+    () => buildMockAvailability(),
+    { bookedDates: [], bookedSlots: [], timeSlots: [] },
+  )
 }
 
 export function getBlogCards(): BlogCard[] {
