@@ -1,4 +1,5 @@
 import type { HomeHeroBannerSlide } from '../types'
+import { publicUrl } from '@/lib/public-url'
 
 /** Autoplay duration per slide (ms). */
 export const HOME_BANNER_INTERVAL_MS = 7000
@@ -12,7 +13,7 @@ export const HOME_HERO_BANNERS: readonly HomeHeroBannerSlide[] = [
       'زمان مناسب را انتخاب کنید و همان روز با وکیل پایه یک گفتگو کنید — شفاف، سریع و قابل پیگیری در پنل.',
     ctaLabel: 'رزرو مشاوره',
     ctaTo: '/app/consultation',
-    imageSrc: '/images/app-home-banner-consult.jpg',
+    imageSrc: publicUrl('/images/app-home-banner-consult.jpg'),
     imageAlt: 'اتاق مشاوره حقوقی با نور ملایم و فضای حرفه‌ای',
   },
   {
@@ -23,7 +24,7 @@ export const HOME_HERO_BANNERS: readonly HomeHeroBannerSlide[] = [
       'درخواست تنظیم سند حقوقی را ثبت کنید؛ تیم وزین عدالت متن را بازبینی و برای ارائه آماده می‌کند.',
     ctaLabel: 'درخواست سند',
     ctaTo: '/app/documents',
-    imageSrc: '/images/app-home-banner-docs.jpg',
+    imageSrc: publicUrl('/images/app-home-banner-docs.jpg'),
     imageAlt: 'پرونده‌ها و اسناد حقوقی روی میز با جزئیات طلایی',
   },
   {
@@ -34,7 +35,7 @@ export const HOME_HERO_BANNERS: readonly HomeHeroBannerSlide[] = [
       'ایجاد پرونده، گفتگو با تیم پیگیری و مشاهده مراحل — همه در یک مسیر یکپارچه و قابل اعتماد.',
     ctaLabel: 'ایجاد پرونده',
     ctaTo: '/app/cases/new',
-    imageSrc: '/images/app-home-banner.jpg',
+    imageSrc: publicUrl('/images/app-home-banner.jpg'),
     imageAlt: 'دفتر حقوقی مدرن با مقیاس عدالت و نور طبیعی',
   },
 ] as const
