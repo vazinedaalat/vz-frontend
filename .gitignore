@@ -4,9 +4,9 @@ node_modules
 .pnp.js
 
 # Build
-dist
-dist-ssr
-*.local
+# dist
+# dist-ssr
+# *.local
 
 # Env
 .env
