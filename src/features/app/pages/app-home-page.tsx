@@ -48,8 +48,8 @@ export default function AppHomePage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-lg font-bold">پیشنهادهای ویژه</h2>
-          <Link to="/app/offers" className="text-sm font-medium text-gold-700 hover:text-gold-600">
-            همه پیشنهادها
+          <Link to="/app/discounts" className="text-sm font-medium text-gold-700 hover:text-gold-600">
+            دیدن تخفیف‌ها
           </Link>
         </div>
         {offers.length > 0 ? (

@@ -17,7 +17,6 @@ const CaseChatPage = lazy(() => import('@/features/app/pages/case-chat-page'))
 const DocumentRequestPage = lazy(() => import('@/features/app/pages/document-request-page'))
 const NotificationsPage = lazy(() => import('@/features/app/pages/notifications-page'))
 const DiscountsPage = lazy(() => import('@/features/app/pages/discounts-page'))
-const OffersPage = lazy(() => import('@/features/app/pages/offers-page'))
 const ChatPage = lazy(() => import('@/features/app/pages/chat-page'))
 
 function PageLoader() {
@@ -75,7 +74,6 @@ const router = createBrowserRouter([
           { path: 'documents', element: <DocumentRequestPage /> },
           { path: 'notifications', element: <NotificationsPage /> },
           { path: 'discounts', element: <DiscountsPage /> },
-          { path: 'offers', element: <OffersPage /> },
           { path: 'chat', element: <ChatPage /> },
         ],
       },

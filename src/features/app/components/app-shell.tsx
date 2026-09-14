@@ -172,7 +172,7 @@ export function AppShell() {
                     <p id={moreTitleId} className="font-display text-base font-bold text-navy-900">
                       سایر بخش‌ها
                     </p>
-                    <p className="mt-0.5 text-xs text-navy-500">اسناد، اطلاعیه‌ها و پیشنهادها</p>
+                    <p className="mt-0.5 text-xs text-navy-500">اسناد، اطلاعیه‌ها و تخفیف‌ها</p>
                   </div>
                   <Button type="button" variant="ghost" size="icon" aria-label="بستن" onClick={() => setMoreOpen(false)}>
                     <X className="size-5" />

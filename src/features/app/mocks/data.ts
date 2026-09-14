@@ -51,8 +51,8 @@ const MOCK_OFFERS: SpecialOffer[] = [
     discountPercent: 15,
     badge: 'پرطرفدار',
     expiresAt: '۱۴۰۴/۰۷/۲۰',
-    ctaLabel: 'مشاهده جزئیات',
-    href: '/app/offers',
+    ctaLabel: 'دیدن تخفیف‌ها',
+    href: '/app/discounts',
   },
 ]
 
