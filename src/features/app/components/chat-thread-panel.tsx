@@ -1,20 +1,14 @@
 import { useEffect, useRef, type ReactNode } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { SendHorizontal, Shield } from 'lucide-react'
-import { z } from 'zod'
-import { Button, Input } from '@/components/ui'
+import { Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { chatMessageSchema } from '../schemas'
-import type { ChatMessage } from '../types'
-
-type ChatForm = z.infer<typeof chatMessageSchema>
+import { ChatAttachmentList, ChatComposer } from './chat-composer'
+import type { ChatMessage, ChatSendPayload } from '../types'
 
 interface ChatThreadPanelProps {
   title: string
   subtitle: string
   messages: ChatMessage[]
-  onSend: (body: string) => void
+  onSend: (payload: ChatSendPayload) => void
   className?: string
   headerStart?: ReactNode
   emptyHint?: string
@@ -31,19 +25,10 @@ export function ChatThreadPanel({
   emptyHint = 'هنوز پیامی رد و بدل نشده است.',
 }: ChatThreadPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const form = useForm<ChatForm>({
-    resolver: zodResolver(chatMessageSchema),
-    defaultValues: { body: '' },
-  })
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages.length])
-
-  const submit = form.handleSubmit((values) => {
-    onSend(values.body)
-    form.reset()
-  })
 
   return (
     <section
@@ -85,7 +70,13 @@ export function ChatThreadPanel({
               {message.sender === 'system' ? (
                 <p className="mb-1 text-[0.65rem] font-semibold text-navy-400">پیام سامانه</p>
               ) : null}
-              {message.body}
+              {message.body ? <p>{message.body}</p> : null}
+              {message.attachments?.length ? (
+                <ChatAttachmentList
+                  attachments={message.attachments}
+                  tone={message.sender === 'user' ? 'dark' : 'light'}
+                />
+              ) : null}
               <p
                 className={cn(
                   'mt-1.5 text-[0.65rem]',
@@ -100,32 +91,7 @@ export function ChatThreadPanel({
         <div ref={messagesEndRef} />
       </div>
 
-      <form
-        onSubmit={submit}
-        className="border-t border-navy-100 bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4"
-      >
-        <div className="flex items-end gap-2">
-          <div className="min-w-0 flex-1">
-            <label htmlFor="thread-chat-body" className="sr-only">
-              متن پیام
-            </label>
-            <Input
-              id="thread-chat-body"
-              placeholder="پیام پیگیری خود را بنویسید…"
-              className="min-h-11"
-              {...form.register('body')}
-            />
-            {form.formState.errors.body ? (
-              <p className="mt-1 text-xs text-destructive" role="alert">
-                {form.formState.errors.body.message}
-              </p>
-            ) : null}
-          </div>
-          <Button type="submit" variant="accent" size="icon" className="size-11 shrink-0" aria-label="ارسال پیام">
-            <SendHorizontal className="size-4" />
-          </Button>
-        </div>
-      </form>
+      <ChatComposer onSend={onSend} placeholder="پیام یا فایل پیگیری را ارسال کنید…" />
     </section>
   )
 }

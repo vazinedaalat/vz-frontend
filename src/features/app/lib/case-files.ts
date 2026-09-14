@@ -40,13 +40,17 @@ export interface MergeCaseFilesResult {
 }
 
 /** Merges new uploads into the current list with count/type/size rules. */
-export function mergeCaseFiles(current: CaseFileMeta[], incoming: File[]): MergeCaseFilesResult {
+export function mergeCaseFiles(
+  current: CaseFileMeta[],
+  incoming: File[],
+  maxCount = CASE_FILE_MAX_COUNT,
+): MergeCaseFilesResult {
   const errors: string[] = []
   const next = [...current]
 
   for (const file of incoming) {
-    if (next.length >= CASE_FILE_MAX_COUNT) {
-      errors.push(`حداکثر ${CASE_FILE_MAX_COUNT} فایل مجاز است.`)
+    if (next.length >= maxCount) {
+      errors.push(`حداکثر ${maxCount} فایل مجاز است.`)
       break
     }
     if (!isAllowedCaseFile(file)) {

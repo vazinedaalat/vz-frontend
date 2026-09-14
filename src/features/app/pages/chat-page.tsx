@@ -3,19 +3,18 @@ import { Link } from 'react-router-dom'
 import { useForm, type UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, FolderOpen, MessageCirclePlus, SendHorizontal, Shield } from 'lucide-react'
-import { z } from 'zod'
+import { ArrowRight, FolderOpen, MessageCirclePlus, Shield } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/lib/format'
-import { chatMessageSchema, ticketSchema, type TicketValues } from '../schemas'
+import { ticketSchema, type TicketValues } from '../schemas'
 import { getCaseChats, getTickets } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
+import { ChatAttachmentList, ChatComposer } from '../components/chat-composer'
 import { Field } from '../components/field'
 import { PageHeader } from '../components/page-header'
-import type { ChatMessage, SupportTicket } from '../types'
+import type { ChatMessage, ChatSendPayload, SupportTicket } from '../types'
 
-type ChatForm = z.infer<typeof chatMessageSchema>
 type MobilePane = 'list' | 'thread' | 'compose'
 type ChatTab = 'cases' | 'support'
 
@@ -35,11 +34,6 @@ export default function ChatPage() {
   const ticketForm = useForm<TicketValues>({
     resolver: zodResolver(ticketSchema),
     defaultValues: { subject: '', category: 'عمومی', message: '' },
-  })
-
-  const chatForm = useForm<ChatForm>({
-    resolver: zodResolver(chatMessageSchema),
-    defaultValues: { body: '' },
   })
 
   useEffect(() => {
@@ -77,13 +71,14 @@ export default function ChatPage() {
     ticketForm.reset()
   })
 
-  const sendMessage = chatForm.handleSubmit((values) => {
+  const sendMessage = ({ body, attachments }: ChatSendPayload) => {
     if (!activeId) return
     const message: ChatMessage = {
       id: `m-${Date.now()}`,
       sender: 'user',
-      body: values.body,
+      body,
       createdAt: 'اکنون',
+      attachments: attachments.length > 0 ? attachments : undefined,
     }
     setTickets((prev) =>
       prev.map((ticket) =>
@@ -92,8 +87,7 @@ export default function ChatPage() {
           : ticket,
       ),
     )
-    chatForm.reset()
-  })
+  }
 
   return (
     <div className="space-y-5 md:space-y-8">
@@ -313,7 +307,13 @@ export default function ChatPage() {
                       {message.sender === 'admin' ? (
                         <p className="mb-1 text-[0.65rem] font-semibold text-gold-700">پاسخ کارشناس</p>
                       ) : null}
-                      {message.body}
+                      {message.body ? <p>{message.body}</p> : null}
+                      {message.attachments?.length ? (
+                        <ChatAttachmentList
+                          attachments={message.attachments}
+                          tone={message.sender === 'user' ? 'dark' : 'light'}
+                        />
+                      ) : null}
                       <p
                         className={cn(
                           'mt-1.5 text-[0.65rem]',
@@ -327,32 +327,7 @@ export default function ChatPage() {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <form
-                  onSubmit={sendMessage}
-                  className="border-t border-navy-100 bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4"
-                >
-                  <div className="flex items-end gap-2">
-                    <div className="min-w-0 flex-1">
-                      <label htmlFor="chat-body" className="sr-only">
-                        متن پیام
-                      </label>
-                      <Input
-                        id="chat-body"
-                        placeholder="پیام خود را بنویسید…"
-                        className="min-h-11"
-                        {...chatForm.register('body')}
-                      />
-                      {chatForm.formState.errors.body ? (
-                        <p className="mt-1 text-xs text-destructive" role="alert">
-                          {chatForm.formState.errors.body.message}
-                        </p>
-                      ) : null}
-                    </div>
-                    <Button type="submit" variant="accent" size="icon" className="size-11 shrink-0" aria-label="ارسال پیام">
-                      <SendHorizontal className="size-4" />
-                    </Button>
-                  </div>
-                </form>
+                <ChatComposer onSend={sendMessage} inputId="support-chat-body" />
               </>
             ) : (
               <div className="flex flex-1 items-center justify-center p-6">

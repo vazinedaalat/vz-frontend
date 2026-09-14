@@ -198,6 +198,12 @@ export interface ChatMessage {
   sender: 'user' | 'admin' | 'system'
   body: string
   createdAt: string
+  attachments?: CaseFileMeta[]
+}
+
+export interface ChatSendPayload {
+  body: string
+  attachments: CaseFileMeta[]
 }
 
 export interface SupportTicket {

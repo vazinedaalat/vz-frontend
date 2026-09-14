@@ -43,6 +43,8 @@ export const CASE_FILE_ACCEPT_MIME = [
 
 export const CASE_FILE_MAX_BYTES = 10 * 1024 * 1024
 export const CASE_FILE_MAX_COUNT = 10
+/** Max attachments per chat message. */
+export const CHAT_FILE_MAX_COUNT = 5
 
 export const CASE_FILE_RULE_SECTIONS: readonly CaseFileRuleSection[] = [
   {

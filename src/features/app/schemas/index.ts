@@ -138,7 +138,7 @@ export const ticketSchema = z.object({
 })
 
 export const chatMessageSchema = z.object({
-  body: z.string().min(1, 'پیام خالی است').max(2000),
+  body: z.string().max(2000, 'پیام بیش از حد طولانی است'),
 })
 
 export type ConsultationRequestValues = z.infer<typeof consultationRequestSchema>

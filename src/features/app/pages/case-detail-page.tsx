@@ -8,7 +8,7 @@ import { getCaseById, getCaseChatByCaseId, getNotifications } from '../mocks/dat
 import { AppEmptyState } from '../components/app-empty-state'
 import { ChatThreadPanel } from '../components/chat-thread-panel'
 import { PageHeader } from '../components/page-header'
-import type { CaseChatThread, ChatMessage } from '../types'
+import type { CaseChatThread, ChatMessage, ChatSendPayload } from '../types'
 
 export default function CaseDetailPage() {
   const { caseId = '' } = useParams()
@@ -31,12 +31,13 @@ export default function CaseDetailPage() {
     )
   }
 
-  const onSend = (body: string) => {
+  const onSend = ({ body, attachments }: ChatSendPayload) => {
     const message: ChatMessage = {
       id: `cm-${Date.now()}`,
       sender: 'user',
       body,
       createdAt: 'اکنون',
+      attachments: attachments.length > 0 ? attachments : undefined,
     }
     setThread((prev) =>
       prev

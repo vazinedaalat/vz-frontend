@@ -184,6 +184,20 @@ const MOCK_CASE_CHATS: CaseChatThread[] = [
         body: 'سلام؛ پیش‌نویس دادخواست آماده است. لطفاً تصویر مبایعه‌نامه و رسیدهای بانکی را ارسال کنید.',
         createdAt: '۱۴۰۴/۰۶/۱۸ · ۱۴:۲۰',
       },
+      {
+        id: 'cm-901-3',
+        sender: 'user',
+        body: 'مبایعه‌نامه را پیوست کردم.',
+        createdAt: '۱۴۰۴/۰۶/۱۸ · ۱۵:۰۵',
+        attachments: [
+          {
+            id: 'att-901-1',
+            name: 'مبیعه‌نامه.pdf',
+            size: 840_000,
+            type: 'application/pdf',
+          },
+        ],
+      },
     ],
   },
   {
