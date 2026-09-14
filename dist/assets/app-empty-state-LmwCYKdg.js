@@ -1,2 +1,0 @@
-import{j as e}from"./query-DzX3C3EL.js";import{b as n}from"./index-BY0kTbjQ.js";function x({title:t,description:r,action:s,className:a}){return e.jsxs("div",{className:n("flex flex-col items-center justify-center gap-3 rounded-[1.5rem] border border-dashed border-navy-200 bg-white px-6 py-14 text-center",a),children:[e.jsx("h3",{className:"font-display text-lg font-bold text-navy-900",children:t}),e.jsx("p",{className:"max-w-md text-sm leading-7 text-navy-600",children:r}),s]})}export{x as A};
-//# sourceMappingURL=app-empty-state-LmwCYKdg.js.map
