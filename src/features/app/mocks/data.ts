@@ -10,11 +10,13 @@ import type {
   ConsultationAvailability,
   ConsultationSlot,
   DiscountCode,
+  HomeHeroBannerSlide,
   LegalCase,
   SpecialOffer,
   SupportTicket,
 } from '../types'
 import { MOCK_CASE_PREPAYMENT } from '../constants/case-intake'
+import { HOME_HERO_BANNERS } from '../constants/home-banner'
 
 const MOCK_USER: AppUser = {
   id: 'usr-1001',
@@ -412,6 +414,10 @@ const MOCK_TICKETS: SupportTicket[] = [
 
 export function getMockUser(): AppUser | null {
   return withMockData(() => MOCK_USER, null)
+}
+
+export function getHomeHeroBanners(): HomeHeroBannerSlide[] {
+  return withMockData(() => [...HOME_HERO_BANNERS], [])
 }
 
 export function getSpecialOffers(): SpecialOffer[] {

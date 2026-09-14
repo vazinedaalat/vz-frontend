@@ -7,6 +7,7 @@ import {
   getBlogCards,
   getCases,
   getConsultations,
+  getHomeHeroBanners,
   getNotifications,
   getSpecialOffers,
 } from '../mocks/data'
@@ -19,6 +20,7 @@ import { PageHeader } from '../components/page-header'
 
 export default function AppHomePage() {
   const user = useAuthStore((s) => s.user)
+  const banners = getHomeHeroBanners()
   const offers = getSpecialOffers()
   const cases = getCases()
   const consultations = getConsultations().filter((item) => item.status !== 'done')
@@ -27,7 +29,7 @@ export default function AppHomePage() {
 
   return (
     <div className="space-y-10">
-      <HomeHeroBanner />
+      {banners.length > 0 ? <HomeHeroBanner slides={banners} /> : null}
 
       <PageHeader
         eyebrow={isMockEnabled ? 'پنل آزمایشی' : 'پنل موکل'}

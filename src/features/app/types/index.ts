@@ -74,7 +74,8 @@ export interface AppUser {
   nationalIdMasked: string
 }
 
-export interface HomeHeroBannerContent {
+export interface HomeHeroBannerSlide {
+  id: string
   eyebrow: string
   title: string
   description: string
