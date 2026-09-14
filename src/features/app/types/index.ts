@@ -74,6 +74,16 @@ export interface AppUser {
   nationalIdMasked: string
 }
 
+export interface HomeHeroBannerContent {
+  eyebrow: string
+  title: string
+  description: string
+  ctaLabel: string
+  ctaTo: string
+  imageSrc: string
+  imageAlt: string
+}
+
 export interface SpecialOffer {
   id: string
   title: string

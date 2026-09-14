@@ -13,6 +13,7 @@ import {
 import { useAuthStore } from '../store/auth-store'
 import { AppEmptyState } from '../components/app-empty-state'
 import { CaseCard } from '../components/case-card'
+import { HomeHeroBanner } from '../components/home-hero-banner'
 import { OfferBanner } from '../components/offer-banner'
 import { PageHeader } from '../components/page-header'
 
@@ -26,6 +27,8 @@ export default function AppHomePage() {
 
   return (
     <div className="space-y-10">
+      <HomeHeroBanner />
+
       <PageHeader
         eyebrow={isMockEnabled ? 'پنل آزمایشی' : 'پنل موکل'}
         title={`سلام${user?.fullName ? `، ${user.fullName}` : ''}`}
