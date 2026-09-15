@@ -1,8 +1,13 @@
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { Bell, FileText, FolderPlus, MessagesSquare } from 'lucide-react'
 import { Button } from '@/components/ui'
-import { isMockEnabled } from '@/config/env'
+import { env, isMockEnabled } from '@/config/env'
 import { formatFaNumber } from '@/lib/format'
+import { appKeys, fetchHomeBanners, fetchHomeBlog, fetchHomeOffers } from '../api'
+import { fetchCases } from '../api/cases'
+import { fetchConsultationBookings } from '../api/consultation'
+import { fetchNotifications } from '../api/notifications'
 import {
   getBlogCards,
   getCases,
@@ -20,19 +25,50 @@ import { PageHeader } from '../components/page-header'
 
 export default function AppHomePage() {
   const user = useAuthStore((s) => s.user)
-  const banners = getHomeHeroBanners()
-  const offers = getSpecialOffers()
-  const cases = getCases()
-  const consultations = getConsultations().filter((item) => item.status !== 'done')
-  const blogs = getBlogCards()
-  const unread = getNotifications().filter((item) => !item.read).length
+
+  const bannersQuery = useQuery({
+    queryKey: appKeys.home.banners,
+    queryFn: isMockEnabled ? async () => getHomeHeroBanners() : fetchHomeBanners,
+  })
+  const offersQuery = useQuery({
+    queryKey: appKeys.home.offers,
+    queryFn: isMockEnabled ? async () => getSpecialOffers() : fetchHomeOffers,
+  })
+  const casesQuery = useQuery({
+    queryKey: appKeys.cases.all,
+    queryFn: isMockEnabled ? async () => getCases() : fetchCases,
+  })
+  const bookingsQuery = useQuery({
+    queryKey: appKeys.consultation.bookings,
+    queryFn: isMockEnabled ? async () => getConsultations() : fetchConsultationBookings,
+  })
+  const blogsQuery = useQuery({
+    queryKey: appKeys.home.blog,
+    queryFn: isMockEnabled ? async () => getBlogCards() : fetchHomeBlog,
+  })
+  const notificationsQuery = useQuery({
+    queryKey: appKeys.notifications,
+    queryFn: isMockEnabled ? async () => getNotifications() : fetchNotifications,
+  })
+
+  const banners = bannersQuery.data ?? []
+  const offers = offersQuery.data ?? []
+  const cases = casesQuery.data ?? []
+  const consultations = (bookingsQuery.data ?? []).filter((item) => item.status !== 'done')
+  const blogs = blogsQuery.data ?? []
+  const unread = (notificationsQuery.data ?? []).filter((item) => !item.read).length
+  const loading =
+    bannersQuery.isLoading ||
+    offersQuery.isLoading ||
+    casesQuery.isLoading ||
+    bookingsQuery.isLoading
 
   return (
     <div className="space-y-10">
       {banners.length > 0 ? <HomeHeroBanner slides={banners} /> : null}
 
       <PageHeader
-        eyebrow={isMockEnabled ? 'پنل آزمایشی' : 'پنل موکل'}
+        eyebrow={env.VITE_APP_ENV === 'production' ? 'پنل موکل' : 'پنل موکل · توسعه'}
         title={`سلام${user?.fullName ? `، ${user.fullName}` : ''}`}
         description="پیشنهادهای ویژه، پرونده‌ها، مشاوره‌ها و مطالب حقوقی — همه در یک نگاه."
         action={
@@ -50,6 +86,10 @@ export default function AppHomePage() {
         }
       />
 
+      {loading ? (
+        <p className="text-sm text-navy-500">در حال بارگذاری…</p>
+      ) : null}
+
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-lg font-bold">پیشنهادهای ویژه</h2>
@@ -62,7 +102,7 @@ export default function AppHomePage() {
         ) : (
           <AppEmptyState
             title="پیشنهادی فعال نیست"
-            description="در محیط تولید، پیشنهادها از سرور بارگذاری می‌شوند."
+            description="پیشنهادهای ویژه از سرور بارگذاری می‌شوند."
           />
         )}
       </section>
@@ -105,7 +145,7 @@ export default function AppHomePage() {
         ) : (
           <AppEmptyState
             title="هنوز پرونده‌ای ندارید"
-            description="پس از اتصال API، فهرست پرونده‌ها اینجا نمایش داده می‌شود."
+            description="پس از ایجاد پرونده، فهرست اینجا نمایش داده می‌شود."
             action={
               <Button variant="accent" asChild>
                 <Link to="/app/cases/new">ایجاد پرونده</Link>
@@ -132,7 +172,9 @@ export default function AppHomePage() {
                         {item.lawyerName} · {item.modeLabel} · {item.durationMinutes} دقیقه
                       </p>
                     </div>
-                    <span className="text-xs font-semibold text-gold-700">{item.status === 'available' ? 'آزاد' : 'رزرو شده'}</span>
+                    <span className="text-xs font-semibold text-gold-700">
+                      {item.status === 'available' ? 'آزاد' : 'رزرو شده'}
+                    </span>
                   </div>
                   <p className="mt-3 text-sm text-navy-600">{item.startsAt}</p>
                 </article>
@@ -159,7 +201,7 @@ export default function AppHomePage() {
               ))}
             </div>
           ) : (
-            <AppEmptyState title="مطلبی موجود نیست" description="محتوای بلاگ در محیط تولید از CMS می‌آید." />
+            <AppEmptyState title="مطلبی موجود نیست" description="محتوای بلاگ از سرور می‌آید." />
           )}
         </div>
       </section>

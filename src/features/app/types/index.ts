@@ -36,6 +36,8 @@ export interface CaseFileMeta {
   name: string
   size: number
   type: string
+  /** Browser File retained for multipart upload before submit. */
+  file?: File
 }
 
 export interface CaseFileRuleSection {

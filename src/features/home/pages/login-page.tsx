@@ -35,10 +35,10 @@ export default function LoginPage() {
     defaultValues: { phone: '', code: '' },
   })
 
-  const submitPhone = phoneForm.handleSubmit((values) => {
+  const submitPhone = phoneForm.handleSubmit(async (values) => {
     setError(null)
     setInfo(null)
-    const result = requestOtp(values.phone)
+    const result = await requestOtp(values.phone)
     if (!result.ok) {
       setError(result.message)
       return
@@ -47,13 +47,15 @@ export default function LoginPage() {
     otpForm.setValue('phone', values.phone)
     setStep('otp')
     if (result.demoCode) {
-      setInfo(`کد آزمایشی: ${result.demoCode} (فقط در محیط غیر Production)`)
+      setInfo(`کد آزمایشی: ${result.demoCode}`)
+    } else {
+      setInfo('کد تایید به شماره شما ارسال شد.')
     }
   })
 
-  const submitOtp = otpForm.handleSubmit((values) => {
+  const submitOtp = otpForm.handleSubmit(async (values) => {
     setError(null)
-    const result = verifyOtp(values.phone, values.code)
+    const result = await verifyOtp(values.phone, values.code)
     if (!result.ok) {
       setError(result.message)
       return
@@ -72,9 +74,13 @@ export default function LoginPage() {
 
         {!isMockEnabled ? (
           <p className="mt-4 rounded-xl border border-navy-200 bg-navy-50 px-3 py-2 text-xs leading-6 text-navy-600">
-            محیط Production: داده و OTP آزمایشی غیرفعال است. پس از اتصال API پیامک واقعی فعال می‌شود.
+            ورود از طریق API واقعی. در محیط توسعه کد دمو معمولاً ۱۲۳۴۵ است.
           </p>
-        ) : null}
+        ) : (
+          <p className="mt-4 rounded-xl border border-gold-300 bg-gold-100 px-3 py-2 text-xs leading-6 text-gold-800">
+            حالت موک فعال است — بدون اتصال به سرور.
+          </p>
+        )}
 
         {info ? (
           <p className="mt-4 rounded-xl border border-gold-300 bg-gold-100 px-3 py-2 text-xs text-gold-800">{info}</p>

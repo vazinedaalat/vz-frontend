@@ -1,13 +1,23 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CreditCard, CalendarDays, Clock3 } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { formatFaNumber, toPersianDigits } from '@/lib/format'
 import { formatJalaliLabel, jalaliFromDate, startOfLocalDay } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
-import { CONSULTATION_PLANS, getConsultationPlan } from '../constants/consultation-plans'
+import { AppError } from '@/services/api/errors'
+import {
+  appKeys,
+  createConsultationBooking,
+  fetchConsultationAvailability,
+  fetchConsultationBookings,
+  fetchConsultationPlans,
+  payConsultationBooking,
+} from '../api'
+import { CONSULTATION_PLANS } from '../constants/consultation-plans'
 import { consultationRequestSchema, type ConsultationRequestValues } from '../schemas'
 import { getConsultationAvailability, getConsultations } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
@@ -16,12 +26,18 @@ import { ConsultationPlanCards } from '../components/consultation-plan-cards'
 import { Field } from '../components/field'
 import { PageHeader } from '../components/page-header'
 import { TimeSlotPicker } from '../components/time-slot-picker'
-import type { ConsultationPlanId } from '../types'
+import type { ConsultationAvailability, ConsultationPlanId } from '../types'
+
+const EMPTY_AVAILABILITY: ConsultationAvailability = {
+  bookedDates: [],
+  bookedSlots: [],
+  timeSlots: [],
+}
 
 export default function ConsultationPage() {
-  const availability = useMemo(() => getConsultationAvailability(), [])
-  const existing = getConsultations()
+  const queryClient = useQueryClient()
   const [submitted, setSubmitted] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
   const [viewMonth, setViewMonth] = useState(() => jalaliFromDate(startOfLocalDay()))
 
   const {
@@ -47,20 +63,75 @@ export default function ConsultationPage() {
   const planId = watch('planId') as ConsultationPlanId | undefined
   const dateKey = watch('dateKey')
   const time = watch('time')
-  const selectedPlan = planId ? getConsultationPlan(planId) : null
 
-  const onSubmit = handleSubmit(() => {
-    setSubmitted(true)
-    reset({
-      planId: undefined,
-      topic: '',
-      description: '',
-      dateKey: '',
-      time: '',
-      discountCode: '',
-    })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+  const { data: plans = CONSULTATION_PLANS } = useQuery({
+    queryKey: appKeys.consultation.plans,
+    queryFn: isMockEnabled ? async () => [...CONSULTATION_PLANS] : fetchConsultationPlans,
   })
+
+  const { data: availability = EMPTY_AVAILABILITY } = useQuery({
+    queryKey: appKeys.consultation.availability(planId),
+    queryFn: () =>
+      isMockEnabled
+        ? Promise.resolve(getConsultationAvailability())
+        : fetchConsultationAvailability({ planId }),
+    enabled: Boolean(planId),
+  })
+
+  const { data: existing = [], isLoading: bookingsLoading } = useQuery({
+    queryKey: appKeys.consultation.bookings,
+    queryFn: isMockEnabled ? async () => getConsultations() : fetchConsultationBookings,
+  })
+
+  const selectedPlan = planId ? (plans.find((plan) => plan.id === planId) ?? null) : null
+
+  const bookMutation = useMutation({
+    mutationFn: async (values: ConsultationRequestValues) => {
+      const booking = await createConsultationBooking(values)
+      if (selectedPlan?.requiresPayment) {
+        await payConsultationBooking(booking.id)
+      }
+      return booking
+    },
+    onSuccess: async () => {
+      setApiError(null)
+      setSubmitted(true)
+      await queryClient.invalidateQueries({ queryKey: appKeys.consultation.bookings })
+      await queryClient.invalidateQueries({ queryKey: appKeys.consultation.availability(planId) })
+      reset({
+        planId: undefined,
+        topic: '',
+        description: '',
+        dateKey: '',
+        time: '',
+        discountCode: '',
+      })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+    onError: (err) => {
+      setApiError(err instanceof AppError ? err.message : 'خطا در ثبت رزرو')
+    },
+  })
+
+  const onSubmit = handleSubmit(async (values) => {
+    setApiError(null)
+    if (isMockEnabled) {
+      setSubmitted(true)
+      reset({
+        planId: undefined,
+        topic: '',
+        description: '',
+        dateKey: '',
+        time: '',
+        discountCode: '',
+      })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    await bookMutation.mutateAsync(values)
+  })
+
+  const submitting = isSubmitting || bookMutation.isPending
 
   return (
     <div className="space-y-8">
@@ -76,6 +147,15 @@ export default function ConsultationPage() {
         </div>
       ) : null}
 
+      {apiError ? (
+        <div
+          className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
+          {apiError}
+        </div>
+      ) : null}
+
       <form onSubmit={onSubmit} className="space-y-8">
         <section className="space-y-4">
           <SectionTitle step="۱" title="انتخاب طرح مشاوره" />
@@ -84,12 +164,14 @@ export default function ConsultationPage() {
             control={control}
             render={({ field }) => (
               <ConsultationPlanCards
+                plans={plans}
                 value={field.value}
                 onChange={(next) => {
                   field.onChange(next)
                   setValue('dateKey', '')
                   setValue('time', '')
                   setSubmitted(false)
+                  setApiError(null)
                 }}
               />
             )}
@@ -218,7 +300,7 @@ export default function ConsultationPage() {
                     variant="accent"
                     size="lg"
                     className="w-full"
-                    disabled={isSubmitting}
+                    disabled={submitting}
                   >
                     {selectedPlan.requiresPayment ? (
                       <>
@@ -253,6 +335,7 @@ export default function ConsultationPage() {
 
       <section className="space-y-4">
         <h2 className="font-display text-lg font-bold text-navy-900">رزروهای شما</h2>
+        {bookingsLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
         {existing.length > 0 ? (
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {existing.map((slot) => (
@@ -286,7 +369,7 @@ export default function ConsultationPage() {
               </article>
             ))}
           </div>
-        ) : (
+        ) : !bookingsLoading ? (
           <AppEmptyState
             title="رزروی نمایش داده نمی‌شود"
             description={
@@ -295,14 +378,8 @@ export default function ConsultationPage() {
                 : 'در محیط تولید، رزروها از سرور دریافت می‌شوند.'
             }
           />
-        )}
+        ) : null}
       </section>
-
-      {!isMockEnabled ? (
-        <p className="text-xs leading-6 text-navy-500">
-          ظرفیت روزها و ساعات از API بارگذاری می‌شود. طرح‌های ثابت: {CONSULTATION_PLANS.map((p) => p.title).join('، ')}.
-        </p>
-      ) : null}
     </div>
   )
 }

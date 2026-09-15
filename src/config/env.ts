@@ -1,9 +1,21 @@
 import { z } from 'zod'
 
 const envSchema = z.object({
-  VITE_API_URL: z.string().url().optional().default('http://localhost:3000/api'),
+  /** Nest base including version, e.g. http://localhost:3000/api/v1 */
+  VITE_API_URL: z.string().url().optional().default('http://localhost:3000/api/v1'),
+  /** Origin for static uploads (/uploads/...), without /api */
+  VITE_ASSET_BASE_URL: z.string().url().optional().default('http://localhost:3000'),
   VITE_APP_ENV: z.enum(['development', 'staging', 'production']).default('development'),
   VITE_APP_NAME: z.string().default('وزین عدالت'),
+  /**
+   * When true (and not production), UI may fall back to local mock datasets.
+   * Default false — prefer live Nest API.
+   */
+  VITE_USE_MOCK: z
+    .enum(['true', 'false'])
+    .optional()
+    .default('false')
+    .transform((value) => value === 'true'),
 })
 
 const parsed = envSchema.safeParse(import.meta.env)
@@ -15,5 +27,5 @@ if (!parsed.success) {
 
 export const env = parsed.data
 
-/** True only when the app is allowed to serve UI demo/mock datasets. */
-export const isMockEnabled = env.VITE_APP_ENV !== 'production'
+/** Local mock datasets — never in production builds. */
+export const isMockEnabled = env.VITE_APP_ENV !== 'production' && env.VITE_USE_MOCK

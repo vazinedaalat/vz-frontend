@@ -1,12 +1,22 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm, type UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, FolderOpen, MessageCirclePlus, Shield } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/lib/format'
+import { isMockEnabled } from '@/config/env'
+import { AppError } from '@/services/api/errors'
+import {
+  appKeys,
+  createSupportTicket,
+  fetchChats,
+  fetchSupportTickets,
+  sendSupportTicketMessage,
+} from '../api'
 import { ticketSchema, type TicketValues } from '../schemas'
 import { getCaseChats, getTickets } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
@@ -22,14 +32,29 @@ const selectClassName =
   'h-11 w-full rounded-xl border border-navy-200 bg-white px-3.5 text-sm shadow-soft focus-visible:border-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/30'
 
 export default function ChatPage() {
-  const caseChats = useMemo(() => getCaseChats(), [])
-  const initialTickets = useMemo(() => getTickets(), [])
-  const [tickets, setTickets] = useState<SupportTicket[]>(initialTickets)
-  const [activeId, setActiveId] = useState<string | null>(initialTickets[0]?.id ?? null)
+  const queryClient = useQueryClient()
+  const [activeId, setActiveId] = useState<string | null>(null)
   const [mobilePane, setMobilePane] = useState<MobilePane>('list')
   const [tab, setTab] = useState<ChatTab>('cases')
+  const [apiError, setApiError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const { data: caseChats = [], isLoading: chatsLoading } = useQuery({
+    queryKey: appKeys.chats.all,
+    queryFn: isMockEnabled ? async () => getCaseChats() : fetchChats,
+  })
+
+  const { data: tickets = [], isLoading: ticketsLoading } = useQuery({
+    queryKey: appKeys.support,
+    queryFn: isMockEnabled ? async () => getTickets() : fetchSupportTickets,
+  })
+
   const active = tickets.find((item) => item.id === activeId) ?? null
+
+  useEffect(() => {
+    if (activeId) return
+    if (tickets[0]) setActiveId(tickets[0].id)
+  }, [tickets, activeId])
 
   const ticketForm = useForm<TicketValues>({
     resolver: zodResolver(ticketSchema),
@@ -46,47 +71,90 @@ export default function ChatPage() {
     setMobilePane('thread')
   }
 
-  const createTicket = ticketForm.handleSubmit((values) => {
-    const id = `tkt-${Date.now()}`
-    const ticket: SupportTicket = {
-      id,
-      subject: values.subject,
-      category: values.category,
-      status: 'open',
-      statusLabel: 'باز',
-      updatedAt: 'اکنون',
-      messages: [
-        {
-          id: `m-${Date.now()}`,
-          sender: 'user',
-          body: values.message,
-          createdAt: 'اکنون',
-        },
-      ],
+  const createTicketMutation = useMutation({
+    mutationFn: createSupportTicket,
+    onSuccess: async (ticket) => {
+      setApiError(null)
+      await queryClient.invalidateQueries({ queryKey: appKeys.support })
+      setActiveId(ticket.id)
+      setTab('support')
+      setMobilePane('thread')
+      ticketForm.reset()
+    },
+    onError: (err) => {
+      setApiError(err instanceof AppError ? err.message : 'خطا در ثبت تیکت')
+    },
+  })
+
+  const sendMessageMutation = useMutation({
+    mutationFn: async ({ body }: ChatSendPayload) => {
+      if (!activeId) throw new Error('no ticket')
+      return sendSupportTicketMessage(activeId, body)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: appKeys.support })
+    },
+    onError: (err) => {
+      setApiError(err instanceof AppError ? err.message : 'خطا در ارسال پیام')
+    },
+  })
+
+  const createTicket = ticketForm.handleSubmit(async (values) => {
+    setApiError(null)
+    if (isMockEnabled) {
+      const id = `tkt-${Date.now()}`
+      const ticket: SupportTicket = {
+        id,
+        subject: values.subject,
+        category: values.category,
+        status: 'open',
+        statusLabel: 'باز',
+        updatedAt: 'اکنون',
+        messages: [
+          {
+            id: `m-${Date.now()}`,
+            sender: 'user',
+            body: values.message,
+            createdAt: 'اکنون',
+          },
+        ],
+      }
+      queryClient.setQueryData(appKeys.support, (prev: SupportTicket[] | undefined) => [
+        ticket,
+        ...(prev ?? []),
+      ])
+      setActiveId(id)
+      setTab('support')
+      setMobilePane('thread')
+      ticketForm.reset()
+      return
     }
-    setTickets((prev) => [ticket, ...prev])
-    setActiveId(id)
-    setTab('support')
-    setMobilePane('thread')
-    ticketForm.reset()
+    await createTicketMutation.mutateAsync(values)
   })
 
   const sendMessage = ({ body, attachments }: ChatSendPayload) => {
     if (!activeId) return
-    const message: ChatMessage = {
-      id: `m-${Date.now()}`,
-      sender: 'user',
-      body,
-      createdAt: 'اکنون',
-      attachments: attachments.length > 0 ? attachments : undefined,
+    setApiError(null)
+
+    if (isMockEnabled) {
+      const message: ChatMessage = {
+        id: `m-${Date.now()}`,
+        sender: 'user',
+        body,
+        createdAt: 'اکنون',
+        attachments: attachments.length > 0 ? attachments : undefined,
+      }
+      queryClient.setQueryData(appKeys.support, (prev: SupportTicket[] | undefined) =>
+        (prev ?? []).map((ticket) =>
+          ticket.id === activeId
+            ? { ...ticket, messages: [...ticket.messages, message], updatedAt: 'اکنون' }
+            : ticket,
+        ),
+      )
+      return
     }
-    setTickets((prev) =>
-      prev.map((ticket) =>
-        ticket.id === activeId
-          ? { ...ticket, messages: [...ticket.messages, message], updatedAt: 'اکنون' }
-          : ticket,
-      ),
-    )
+
+    sendMessageMutation.mutate({ body, attachments })
   }
 
   return (
@@ -97,6 +165,12 @@ export default function ChatPage() {
           title="چت پرونده‌ها و پشتیبانی"
           description="هر پرونده چت اختصاصی پیگیری دارد. برای مسائل عمومی هم می‌توانید تیکت پشتیبانی بسازید."
         />
+
+        {apiError ? (
+          <p className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+            {apiError}
+          </p>
+        ) : null}
 
         <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl border border-navy-200 bg-white p-1.5 shadow-soft">
           <button
@@ -130,6 +204,7 @@ export default function ChatPage() {
 
       {tab === 'cases' ? (
         <div className={cn('space-y-3', mobilePane === 'thread' && 'hidden md:block')}>
+          {chatsLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
           {caseChats.length > 0 ? (
             <ul className="grid gap-3 md:grid-cols-2">
               {caseChats.map((chat) => (
@@ -166,7 +241,7 @@ export default function ChatPage() {
                 </li>
               ))}
             </ul>
-          ) : (
+          ) : !chatsLoading ? (
             <AppEmptyState
               title="چت پرونده‌ای نیست"
               description="با ایجاد پرونده، کانال چت پیگیری به‌صورت خودکار فعال می‌شود."
@@ -176,7 +251,7 @@ export default function ChatPage() {
                 </Button>
               }
             />
-          )}
+          ) : null}
         </div>
       ) : (
         <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr] xl:gap-6">
@@ -215,6 +290,8 @@ export default function ChatPage() {
                 </Button>
               </div>
 
+              {ticketsLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
+
               {tickets.length > 0 ? (
                 <ul className="space-y-2.5">
                   {tickets.map((ticket) => (
@@ -246,9 +323,9 @@ export default function ChatPage() {
                     </li>
                   ))}
                 </ul>
-              ) : (
+              ) : !ticketsLoading ? (
                 <AppEmptyState title="تیکتی نیست" description="اولین تیکت را ثبت کنید تا گفتگو آغاز شود." />
-              )}
+              ) : null}
             </div>
 
             <div className="hidden md:block">

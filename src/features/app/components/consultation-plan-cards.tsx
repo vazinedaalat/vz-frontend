@@ -14,12 +14,17 @@ const PLAN_ICON = {
 interface ConsultationPlanCardsProps {
   value?: ConsultationPlanId
   onChange: (planId: ConsultationPlanId) => void
+  plans?: readonly ConsultationPlan[]
 }
 
-export function ConsultationPlanCards({ value, onChange }: ConsultationPlanCardsProps) {
+export function ConsultationPlanCards({
+  value,
+  onChange,
+  plans = CONSULTATION_PLANS,
+}: ConsultationPlanCardsProps) {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      {CONSULTATION_PLANS.map((plan) => (
+      {plans.map((plan) => (
         <PlanCard
           key={plan.id}
           plan={plan}

@@ -1,10 +1,14 @@
 import { useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FileStack, ScrollText } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/lib/format'
+import { isMockEnabled } from '@/config/env'
+import { AppError } from '@/services/api/errors'
+import { appKeys, createDocumentRequest, fetchDocuments } from '../api'
 import {
   documentRequestFieldsSchema,
   type DocumentRequestValues,
@@ -19,10 +23,18 @@ import { PageHeader } from '../components/page-header'
 import type { CaseFileMeta } from '../types'
 
 export default function DocumentRequestPage() {
+  const queryClient = useQueryClient()
   const [done, setDone] = useState(false)
   const [files, setFiles] = useState<CaseFileMeta[]>([])
   const [fileError, setFileError] = useState<string>()
   const [formErrorBanner, setFormErrorBanner] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
+
+  const { data: documents = [] } = useQuery({
+    queryKey: appKeys.documents,
+    queryFn: fetchDocuments,
+    enabled: !isMockEnabled,
+  })
 
   const {
     register,
@@ -57,10 +69,45 @@ export default function DocumentRequestPage() {
 
   const documentType = watch('documentType')
 
+  const createMutation = useMutation({
+    mutationFn: async (values: DocumentRequestValues) => {
+      const uploadFiles = files.map((item) => item.file).filter(Boolean) as File[]
+      return createDocumentRequest(values, uploadFiles)
+    },
+    onSuccess: async () => {
+      setApiError(null)
+      setDone(true)
+      setFiles([])
+      reset({
+        documentType: 'petition',
+        plaintiffName: '',
+        plaintiffFatherName: '',
+        plaintiffNationalId: '',
+        plaintiffAddress: '',
+        defendantName: '',
+        defendantAddress: '',
+        defendantPhone: '',
+        claimTitle: '',
+        claimAmount: '',
+        claimBasis: '',
+        courtRequest: '',
+        evidenceSummary: '',
+        notes: '',
+        acceptFileRules: false,
+      })
+      await queryClient.invalidateQueries({ queryKey: appKeys.documents })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+    onError: (err) => {
+      setApiError(err instanceof AppError ? err.message : 'خطا در ثبت درخواست')
+    },
+  })
+
   const onSubmit = handleSubmit(
-    () => {
+    async (values) => {
       clearErrors('acceptFileRules')
       setFormErrorBanner(false)
+      setApiError(null)
 
       if (!getValues('acceptFileRules')) {
         setError('acceptFileRules', {
@@ -84,26 +131,35 @@ export default function DocumentRequestPage() {
       }
 
       setFileError(undefined)
-      setDone(true)
-      setFiles([])
-      reset({
-        documentType: 'petition',
-        plaintiffName: '',
-        plaintiffFatherName: '',
-        plaintiffNationalId: '',
-        plaintiffAddress: '',
-        defendantName: '',
-        defendantAddress: '',
-        defendantPhone: '',
-        claimTitle: '',
-        claimAmount: '',
-        claimBasis: '',
-        courtRequest: '',
-        evidenceSummary: '',
-        notes: '',
-        acceptFileRules: false,
+
+      if (isMockEnabled) {
+        setDone(true)
+        setFiles([])
+        reset({
+          documentType: 'petition',
+          plaintiffName: '',
+          plaintiffFatherName: '',
+          plaintiffNationalId: '',
+          plaintiffAddress: '',
+          defendantName: '',
+          defendantAddress: '',
+          defendantPhone: '',
+          claimTitle: '',
+          claimAmount: '',
+          claimBasis: '',
+          courtRequest: '',
+          evidenceSummary: '',
+          notes: '',
+          acceptFileRules: false,
+        })
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
+      }
+
+      await createMutation.mutateAsync({
+        ...values,
+        acceptFileRules: true,
       })
-      window.scrollTo({ top: 0, behavior: 'smooth' })
     },
     () => {
       setFormErrorBanner(true)
@@ -115,6 +171,8 @@ export default function DocumentRequestPage() {
       }, 50)
     },
   )
+
+  const submitting = isSubmitting || createMutation.isPending
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -130,6 +188,34 @@ export default function DocumentRequestPage() {
         <div className="rounded-2xl border border-gold-300 bg-gold-100 px-4 py-3 text-sm text-gold-800">
           درخواست ثبت شد. پیش‌نویس توسط وکیل بررسی و برای تایید شما ارسال می‌شود.
         </div>
+      ) : null}
+
+      {apiError ? (
+        <div
+          className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
+          {apiError}
+        </div>
+      ) : null}
+
+      {!isMockEnabled && documents.length > 0 ? (
+        <section className="rounded-[1.5rem] border border-navy-200 bg-white p-5 shadow-soft sm:p-6">
+          <h2 className="font-display text-base font-bold text-navy-900">درخواست‌های قبلی</h2>
+          <ul className="mt-4 space-y-2">
+            {documents.slice(0, 5).map((doc) => (
+              <li
+                key={doc.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-navy-100 bg-navy-50/60 px-3 py-2.5 text-sm"
+              >
+                <span className="font-medium text-navy-900">{doc.claimTitle}</span>
+                <span className="text-xs text-navy-500">
+                  {doc.status} · {doc.createdAt}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
 
       <form onSubmit={onSubmit} className="space-y-6" noValidate>
@@ -321,7 +407,7 @@ export default function DocumentRequestPage() {
         </section>
 
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <Button type="submit" variant="accent" size="lg" className="w-full sm:w-auto" disabled={isSubmitting}>
+          <Button type="submit" variant="accent" size="lg" className="w-full sm:w-auto" disabled={submitting}>
             ارسال درخواست تنظیم سند
           </Button>
         </div>

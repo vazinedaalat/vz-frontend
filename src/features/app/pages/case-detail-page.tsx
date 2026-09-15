@@ -1,27 +1,107 @@
-import { useMemo, useState } from 'react'
+import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { toPersianDigits, formatFaNumber } from '@/lib/format'
+import { isMockEnabled } from '@/config/env'
+import { AppError } from '@/services/api/errors'
+import {
+  appKeys,
+  fetchCaseById,
+  fetchCaseChat,
+  fetchNotifications,
+  markChatRead,
+  sendCaseChatMessage,
+} from '../api'
 import { getCaseById, getCaseChatByCaseId, getNotifications } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
 import { ChatThreadPanel } from '../components/chat-thread-panel'
 import { PageHeader } from '../components/page-header'
-import type { CaseChatThread, ChatMessage, ChatSendPayload } from '../types'
+import type { ChatMessage, ChatSendPayload } from '../types'
 
 export default function CaseDetailPage() {
   const { caseId = '' } = useParams()
-  const item = getCaseById(caseId)
-  const notes = getNotifications().filter((n) => n.caseId === caseId)
-  const initialChat = useMemo(() => getCaseChatByCaseId(caseId), [caseId])
-  const [thread, setThread] = useState<CaseChatThread | null>(initialChat ?? null)
+  const queryClient = useQueryClient()
 
-  if (!item) {
+  const {
+    data: item,
+    isLoading: caseLoading,
+    error: caseError,
+  } = useQuery({
+    queryKey: appKeys.cases.detail(caseId),
+    queryFn: () => (isMockEnabled ? Promise.resolve(getCaseById(caseId)) : fetchCaseById(caseId)),
+    enabled: Boolean(caseId),
+  })
+
+  const { data: notes = [] } = useQuery({
+    queryKey: appKeys.notifications,
+    queryFn: isMockEnabled ? async () => getNotifications() : fetchNotifications,
+    select: (items) => items.filter((n) => n.caseId === caseId),
+  })
+
+  const { data: thread } = useQuery({
+    queryKey: appKeys.chats.byCase(caseId),
+    queryFn: () =>
+      isMockEnabled ? Promise.resolve(getCaseChatByCaseId(caseId)) : fetchCaseChat(caseId),
+    enabled: Boolean(caseId),
+  })
+
+  useEffect(() => {
+    if (isMockEnabled || !thread?.id) return
+    void markChatRead(thread.id).catch(() => {
+      // non-blocking
+    })
+  }, [thread?.id])
+
+  const sendMutation = useMutation({
+    mutationFn: async ({ body, attachments }: ChatSendPayload) => {
+      if (isMockEnabled) {
+        const message: ChatMessage = {
+          id: `cm-${Date.now()}`,
+          sender: 'user',
+          body,
+          createdAt: 'اکنون',
+          attachments: attachments.length > 0 ? attachments : undefined,
+        }
+        return message
+      }
+      const files = attachments.map((a) => a.file).filter(Boolean) as File[]
+      return sendCaseChatMessage(caseId, body, files)
+    },
+    onSuccess: async (message) => {
+      if (isMockEnabled) {
+        queryClient.setQueryData(appKeys.chats.byCase(caseId), (prev: typeof thread) =>
+          prev
+            ? {
+                ...prev,
+                updatedAt: 'اکنون',
+                unreadCount: 0,
+                messages: [...prev.messages, message],
+              }
+            : prev,
+        )
+        return
+      }
+      await queryClient.invalidateQueries({ queryKey: appKeys.chats.byCase(caseId) })
+      await queryClient.invalidateQueries({ queryKey: appKeys.chats.all })
+    },
+  })
+
+  if (caseLoading) {
+    return <p className="text-sm text-navy-500">در حال بارگذاری…</p>
+  }
+
+  if (!item || caseError) {
     return (
       <AppEmptyState
         title="پرونده پیدا نشد"
-        description="این پرونده در داده‌های فعلی موجود نیست یا در محیط تولید هنوز از API نیامده است."
+        description={
+          caseError instanceof AppError
+            ? caseError.message
+            : 'این پرونده در داده‌های فعلی موجود نیست یا در محیط تولید هنوز از API نیامده است.'
+        }
         action={
           <Button variant="outline" asChild>
             <Link to="/app/cases">بازگشت به فهرست</Link>
@@ -31,19 +111,8 @@ export default function CaseDetailPage() {
     )
   }
 
-  const onSend = ({ body, attachments }: ChatSendPayload) => {
-    const message: ChatMessage = {
-      id: `cm-${Date.now()}`,
-      sender: 'user',
-      body,
-      createdAt: 'اکنون',
-      attachments: attachments.length > 0 ? attachments : undefined,
-    }
-    setThread((prev) =>
-      prev
-        ? { ...prev, updatedAt: 'اکنون', unreadCount: 0, messages: [...prev.messages, message] }
-        : prev,
-    )
+  const onSend = (payload: ChatSendPayload) => {
+    sendMutation.mutate(payload)
   }
 
   return (

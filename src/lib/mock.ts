@@ -1,8 +1,8 @@
 import { isMockEnabled } from '@/config/env'
 
 /**
- * Mock/demo datasets are available only outside production.
- * In production builds (`VITE_APP_ENV=production`) all mock getters return empty.
+ * Local mock datasets — enabled only when `VITE_USE_MOCK=true`
+ * and never in production builds.
  */
 export const USE_MOCK_DATA = isMockEnabled
 

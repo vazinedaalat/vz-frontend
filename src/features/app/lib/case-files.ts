@@ -31,6 +31,7 @@ export function toCaseFileMeta(file: File): CaseFileMeta {
     name: file.name,
     size: file.size,
     type: file.type || 'unknown',
+    file,
   }
 }
 

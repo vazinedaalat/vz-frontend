@@ -2,10 +2,20 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, FolderCheck } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { isMockEnabled } from '@/config/env'
+import { AppError } from '@/services/api/errors'
+import {
+  appKeys,
+  createCaseApi,
+  fetchCaseIntakeCatalog,
+  fetchCasePrepayment,
+  payCasePrepayment,
+  uploadCaseFilesApi,
+} from '../api'
 import { createCaseIntakeSchema, type CreateCaseValues } from '../schemas'
 import { CASE_CATEGORY_OPTIONS } from '../constants/nav'
 import {
@@ -26,7 +36,11 @@ import type { CaseFileMeta, CasePrepaymentInvoice, CreateCaseWizardStep } from '
 const selectClassName =
   'h-11 w-full rounded-xl border border-navy-200 bg-white px-3.5 text-sm text-navy-900 shadow-soft focus-visible:border-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/30'
 
+const URGENCY_FALLBACK = ['عادی', 'فوری', 'خیلی فوری'] as const
+const THANA_FALLBACK = ['بله', 'خیر', 'نامشخص'] as const
+
 export default function CreateCasePage() {
+  const queryClient = useQueryClient()
   const [step, setStep] = useState<CreateCaseWizardStep>('intake')
   const [files, setFiles] = useState<CaseFileMeta[]>([])
   const [fileError, setFileError] = useState<string>()
@@ -34,6 +48,24 @@ export default function CreateCasePage() {
   const [invoice, setInvoice] = useState<CasePrepaymentInvoice | null>(null)
   const [paying, setPaying] = useState(false)
   const [intakeErrorBanner, setIntakeErrorBanner] = useState(false)
+  const [createdCaseId, setCreatedCaseId] = useState<string | null>(null)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [submittingUpload, setSubmittingUpload] = useState(false)
+
+  const { data: catalog } = useQuery({
+    queryKey: appKeys.catalog,
+    queryFn: fetchCaseIntakeCatalog,
+    enabled: !isMockEnabled,
+  })
+
+  const clientRoles = catalog?.clientRoles?.length ? catalog.clientRoles : [...CLIENT_ROLE_OPTIONS]
+  const claimTypes = catalog?.claimTypes?.length ? catalog.claimTypes : [...CLAIM_TYPE_OPTIONS]
+  const categories = catalog?.categories?.length ? catalog.categories : [...CASE_CATEGORY_OPTIONS]
+  const proceedingTypes = catalog?.proceedingTypes?.length
+    ? catalog.proceedingTypes
+    : [...PROCEEDING_TYPE_OPTIONS]
+  const urgencyOptions = catalog?.urgency?.length ? catalog.urgency : [...URGENCY_FALLBACK]
+  const thanaOptions = catalog?.thanaOptions?.length ? catalog.thanaOptions : [...THANA_FALLBACK]
 
   const {
     register,
@@ -70,13 +102,7 @@ export default function CreateCasePage() {
   })
 
   useEffect(() => {
-    if (!waitingInvoice) return
-
-    if (!isMockEnabled) {
-      setWaitingInvoice(false)
-      setInvoice(null)
-      return
-    }
+    if (!waitingInvoice || !isMockEnabled) return
 
     const timer = window.setTimeout(() => {
       setInvoice(getCasePrepaymentInvoice())
@@ -103,8 +129,10 @@ export default function CreateCasePage() {
     },
   )
 
-  const submitUpload = () => {
+  const submitUpload = async () => {
     clearErrors('acceptFileRules')
+    setApiError(null)
+
     if (!getValues('acceptFileRules')) {
       setError('acceptFileRules', {
         type: 'manual',
@@ -121,15 +149,64 @@ export default function CreateCasePage() {
     setWaitingInvoice(true)
     setInvoice(null)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+
+    if (isMockEnabled) return
+
+    setSubmittingUpload(true)
+    try {
+      const payload: CreateCaseValues = {
+        ...getValues(),
+        acceptFileRules: true,
+      }
+      const created = await createCaseApi(payload)
+      setCreatedCaseId(created.id)
+
+      const uploadFiles = files.map((item) => item.file).filter(Boolean) as File[]
+      if (uploadFiles.length > 0) {
+        await uploadCaseFilesApi(created.id, uploadFiles)
+      }
+
+      const prepayment = await fetchCasePrepayment(created.id)
+      setInvoice(prepayment)
+      await queryClient.invalidateQueries({ queryKey: appKeys.cases.all })
+    } catch (err) {
+      setApiError(err instanceof AppError ? err.message : 'خطا در ایجاد پرونده')
+      setStep('upload')
+    } finally {
+      setWaitingInvoice(false)
+      setSubmittingUpload(false)
+    }
   }
 
-  const onPay = () => {
+  const onPay = async () => {
     setPaying(true)
-    window.setTimeout(() => {
+    setApiError(null)
+
+    if (isMockEnabled) {
+      window.setTimeout(() => {
+        setPaying(false)
+        setStep('completed')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }, 900)
+      return
+    }
+
+    if (!createdCaseId) {
       setPaying(false)
+      setApiError('شناسه پرونده یافت نشد')
+      return
+    }
+
+    try {
+      await payCasePrepayment(createdCaseId)
+      await queryClient.invalidateQueries({ queryKey: appKeys.cases.all })
       setStep('completed')
       window.scrollTo({ top: 0, behavior: 'smooth' })
-    }, 900)
+    } catch (err) {
+      setApiError(err instanceof AppError ? err.message : 'خطا در پرداخت')
+    } finally {
+      setPaying(false)
+    }
   }
 
   return (
@@ -146,6 +223,15 @@ export default function CreateCasePage() {
       />
 
       <CaseWizardSteps current={step} />
+
+      {apiError ? (
+        <div
+          className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
+          {apiError}
+        </div>
+      ) : null}
 
       {step === 'intake' || step === 'upload' ? <CaseFormHelpBanner /> : null}
 
@@ -178,7 +264,7 @@ export default function CreateCasePage() {
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
                 <Field label="سمت در دعوا" htmlFor="clientRole" required error={errors.clientRole?.message}>
                   <select id="clientRole" className={selectClassName} {...register('clientRole')}>
-                    {CLIENT_ROLE_OPTIONS.map((option) => (
+                    {clientRoles.map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
@@ -217,9 +303,11 @@ export default function CreateCasePage() {
                 </Field>
                 <Field label="حساب ثنا" htmlFor="hasThanaAccount" required error={errors.hasThanaAccount?.message}>
                   <select id="hasThanaAccount" className={selectClassName} {...register('hasThanaAccount')}>
-                    <option value="بله">بله</option>
-                    <option value="خیر">خیر</option>
-                    <option value="نامشخص">نامشخص</option>
+                    {thanaOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
                   </select>
                 </Field>
               </div>
@@ -253,7 +341,7 @@ export default function CreateCasePage() {
                 </Field>
                 <Field label="نوع خواسته" htmlFor="claimType" required error={errors.claimType?.message}>
                   <select id="claimType" className={selectClassName} {...register('claimType')}>
-                    {CLAIM_TYPE_OPTIONS.map((option) => (
+                    {claimTypes.map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
@@ -262,7 +350,7 @@ export default function CreateCasePage() {
                 </Field>
                 <Field label="حوزه موضوعی" htmlFor="category" required error={errors.category?.message}>
                   <select id="category" className={selectClassName} {...register('category')}>
-                    {CASE_CATEGORY_OPTIONS.map((option) => (
+                    {categories.map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
@@ -271,7 +359,7 @@ export default function CreateCasePage() {
                 </Field>
                 <Field label="نوع رسیدگی" htmlFor="proceedingType" required error={errors.proceedingType?.message}>
                   <select id="proceedingType" className={selectClassName} {...register('proceedingType')}>
-                    {PROCEEDING_TYPE_OPTIONS.map((option) => (
+                    {proceedingTypes.map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
@@ -280,9 +368,11 @@ export default function CreateCasePage() {
                 </Field>
                 <Field label="فوریت" htmlFor="urgency" required error={errors.urgency?.message}>
                   <select id="urgency" className={selectClassName} {...register('urgency')}>
-                    <option value="عادی">عادی</option>
-                    <option value="فوری">فوری</option>
-                    <option value="خیلی فوری">خیلی فوری</option>
+                    {urgencyOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
                   </select>
                 </Field>
                 <Field label="شهر" htmlFor="city" required error={errors.city?.message}>
@@ -387,7 +477,10 @@ export default function CreateCasePage() {
               </label>
             </section>
 
-            <CaseRulesDropdowns />
+            <CaseRulesDropdowns
+              rules={catalog?.fileRulesSections}
+              deliveryMethods={catalog?.deliveryMethods}
+            />
 
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
               <Button
@@ -396,11 +489,19 @@ export default function CreateCasePage() {
                 size="lg"
                 className="w-full sm:w-auto"
                 onClick={() => setStep('intake')}
+                disabled={submittingUpload}
               >
                 <ArrowRight className="size-4" aria-hidden />
                 بازگشت به فرم
               </Button>
-              <Button type="button" variant="accent" size="lg" className="w-full sm:w-auto" onClick={submitUpload}>
+              <Button
+                type="button"
+                variant="accent"
+                size="lg"
+                className="w-full sm:w-auto"
+                onClick={() => void submitUpload()}
+                disabled={submittingUpload}
+              >
                 ارسال مدارک و دریافت پیش‌فاکتور
                 <ArrowLeft className="size-4" aria-hidden />
               </Button>
@@ -438,7 +539,9 @@ export default function CreateCasePage() {
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Button asChild variant="accent" size="lg">
-                <Link to="/app/cases">مشاهده پرونده‌ها و چت</Link>
+                <Link to={createdCaseId ? `/app/cases/${createdCaseId}` : '/app/cases'}>
+                  مشاهده پرونده‌ها و چت
+                </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
                 <Link to="/app/chat">چت پرونده‌ها</Link>

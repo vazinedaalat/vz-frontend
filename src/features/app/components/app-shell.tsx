@@ -29,8 +29,7 @@ export function AppShell() {
   }, [moreOpen])
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
+    void logout().then(() => navigate('/login'))
   }
 
   const moreActive = APP_MOBILE_MORE_NAV.some((item) =>

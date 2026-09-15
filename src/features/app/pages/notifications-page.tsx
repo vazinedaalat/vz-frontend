@@ -1,11 +1,43 @@
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { Button } from '@/components/ui'
+import { isMockEnabled } from '@/config/env'
+import { AppError } from '@/services/api/errors'
+import { appKeys, fetchNotifications, markAllNotificationsRead, markNotificationRead } from '../api'
 import { getNotifications } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
 import { PageHeader } from '../components/page-header'
 import { cn } from '@/lib/utils'
 
 export default function NotificationsPage() {
-  const items = getNotifications()
+  const queryClient = useQueryClient()
+  const [error, setError] = useState<string | null>(null)
+
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: appKeys.notifications,
+    queryFn: isMockEnabled ? async () => getNotifications() : fetchNotifications,
+  })
+
+  const markAll = useMutation({
+    mutationFn: markAllNotificationsRead,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: appKeys.notifications })
+    },
+    onError: (err) => {
+      setError(err instanceof AppError ? err.message : 'خطا در خواندن اعلان‌ها')
+    },
+  })
+
+  const onOpen = async (id: string, read: boolean) => {
+    if (isMockEnabled || read) return
+    try {
+      await markNotificationRead(id)
+      await queryClient.invalidateQueries({ queryKey: appKeys.notifications })
+    } catch {
+      // non-blocking
+    }
+  }
 
   return (
     <div>
@@ -13,19 +45,41 @@ export default function NotificationsPage() {
         eyebrow="اطلاع‌رسانی"
         title="اطلاعیه‌های پرونده"
         description="هر به‌روزرسانی مهم پرونده — مدارک، وضعیت، جلسه و پیام — اینجا می‌آید."
+        action={
+          !isMockEnabled && items.some((item) => !item.read) ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={markAll.isPending}
+              onClick={() => markAll.mutate()}
+            >
+              همه را خواندم
+            </Button>
+          ) : null
+        }
       />
+
+      {error ? (
+        <p className="mb-4 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+          {error}
+        </p>
+      ) : null}
+
+      {isLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
 
       {items.length > 0 ? (
         <ul className="space-y-3">
           {items.map((item) => (
             <li key={item.id}>
               <Link
-                to={`/app/cases/${item.caseId}`}
+                to={item.caseId ? `/app/cases/${item.caseId}` : '/app/notifications'}
+                onClick={() => void onOpen(item.id, item.read)}
                 className={cn(
                   'block rounded-[1.25rem] border p-5 transition-all hover:shadow-lift',
                   item.read
                     ? 'border-navy-200 bg-white'
-                    : 'border-gold-300 bg-gold-100/40 shadow-soft'
+                    : 'border-gold-300 bg-gold-100/40 shadow-soft',
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -45,12 +99,9 @@ export default function NotificationsPage() {
             </li>
           ))}
         </ul>
-      ) : (
-        <AppEmptyState
-          title="اطلاعیه‌ای نیست"
-          description="در محیط تولید، اعلان‌ها از سرویس پیام‌رسانی دریافت می‌شوند."
-        />
-      )}
+      ) : !isLoading ? (
+        <AppEmptyState title="اطلاعیه‌ای نیست" description="اعلان‌ها از سرویس پیام‌رسانی دریافت می‌شوند." />
+      ) : null}
     </div>
   )
 }

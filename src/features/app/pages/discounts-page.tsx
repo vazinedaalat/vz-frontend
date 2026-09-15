@@ -1,12 +1,18 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui'
+import { isMockEnabled } from '@/config/env'
+import { appKeys, fetchMyDiscounts } from '../api'
 import { getDiscountCodes } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
 import { PageHeader } from '../components/page-header'
 import { cn } from '@/lib/utils'
 
 export default function DiscountsPage() {
-  const codes = getDiscountCodes()
+  const { data: codes = [], isLoading } = useQuery({
+    queryKey: appKeys.discounts,
+    queryFn: isMockEnabled ? async () => getDiscountCodes() : fetchMyDiscounts,
+  })
   const [copied, setCopied] = useState<string | null>(null)
 
   const copyCode = async (code: string) => {
@@ -27,6 +33,8 @@ export default function DiscountsPage() {
         description="کد را کپی کنید و هنگام رزرو مشاوره یا ثبت درخواست سند اعمال کنید."
       />
 
+      {isLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
+
       {codes.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
           {codes.map((item) => (
@@ -34,7 +42,7 @@ export default function DiscountsPage() {
               key={item.id}
               className={cn(
                 'rounded-[1.5rem] border p-5 shadow-soft',
-                item.isActive ? 'border-navy-200 bg-white' : 'border-navy-100 bg-navy-50 opacity-70'
+                item.isActive ? 'border-navy-200 bg-white' : 'border-navy-100 bg-navy-50 opacity-70',
               )}
             >
               <div className="flex items-start justify-between gap-3">
@@ -46,7 +54,10 @@ export default function DiscountsPage() {
               </div>
 
               <div className="mt-5 flex flex-wrap items-center gap-3">
-                <code className="rounded-xl bg-navy-900 px-3 py-2 text-sm tracking-wider text-gold-300" dir="ltr">
+                <code
+                  className="rounded-xl bg-navy-900 px-3 py-2 text-sm tracking-wider text-gold-300"
+                  dir="ltr"
+                >
                   {item.code}
                 </code>
                 <Button
@@ -71,12 +82,12 @@ export default function DiscountsPage() {
             </article>
           ))}
         </div>
-      ) : (
+      ) : !isLoading ? (
         <AppEmptyState
           title="کد تخفیفی موجود نیست"
-          description="کدهای تخفیف در محیط تولید از سرویس کمپین دریافت می‌شوند."
+          description="کدهای تخفیف از سرویس کمپین دریافت می‌شوند."
         />
-      )}
+      ) : null}
     </div>
   )
 }

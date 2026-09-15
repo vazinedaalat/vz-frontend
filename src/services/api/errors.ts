@@ -67,12 +67,15 @@ export function normalizeApiError(error: unknown): AppError {
     }
 
     const status = axiosError.response.status
-    const message = axiosError.response.data?.message || axiosError.message || 'Request failed'
-    const code = axiosError.response.data?.code
+    const payload = axiosError.response.data as
+      | { message?: string; code?: string; errorCode?: string; details?: unknown }
+      | undefined
+    const message = payload?.message || axiosError.message || 'Request failed'
+    const code = payload?.errorCode || payload?.code
 
     switch (status) {
       case 400:
-        return new ValidationError(message, axiosError.response.data)
+        return new ValidationError(message, payload)
       case 401:
         return new AuthenticationError(message)
       case 403:
@@ -80,7 +83,7 @@ export function normalizeApiError(error: unknown): AppError {
       case 404:
         return new NotFoundError(message)
       default:
-        return new AppError(message, code || 'API_ERROR', status, axiosError.response.data)
+        return new AppError(message, code || 'API_ERROR', status, payload)
     }
   }
 

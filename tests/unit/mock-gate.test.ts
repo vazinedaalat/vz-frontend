@@ -66,10 +66,10 @@ describe('Iranian legal form schemas', () => {
 })
 
 describe('mock data gate', () => {
-  it('loads demo datasets when mock mode is enabled (non-production)', () => {
-    expect(USE_MOCK_DATA).toBe(true)
-    expect(withMockData(() => ['a'], [])).toEqual(['a'])
-    expect(getCases().length).toBeGreaterThan(0)
-    expect(getSpecialOffers().length).toBeGreaterThan(0)
+  it('defaults to API mode (mock off) in development env files', () => {
+    expect(USE_MOCK_DATA).toBe(false)
+    expect(withMockData(() => ['a'], [])).toEqual([])
+    expect(getCases()).toEqual([])
+    expect(getSpecialOffers()).toEqual([])
   })
 })
