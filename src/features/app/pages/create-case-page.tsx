@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, FolderCheck } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { isMockEnabled } from '@/config/env'
+import { asciiDigitsField } from '@/lib/format'
 import { AppError } from '@/services/api/errors'
 import {
   appKeys,
@@ -288,7 +289,7 @@ export default function CreateCasePage() {
                     inputMode="numeric"
                     maxLength={10}
                     placeholder="۱۰ رقم"
-                    {...register('clientNationalId')}
+                    {...register('clientNationalId', asciiDigitsField)}
                   />
                 </Field>
                 <Field label="موبایل" htmlFor="clientPhone" required error={errors.clientPhone?.message}>
@@ -298,7 +299,7 @@ export default function CreateCasePage() {
                     placeholder="0912…"
                     dir="ltr"
                     className="text-left"
-                    {...register('clientPhone')}
+                    {...register('clientPhone', asciiDigitsField)}
                   />
                 </Field>
                 <Field label="حساب ثنا" htmlFor="hasThanaAccount" required error={errors.hasThanaAccount?.message}>
@@ -421,7 +422,7 @@ export default function CreateCasePage() {
                   htmlFor="priorCaseNumber"
                   error={errors.priorCaseNumber?.message}
                 >
-                  <Input id="priorCaseNumber" placeholder="در صورت وجود" {...register('priorCaseNumber')} />
+                  <Input id="priorCaseNumber" placeholder="در صورت وجود" {...register('priorCaseNumber', asciiDigitsField)} />
                 </Field>
                 <Field
                   label="اقامتگاه طرف مقابل (اختیاری)"

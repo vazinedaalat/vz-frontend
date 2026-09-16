@@ -10,6 +10,7 @@ import { CONTACT_INFO, CTA } from '@/features/home/constants'
 import { smsLoginOtpSchema, smsLoginPhoneSchema } from '@/features/app/schemas'
 import { useAuthStore } from '@/features/app/store/auth-store'
 import { Field } from '@/features/app/components/field'
+import { asciiDigitsField } from '@/lib/format'
 import { z } from 'zod'
 
 type PhoneForm = z.infer<typeof smsLoginPhoneSchema>
@@ -105,7 +106,7 @@ export default function LoginPage() {
                 inputMode="numeric"
                 dir="ltr"
                 placeholder="09xxxxxxxxx"
-                {...phoneForm.register('phone')}
+                {...phoneForm.register('phone', asciiDigitsField)}
               />
             </Field>
             <Button type="submit" variant="accent" size="lg" className="w-full">
@@ -124,7 +125,7 @@ export default function LoginPage() {
                 dir="ltr"
                 maxLength={5}
                 placeholder="-----"
-                {...otpForm.register('code')}
+                {...otpForm.register('code', asciiDigitsField)}
               />
             </Field>
             <Button type="submit" variant="accent" size="lg" className="w-full">

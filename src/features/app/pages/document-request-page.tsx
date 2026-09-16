@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FileStack, ScrollText } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { cn } from '@/lib/utils'
-import { toPersianDigits } from '@/lib/format'
+import { toPersianDigits, asciiDigitsField, asciiAmountField } from '@/lib/format'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
 import { appKeys, createDocumentRequest, fetchDocuments } from '../api'
@@ -283,7 +283,7 @@ export default function DocumentRequestPage() {
                 maxLength={10}
                 dir="ltr"
                 className="text-left"
-                {...register('plaintiffNationalId')}
+                {...register('plaintiffNationalId', asciiDigitsField)}
               />
             </Field>
             <Field
@@ -317,7 +317,7 @@ export default function DocumentRequestPage() {
                 placeholder="0912…"
                 dir="ltr"
                 className="text-left"
-                {...register('defendantPhone')}
+                {...register('defendantPhone', asciiDigitsField)}
               />
             </Field>
             <Field
@@ -343,7 +343,7 @@ export default function DocumentRequestPage() {
             error={errors.claimAmount?.message}
             hint="اگر خواسته غیرمالی است خالی بگذارید"
           >
-            <Input id="claimAmount" placeholder="مبلغ به ریال" dir="ltr" className="text-left" {...register('claimAmount')} />
+            <Input id="claimAmount" placeholder="مبلغ به ریال" dir="ltr" className="text-left" {...register('claimAmount', asciiAmountField)} />
           </Field>
           <Field
             label="تعهدات و جهات استحقاق"

@@ -1,15 +1,33 @@
 import { z } from 'zod'
+import { normalizeNumericInput, toAsciiDigits } from '@/lib/format'
 
-/** Iranian mobile numbers: 09XXXXXXXXX */
-export const iranianMobileSchema = z
-  .string()
-  .trim()
-  .regex(/^09\d{9}$/, 'شماره موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد')
+/** Normalize Persian/Arabic digits then run the inner string schema. */
+function asciiDigitString<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess((value) => {
+    if (typeof value !== 'string') return value
+    return toAsciiDigits(value).trim()
+  }, schema)
+}
 
-export const otpSchema = z
-  .string()
-  .trim()
-  .regex(/^\d{5}$/, 'کد تایید باید ۵ رقم باشد')
+function asciiAmountString<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess((value) => {
+    if (typeof value !== 'string') return value
+    return normalizeNumericInput(value)
+  }, schema)
+}
+
+/** Iranian mobile numbers: 09XXXXXXXXX (Persian digits accepted). */
+export const iranianMobileSchema = asciiDigitString(
+  z.string().regex(/^09\d{9}$/, 'شماره موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد'),
+)
+
+export const otpSchema = asciiDigitString(
+  z.string().regex(/^\d{5}$/, 'کد تایید باید ۵ رقم باشد'),
+)
+
+export const nationalIdSchema = asciiDigitString(
+  z.string().regex(/^\d{10}$/, 'کد ملی باید ۱۰ رقم باشد'),
+)
 
 export const smsLoginPhoneSchema = z.object({
   phone: iranianMobileSchema,
@@ -31,7 +49,7 @@ export const consultationRequestSchema = z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, 'تاریخ رزرو را از تقویم انتخاب کنید'),
     time: z.string().optional(),
-    discountCode: z.string().optional(),
+    discountCode: asciiDigitString(z.string().optional()),
   })
   .superRefine((values, ctx) => {
     const needsTime = values.planId === 'in-person' || values.planId === 'dargahi-premium'
@@ -51,7 +69,7 @@ const createCaseIntakeFields = {
   ),
   clientFullName: z.string().min(3, 'نام و نام خانوادگی را کامل وارد کنید'),
   clientFatherName: z.string().min(2, 'نام پدر را وارد کنید'),
-  clientNationalId: z.string().regex(/^\d{10}$/, 'کد ملی باید ۱۰ رقم باشد'),
+  clientNationalId: nationalIdSchema,
   clientPhone: iranianMobileSchema,
   clientAddress: z.string().min(15, 'اقامتگاه را کامل بنویسید (شهر، خیابان، پلاک)'),
   title: z.string().min(5, 'عنوان / خواسته پرونده را کامل‌تر بنویسید'),
@@ -84,7 +102,7 @@ const createCaseIntakeFields = {
   courtHint: z.string().optional(),
   urgency: z.enum(['عادی', 'فوری', 'خیلی فوری']),
   hasThanaAccount: z.enum(['بله', 'خیر', 'نامشخص']),
-  priorCaseNumber: z.string().optional(),
+  priorCaseNumber: asciiDigitString(z.string().optional()),
 }
 
 /** Step 1 — intake form only (file rules validated on upload step). */
@@ -104,21 +122,21 @@ export const documentRequestFieldsSchema = z.object({
   documentType: z.enum(['petition', 'declaration', 'complaint', 'brief', 'power-of-attorney']),
   plaintiffName: z.string().min(3, 'نام خواهان / اظهارکننده الزامی است'),
   plaintiffFatherName: z.string().min(2, 'نام پدر را وارد کنید'),
-  plaintiffNationalId: z
-    .string()
-    .regex(/^\d{10}$/, 'کد ملی باید ۱۰ رقم باشد'),
+  plaintiffNationalId: nationalIdSchema,
   plaintiffAddress: z.string().min(15, 'اقامتگاه را کامل بنویسید (شهر، خیابان، پلاک)'),
   defendantName: z.string().min(2, 'نام خوانده / مخاطب الزامی است'),
   defendantAddress: z.string().min(10, 'اقامتگاه طرف مقابل را وارد کنید'),
-  defendantPhone: z
-    .string()
-    .trim()
-    .optional()
-    .refine((value) => !value || /^09\d{9}$/.test(value), {
-      message: 'شماره موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد',
-    }),
+  defendantPhone: asciiDigitString(
+    z
+      .string()
+      .trim()
+      .optional()
+      .refine((value) => !value || /^09\d{9}$/.test(value), {
+        message: 'شماره موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد',
+      }),
+  ),
   claimTitle: z.string().min(5, 'خواسته را مشخص کنید'),
-  claimAmount: z.string().optional(),
+  claimAmount: asciiAmountString(z.string().optional()),
   claimBasis: z.string().min(20, 'مبنای استحقاق / تعهد را توضیح دهید'),
   courtRequest: z.string().min(10, 'درخواست از مرجع را بنویسید'),
   evidenceSummary: z.string().min(10, 'ادله و منضمات را خلاصه کنید'),

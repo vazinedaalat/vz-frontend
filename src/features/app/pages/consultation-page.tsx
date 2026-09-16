@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CreditCard, CalendarDays, Clock3 } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
-import { formatFaNumber, toPersianDigits } from '@/lib/format'
+import { formatFaNumber, toPersianDigits, asciiDigitsField } from '@/lib/format'
 import { formatJalaliLabel, jalaliFromDate, startOfLocalDay } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
@@ -280,7 +280,7 @@ export default function ConsultationPage() {
                         id="discountCode"
                         placeholder="VAZIN40"
                         className="uppercase"
-                        {...register('discountCode')}
+                        {...register('discountCode', asciiDigitsField)}
                       />
                     </Field>
                   ) : null}

@@ -27,8 +27,9 @@ describe('consultation availability', () => {
   })
 
   it('filters booked time slots', () => {
+    const today = new Date(2026, 8, 14)
     expect(isTimeSlotBooked('2026-09-15', '10:00', availability)).toBe(true)
-    expect(getAvailableTimeSlots('2026-09-15', availability)).toEqual(['09:00', '11:00'])
+    expect(getAvailableTimeSlots('2026-09-15', availability, today)).toEqual(['09:00', '11:00'])
   })
 })
 

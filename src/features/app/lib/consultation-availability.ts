@@ -32,8 +32,9 @@ export function isTimeSlotBooked(
 export function getAvailableTimeSlots(
   dateKey: string,
   availability: ConsultationAvailability,
+  today = startOfLocalDay(),
 ): string[] {
-  if (!isDateSelectable(dateKey, availability)) return []
+  if (!isDateSelectable(dateKey, availability, today)) return []
   return availability.timeSlots.filter((time) => !isTimeSlotBooked(dateKey, time, availability))
 }
 
