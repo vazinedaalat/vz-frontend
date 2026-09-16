@@ -24,8 +24,8 @@ export function TimeSlotPicker({ dateKey, availability, value, onChange, error }
   }
 
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+    <div className="min-w-0 space-y-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {availability.timeSlots.map((time) => {
           const booked = isTimeSlotBooked(dateKey, time, availability)
           const selected = value === time
@@ -37,7 +37,7 @@ export function TimeSlotPicker({ dateKey, availability, value, onChange, error }
               aria-pressed={selected}
               onClick={() => onChange(time)}
               className={cn(
-                'h-11 rounded-xl border text-sm font-semibold transition-all duration-200',
+                'h-11 min-w-0 rounded-xl border text-xs font-semibold transition-all duration-200 sm:text-sm',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/40',
                 selected && 'border-gold-400 bg-navy-900 text-white shadow-soft',
                 !selected && !booked && 'border-navy-200 bg-white text-navy-800 hover:border-gold-300 hover:bg-gold-100/50',

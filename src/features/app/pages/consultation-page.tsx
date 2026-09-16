@@ -153,7 +153,7 @@ export default function ConsultationPage() {
   const submitting = isSubmitting || bookMutation.isPending
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 max-w-full space-y-8 overflow-x-clip">
       <PageHeader
         eyebrow="مشاوره حقوقی"
         title="رزرو مشاوره"
@@ -161,11 +161,11 @@ export default function ConsultationPage() {
       />
 
       {submitted ? (
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           {lastBooking?.bookingCode ? (
             <BookingCodeDisplay code={lastBooking.bookingCode} variant="hero" />
           ) : null}
-          <div className="rounded-2xl border border-gold-300 bg-gold-100 px-4 py-3 text-sm leading-7 text-gold-800">
+          <div className="rounded-2xl border border-gold-300 bg-gold-100 px-3 py-3 text-sm leading-7 text-gold-800 sm:px-4">
             رزرو با موفقیت ثبت شد. کد بالا را برای پیگیری نزد خود نگه دارید؛ تایید زمان از طریق پنل و پیامک اعلام
             می‌شود.
           </div>
@@ -174,8 +174,8 @@ export default function ConsultationPage() {
 
       {apiError ? <ErrorBadge variant="page">{apiError}</ErrorBadge> : null}
 
-      <form onSubmit={onSubmit} className="space-y-8">
-        <section className="space-y-4">
+      <form onSubmit={onSubmit} className="min-w-0 space-y-8">
+        <section className="min-w-0 space-y-4">
           <SectionTitle step="۱" title="انتخاب طرح مشاوره" />
           <Controller
             name="planId"
@@ -206,9 +206,9 @@ export default function ConsultationPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.28 }}
-              className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]"
+              className="grid min-w-0 gap-6 lg:grid-cols-[1.05fr_0.95fr]"
             >
-              <div className="space-y-4">
+              <div className="min-w-0 space-y-4">
                 <SectionTitle
                   step="۲"
                   title={selectedPlan.requiresTime ? 'انتخاب روز و ساعت' : 'انتخاب روز'}
@@ -241,10 +241,10 @@ export default function ConsultationPage() {
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="space-y-3"
+                    className="min-w-0 space-y-3"
                   >
                     <h3 className="flex items-center gap-2 text-sm font-semibold text-navy-900">
-                      <Clock3 className="size-4 text-gold-600" aria-hidden />
+                      <Clock3 className="size-4 shrink-0 text-gold-600" aria-hidden />
                       ساعت جلسه
                     </h3>
                     <Controller
@@ -264,9 +264,9 @@ export default function ConsultationPage() {
                 ) : null}
               </div>
 
-              <div className="space-y-5">
+              <div className="min-w-0 space-y-5">
                 <SectionTitle step="۳" title="جزئیات درخواست" />
-                <div className="space-y-5 rounded-[1.5rem] border border-navy-200 bg-white p-5 shadow-soft sm:p-6">
+                <div className="min-w-0 space-y-5 rounded-[1.25rem] border border-navy-200 bg-white p-4 shadow-soft sm:rounded-[1.5rem] sm:p-6">
                   <Field label="موضوع مشاوره" htmlFor="topic" required error={errors.topic?.message}>
                     <Input id="topic" placeholder="مثلاً اختلاف قرارداد اجاره" {...register('topic')} />
                   </Field>
@@ -333,7 +333,7 @@ export default function ConsultationPage() {
               key="empty-plan"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="rounded-2xl border border-dashed border-navy-200 bg-navy-50/50 px-5 py-8"
+              className="rounded-2xl border border-dashed border-navy-200 bg-navy-50/50 px-4 py-8 sm:px-5"
             >
               <AppEmptyState
                 title="ابتدا طرح را انتخاب کنید"
@@ -344,17 +344,20 @@ export default function ConsultationPage() {
         </AnimatePresence>
       </form>
 
-      <section className="space-y-4">
+      <section className="min-w-0 space-y-4">
         <h2 className="font-display text-lg font-bold text-navy-900">رزروهای شما</h2>
         {bookingsLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
         {existing.length > 0 ? (
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
             {existing.map((slot) => (
-              <article key={slot.id} className="flex h-full flex-col gap-4 rounded-2xl border border-navy-200 bg-white p-5 shadow-soft">
+              <article
+                key={slot.id}
+                className="flex h-full min-w-0 flex-col gap-3 rounded-2xl border border-navy-200 bg-white p-4 shadow-soft sm:gap-4 sm:p-5"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-navy-900">{slot.topic}</h3>
-                    <p className="mt-1 text-xs text-navy-500">
+                    <h3 className="font-semibold break-words text-navy-900">{slot.topic}</h3>
+                    <p className="mt-1 text-xs break-words text-navy-500">
                       {slot.lawyerName} · {slot.modeLabel}
                     </p>
                   </div>
@@ -362,7 +365,7 @@ export default function ConsultationPage() {
                     {slot.status === 'available' ? 'آزاد' : slot.status === 'done' ? 'انجام‌شده' : 'رزرو شده'}
                   </span>
                 </div>
-                <p className="text-sm text-navy-600">{formatFaDateTime(slot.startsAt)}</p>
+                <p className="text-sm break-words text-navy-600">{formatFaDateTime(slot.startsAt)}</p>
                 {slot.bookingCode ? <BookingCodeDisplay code={slot.bookingCode} /> : null}
                 <p className="mt-auto text-sm font-semibold text-navy-900">
                   {slot.price === 0 ? (
@@ -398,14 +401,14 @@ export default function ConsultationPage() {
 
 function SectionTitle({ step, title, hint }: { step: string; title: string; hint?: string }) {
   return (
-    <div>
+    <div className="min-w-0">
       <div className="flex items-center gap-2">
-        <span className="inline-flex size-7 items-center justify-center rounded-lg bg-navy-900 text-xs font-bold text-gold-300">
+        <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-navy-900 text-xs font-bold text-gold-300">
           {toPersianDigits(step)}
         </span>
-        <h2 className="font-display text-lg font-bold text-navy-900">{title}</h2>
+        <h2 className="font-display text-base font-bold text-navy-900 sm:text-lg">{title}</h2>
       </div>
-      {hint ? <p className="mt-2 text-sm leading-7 text-navy-600">{hint}</p> : null}
+      {hint ? <p className="mt-2 text-sm leading-6 text-navy-600 sm:leading-7">{hint}</p> : null}
     </div>
   )
 }
@@ -428,32 +431,32 @@ function BookingSummary({
   requiresPayment: boolean
 }) {
   return (
-    <div className="rounded-2xl border border-navy-100 bg-navy-50/70 p-4">
+    <div className="min-w-0 rounded-2xl border border-navy-100 bg-navy-50/70 p-3.5 sm:p-4">
       <p className="text-xs font-semibold text-gold-700">خلاصه رزرو</p>
       <ul className="mt-3 space-y-2 text-sm text-navy-700">
         <li className="flex justify-between gap-3">
-          <span className="text-navy-500">طرح</span>
-          <span className="text-left font-medium">{planTitle}</span>
+          <span className="shrink-0 text-navy-500">طرح</span>
+          <span className="min-w-0 break-words text-left font-medium">{planTitle}</span>
         </li>
         <li className="flex justify-between gap-3">
-          <span className="text-navy-500">مشاور</span>
-          <span className="font-medium">{lawyerName}</span>
+          <span className="shrink-0 text-navy-500">مشاور</span>
+          <span className="min-w-0 break-words text-left font-medium">{lawyerName}</span>
         </li>
         <li className="flex justify-between gap-3">
-          <span className="text-navy-500">روز</span>
-          <span className="font-medium">
+          <span className="shrink-0 text-navy-500">روز</span>
+          <span className="min-w-0 break-words text-left font-medium">
             {dateKey ? formatJalaliLabel(dateKey) : '—'}
           </span>
         </li>
         {time !== undefined ? (
           <li className="flex justify-between gap-3">
-            <span className="text-navy-500">ساعت</span>
+            <span className="shrink-0 text-navy-500">ساعت</span>
             <span className="font-medium">{time ? toPersianDigits(time) : '—'}</span>
           </li>
         ) : null}
         <li className="flex justify-between gap-3 border-t border-navy-200/80 pt-2">
-          <span className="text-navy-500">{requiresPayment ? 'مبلغ قابل پرداخت' : 'هزینه'}</span>
-          <span className="font-display font-bold text-navy-900">
+          <span className="shrink-0 text-navy-500">{requiresPayment ? 'مبلغ قابل پرداخت' : 'هزینه'}</span>
+          <span className="min-w-0 break-words text-left font-display font-bold text-navy-900">
             {isFree ? 'رایگان' : `${formatFaNumber(price)} تومان`}
           </span>
         </li>
