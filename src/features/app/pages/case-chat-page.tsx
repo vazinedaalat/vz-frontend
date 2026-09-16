@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, FolderOpen } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { toPersianDigits } from '@/lib/format'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
 import {
@@ -113,7 +114,7 @@ export default function CaseChatPage() {
     <div className="mx-auto min-w-0 max-w-3xl md:space-y-5">
       <div className="hidden md:block">
         <PageHeader
-          eyebrow={legalCase.caseNumber}
+          eyebrow={toPersianDigits(legalCase.caseNumber)}
           title="چت پیگیری پرونده"
           description={`${legalCase.title} · وکیل مسئول: ${legalCase.lawyerName}`}
           action={
@@ -135,7 +136,8 @@ export default function CaseChatPage() {
       <ChatThreadPanel
         immersive
         title={legalCase.title}
-        subtitle={`${legalCase.caseNumber} · ${legalCase.lawyerName}`}
+        subtitle={`${toPersianDigits(legalCase.caseNumber)} · ${legalCase.lawyerName}`}
+        updatedAt={thread.updatedAt}
         messages={thread.messages}
         onSend={onSend}
         className="md:min-h-[min(70vh,40rem)]"

@@ -340,6 +340,7 @@ export default function ChatPage() {
                 immersive={mobilePane === 'thread'}
                 title={active.subject}
                 subtitle={`پشتیبانی حقوقی · ${active.category}`}
+                updatedAt={active.updatedAt}
                 messages={active.messages}
                 onSend={sendMessage}
                 placeholder="پیام پشتیبانی را بنویسید…"

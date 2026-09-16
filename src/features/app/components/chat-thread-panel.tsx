@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
-import { Shield } from 'lucide-react'
+import { Clock3, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { toPersianDigits } from '@/lib/format'
 import { formatFaDateTime } from '@/lib/jalali'
 import { ChatAttachmentList, ChatComposer } from './chat-composer'
 import type { ChatMessage, ChatSendPayload } from '../types'
@@ -14,6 +15,8 @@ interface ChatThreadPanelProps {
   headerStart?: ReactNode
   emptyHint?: string
   placeholder?: string
+  /** Last activity time shown in Persian under the title. */
+  updatedAt?: string
   /** Mobile immersive fill above bottom nav with clipped bottom edge. */
   immersive?: boolean
 }
@@ -28,6 +31,7 @@ export function ChatThreadPanel({
   headerStart,
   emptyHint = 'هنوز پیامی رد و بدل نشده است. اولین پیام را بفرستید.',
   placeholder = 'پیام یا فایل پیگیری را ارسال کنید…',
+  updatedAt,
   immersive = false,
 }: ChatThreadPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -38,6 +42,8 @@ export function ChatThreadPanel({
     if (!node) return
     node.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages.length])
+
+  const lastActivity = updatedAt ?? messages.at(-1)?.createdAt
 
   return (
     <section
@@ -56,11 +62,19 @@ export function ChatThreadPanel({
       <header className="relative z-20 flex shrink-0 items-start gap-2.5 border-b border-navy-100 bg-white/95 px-3 py-3 backdrop-blur-xl sm:gap-3 sm:px-5 sm:py-3.5">
         {headerStart}
         <div className="min-w-0 flex-1">
-          <h2 className="font-display truncate text-base font-bold text-navy-900 sm:text-lg">{title}</h2>
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-navy-500">
+          <h2 className="font-display truncate text-base font-bold text-navy-900 sm:text-lg">
+            {toPersianDigits(title)}
+          </h2>
+          <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-navy-500">
             <Shield className="size-3.5 shrink-0 text-gold-600" aria-hidden />
-            <span className="truncate">{subtitle}</span>
+            <span className="truncate">{toPersianDigits(subtitle)}</span>
           </p>
+          {lastActivity ? (
+            <p className="mt-1.5 flex items-center gap-1.5 text-[0.7rem] text-navy-400">
+              <Clock3 className="size-3 shrink-0 text-gold-600" aria-hidden />
+              <span>آخرین فعالیت: {formatFaDateTime(lastActivity)}</span>
+            </p>
+          ) : null}
         </div>
       </header>
 
@@ -83,9 +97,7 @@ export function ChatThreadPanel({
             {messages.map((message, index) => {
               const prev = messages[index - 1]
               const showMeta = !prev || prev.sender !== message.sender
-              return (
-                <ChatBubble key={message.id} message={message} showMeta={showMeta} />
-              )
+              return <ChatBubble key={message.id} message={message} showMeta={showMeta} />
             })}
             <div ref={messagesEndRef} className="h-px w-full shrink-0" />
           </div>
@@ -127,12 +139,7 @@ function ChatBubble({ message, showMeta }: { message: ChatMessage; showMeta: boo
         {message.attachments?.length ? (
           <ChatAttachmentList attachments={message.attachments} tone={isUser ? 'dark' : 'light'} />
         ) : null}
-        <p
-          className={cn(
-            'mt-1.5 text-end text-[0.65rem]',
-            isUser ? 'text-white/55' : 'text-navy-400',
-          )}
-        >
+        <p className={cn('mt-1.5 text-end text-[0.65rem]', isUser ? 'text-white/55' : 'text-navy-400')}>
           {formatFaDateTime(message.createdAt)}
         </p>
       </div>
