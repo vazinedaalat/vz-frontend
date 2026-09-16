@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FileText, Paperclip, SendHorizontal, X } from 'lucide-react'
 import { z } from 'zod'
-import { Button, Input } from '@/components/ui'
+import { Button } from '@/components/ui'
 import { ErrorBadge, ErrorBadgeList } from '@/components/shared/error-badge'
 import { toPersianDigits } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -18,13 +18,15 @@ interface ChatComposerProps {
   onSend: (payload: ChatSendPayload) => void
   placeholder?: string
   inputId?: string
+  className?: string
 }
 
-/** Text + attachment composer shared by case and support chats. */
+/** Docked chat composer — rounded top cut sits above the message stream like mobile chat apps. */
 export function ChatComposer({
   onSend,
   placeholder = 'پیام خود را بنویسید…',
   inputId,
+  className,
 }: ChatComposerProps) {
   const generatedId = useId()
   const fieldId = inputId ?? generatedId
@@ -66,14 +68,20 @@ export function ChatComposer({
   return (
     <form
       onSubmit={submit}
-      className="border-t border-navy-100 bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4"
+      className={cn(
+        'relative z-10 rounded-t-[1.35rem] border border-b-0 border-navy-200/90 bg-white/95 px-3 pt-3 shadow-lift backdrop-blur-xl',
+        'pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4 sm:pt-3.5',
+        className,
+      )}
     >
+      <div className="mx-auto mb-2.5 h-1 w-10 rounded-full bg-navy-200/80 sm:hidden" aria-hidden />
+
       {attachments.length > 0 ? (
-        <ul className="mb-3 flex flex-wrap gap-2">
+        <ul className="mb-2.5 flex gap-2 overflow-x-auto pb-0.5">
           {attachments.map((file) => (
             <li
               key={file.id}
-              className="inline-flex max-w-full items-center gap-2 rounded-xl border border-navy-200 bg-navy-50 px-2.5 py-1.5 text-xs text-navy-700"
+              className="inline-flex max-w-[14rem] shrink-0 items-center gap-2 rounded-xl border border-navy-200 bg-navy-50 px-2.5 py-1.5 text-xs text-navy-700"
             >
               <FileText className="size-3.5 shrink-0 text-gold-700" aria-hidden />
               <span className="truncate">{file.name}</span>
@@ -94,9 +102,9 @@ export function ChatComposer({
       <div className="flex items-end gap-2">
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className="size-11 shrink-0"
+          className="size-11 shrink-0 rounded-2xl text-navy-600 hover:bg-navy-50"
           aria-label="پیوست فایل"
           onClick={() => fileInputRef.current?.click()}
         >
@@ -115,28 +123,28 @@ export function ChatComposer({
           <label htmlFor={fieldId} className="sr-only">
             متن پیام
           </label>
-          <Input
+          <input
             id={fieldId}
             placeholder={placeholder}
-            className="min-h-11"
+            className={cn(
+              'min-h-11 w-full rounded-2xl border border-navy-200 bg-navy-50/80 px-3.5 py-2.5 text-sm text-navy-900 shadow-soft',
+              'placeholder:text-navy-400',
+              'focus-visible:border-gold-400 focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/30',
+            )}
             {...form.register('body', {
               onChange: () => setSubmitError(undefined),
             })}
           />
         </div>
 
-        <Button type="submit" variant="accent" size="icon" className="size-11 shrink-0" aria-label="ارسال پیام">
+        <Button type="submit" variant="accent" size="icon" className="size-11 shrink-0 rounded-2xl" aria-label="ارسال پیام">
           <SendHorizontal className="size-4" />
         </Button>
       </div>
 
-      <p className="mt-2 text-[0.7rem] leading-5 text-navy-400">
-        PDF، تصویر یا ZIP · حداکثر {toPersianDigits(CHAT_FILE_MAX_COUNT)} فایل در هر پیام
-      </p>
-
-      <ErrorBadgeList className="mt-1" messages={fileErrors} />
+      <ErrorBadgeList className="mt-2" messages={fileErrors} />
       {submitError || form.formState.errors.body ? (
-        <ErrorBadge className="mt-1">{submitError ?? form.formState.errors.body?.message}</ErrorBadge>
+        <ErrorBadge className="mt-2">{submitError ?? form.formState.errors.body?.message}</ErrorBadge>
       ) : null}
     </form>
   )

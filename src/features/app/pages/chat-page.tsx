@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm, type UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, FolderOpen, MessageCirclePlus, Shield } from 'lucide-react'
+import { ArrowRight, FolderOpen, MessageCirclePlus } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { ErrorBadge } from '@/components/shared/error-badge'
 import { cn } from '@/lib/utils'
@@ -22,7 +22,7 @@ import {
 import { ticketSchema, type TicketValues } from '../schemas'
 import { getCaseChats, getTickets } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
-import { ChatAttachmentList, ChatComposer } from '../components/chat-composer'
+import { ChatThreadPanel } from '../components/chat-thread-panel'
 import { Field } from '../components/field'
 import { PageHeader } from '../components/page-header'
 import type { ChatMessage, ChatSendPayload, SupportTicket } from '../types'
@@ -39,7 +39,6 @@ export default function ChatPage() {
   const [mobilePane, setMobilePane] = useState<MobilePane>('list')
   const [tab, setTab] = useState<ChatTab>('cases')
   const [apiError, setApiError] = useState<string | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const { data: caseChats = [], isLoading: chatsLoading } = useQuery({
     queryKey: appKeys.chats.all,
@@ -62,10 +61,6 @@ export default function ChatPage() {
     resolver: zodResolver(ticketSchema),
     defaultValues: { subject: '', category: 'عمومی', message: '' },
   })
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-  }, [active?.messages.length, mobilePane, activeId])
 
   const openThread = (id: string) => {
     setActiveId(id)
@@ -335,88 +330,45 @@ export default function ChatPage() {
             </div>
           </div>
 
-          <section
+          <div
             className={cn(
-              'flex flex-col overflow-hidden rounded-[1.5rem] border border-navy-200 bg-white shadow-soft',
-              mobilePane === 'thread'
-                ? 'fixed inset-x-0 top-0 bottom-[4.25rem] z-30 md:static md:inset-auto md:z-auto md:min-h-[32rem]'
-                : 'hidden min-h-[28rem] md:flex',
+              mobilePane === 'thread' ? 'block min-w-0' : 'hidden min-h-[28rem] md:block',
             )}
           >
             {active ? (
-              <>
-                <div className="flex items-start gap-3 border-b border-navy-100 bg-navy-50/40 px-4 py-3.5 sm:px-5">
+              <ChatThreadPanel
+                immersive={mobilePane === 'thread'}
+                title={active.subject}
+                subtitle={`پشتیبانی حقوقی · ${active.category}`}
+                messages={active.messages}
+                onSend={sendMessage}
+                placeholder="پیام پشتیبانی را بنویسید…"
+                className={cn(
+                  'md:min-h-[32rem]',
+                  mobilePane !== 'thread' && 'hidden md:flex',
+                )}
+                headerStart={
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="mt-0.5 shrink-0 md:hidden"
+                    className="mt-0.5 shrink-0 rounded-2xl md:hidden"
                     aria-label="بازگشت به فهرست تیکت‌ها"
                     onClick={() => setMobilePane('list')}
                   >
                     <ArrowRight className="size-5" />
                   </Button>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-display truncate text-base font-bold text-navy-900 sm:text-lg">
-                        {active.subject}
-                      </h2>
-                      <StatusChip label={active.statusLabel} status={active.status} />
-                    </div>
-                    <p className="mt-1 flex items-center gap-1.5 text-xs text-navy-500">
-                      <Shield className="size-3.5 text-gold-600" aria-hidden />
-                      پشتیبانی حقوقی · {active.category}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex-1 space-y-3 overflow-y-auto bg-navy-50/40 px-4 py-4 sm:px-5">
-                  {active.messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={cn(
-                        'max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-7 shadow-soft sm:max-w-[80%]',
-                        message.sender === 'user'
-                          ? 'ms-auto rounded-es-md bg-navy-900 text-white'
-                          : message.sender === 'admin'
-                            ? 'me-auto rounded-ee-md border border-gold-200 bg-gold-100 text-navy-900'
-                            : 'mx-auto bg-navy-50 text-navy-600',
-                      )}
-                    >
-                      {message.sender === 'admin' ? (
-                        <p className="mb-1 text-[0.65rem] font-semibold text-gold-700">پاسخ کارشناس</p>
-                      ) : null}
-                      {message.body ? <p>{message.body}</p> : null}
-                      {message.attachments?.length ? (
-                        <ChatAttachmentList
-                          attachments={message.attachments}
-                          tone={message.sender === 'user' ? 'dark' : 'light'}
-                        />
-                      ) : null}
-                      <p
-                        className={cn(
-                          'mt-1.5 text-[0.65rem]',
-                          message.sender === 'user' ? 'text-white/55' : 'text-navy-400',
-                        )}
-                      >
-                        {formatFaDateTime(message.createdAt)}
-                      </p>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                <ChatComposer onSend={sendMessage} inputId="support-chat-body" />
-              </>
+                }
+              />
             ) : (
-              <div className="flex flex-1 items-center justify-center p-6">
+              <div className="hidden min-h-[28rem] items-center justify-center rounded-[1.5rem] border border-navy-200 bg-white p-6 shadow-soft md:flex">
                 <AppEmptyState
                   title="گفتگویی انتخاب نشده"
                   description="یک تیکت را انتخاب کنید یا تیکت جدید بسازید."
                 />
               </div>
             )}
-          </section>
+          </div>
         </div>
       )}
     </div>

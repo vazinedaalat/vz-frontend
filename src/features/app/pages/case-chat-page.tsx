@@ -110,7 +110,7 @@ export default function CaseChatPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="mx-auto min-w-0 max-w-3xl md:space-y-5">
       <div className="hidden md:block">
         <PageHeader
           eyebrow={legalCase.caseNumber}
@@ -133,13 +133,14 @@ export default function CaseChatPage() {
       </div>
 
       <ChatThreadPanel
+        immersive
         title={legalCase.title}
         subtitle={`${legalCase.caseNumber} · ${legalCase.lawyerName}`}
         messages={thread.messages}
         onSend={onSend}
-        className="min-h-[70vh] md:min-h-[32rem]"
+        className="md:min-h-[min(70vh,40rem)]"
         headerStart={
-          <Button variant="ghost" size="icon" className="mt-0.5 shrink-0 md:hidden" asChild>
+          <Button variant="ghost" size="icon" className="mt-0.5 shrink-0 rounded-2xl md:hidden" asChild>
             <Link to={`/app/cases/${legalCase.id}`} aria-label="بازگشت به پرونده">
               <ArrowRight className="size-5" />
             </Link>
