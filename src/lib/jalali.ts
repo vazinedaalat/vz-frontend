@@ -1,5 +1,7 @@
 /** Jalali calendar helpers via Intl (no external date libraries). */
 
+import { toPersianDigits } from '@/lib/format'
+
 export interface JalaliDate {
   jy: number
   jm: number
@@ -171,5 +173,85 @@ export function shiftJalaliMonth(jy: number, jm: number, delta: number): JalaliD
 export function formatJalaliLabel(dateKey: string): string {
   const date = parseDateKey(dateKey)
   const { jy, jm, jd } = jalaliFromDate(date)
-  return `${jd} ${persianMonthName(jm)} ${jy}`
+  return toPersianDigits(`${jd} ${persianMonthName(jm)} ${jy}`)
+}
+
+const PERSIAN_MONTH_RE =
+  /فروردین|اردیبهشت|خرداد|تیر|مرداد|شهریور|مهر|آبان|آذر|دی|بهمن|اسفند/
+const PERSIAN_WEEKDAY_RE = /شنبه|یکشنبه|دوشنبه|سه‌?شنبه|چهارشنبه|پنج‌?شنبه|جمعه/
+
+function isAlreadyPersianDateLabel(value: string): boolean {
+  if (value === 'اکنون') return true
+  if (/[۰-۹٠-٩]/.test(value)) return true
+  if (PERSIAN_MONTH_RE.test(value) || PERSIAN_WEEKDAY_RE.test(value)) return true
+  return false
+}
+
+function formatJalaliYmd(date: Date): string {
+  const { jy, jm, jd } = jalaliFromDate(date)
+  return toPersianDigits(`${jy}/${String(jm).padStart(2, '0')}/${String(jd).padStart(2, '0')}`)
+}
+
+function formatJalaliClock(date: Date): string {
+  const hh = String(date.getHours()).padStart(2, '0')
+  const mm = String(date.getMinutes()).padStart(2, '0')
+  return toPersianDigits(`${hh}:${mm}`)
+}
+
+/**
+ * Displays any API / mock date-time value in Persian Jalali digits.
+ * Accepts ISO timestamps, `YYYY-MM-DD`, `YYYY-MM-DD · HH:mm`, or already-Persian labels.
+ */
+export function formatFaDateTime(input: string | Date | null | undefined): string {
+  if (input == null) return '—'
+  if (input instanceof Date) {
+    return Number.isNaN(input.getTime()) ? '—' : `${formatJalaliYmd(input)} · ${formatJalaliClock(input)}`
+  }
+
+  const value = input.trim()
+  if (!value) return '—'
+  if (isAlreadyPersianDateLabel(value)) return toPersianDigits(value)
+
+  const combo = value.match(/^(\d{4}-\d{2}-\d{2})\s*[·•]\s*(.+)$/)
+  if (combo?.[1] && combo[2]) {
+    return `${formatJalaliYmd(parseDateKey(combo[1]))} · ${toPersianDigits(combo[2].trim())}`
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return formatJalaliYmd(parseDateKey(value))
+  }
+
+  const ms = Date.parse(value)
+  if (!Number.isNaN(ms)) {
+    const date = new Date(ms)
+    const hasClock = /T\d{2}:\d{2}/.test(value)
+    return hasClock ? `${formatJalaliYmd(date)} · ${formatJalaliClock(date)}` : formatJalaliYmd(date)
+  }
+
+  return toPersianDigits(value)
+}
+
+/** Date-only display (Jalali Y/M/D). Time portion of ISO values is ignored. */
+export function formatFaDate(input: string | Date | null | undefined): string {
+  if (input == null) return '—'
+  if (input instanceof Date) {
+    return Number.isNaN(input.getTime()) ? '—' : formatJalaliYmd(input)
+  }
+
+  const value = input.trim()
+  if (!value) return '—'
+  if (isAlreadyPersianDateLabel(value)) {
+    const withoutTime = value.split(/\s*[·•]\s*/)[0] ?? value
+    return toPersianDigits(withoutTime)
+  }
+
+  const dateKeyMatch = value.match(/^(\d{4}-\d{2}-\d{2})/)
+  if (dateKeyMatch?.[1]) {
+    return formatJalaliYmd(parseDateKey(dateKeyMatch[1]))
+  }
+
+  const ms = Date.parse(value)
+  if (!Number.isNaN(ms)) return formatJalaliYmd(new Date(ms))
+
+  return toPersianDigits(value)
 }

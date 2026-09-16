@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui'
 import { isMockEnabled } from '@/config/env'
+import { formatFaDateTime } from '@/lib/jalali'
 import { AppError } from '@/services/api/errors'
 import { appKeys, fetchNotifications, markAllNotificationsRead, markNotificationRead } from '../api'
 import { getNotifications } from '../mocks/data'
@@ -94,7 +95,7 @@ export default function NotificationsPage() {
                   ) : null}
                 </div>
                 <p className="mt-2 text-sm leading-7 text-navy-600">{item.body}</p>
-                <p className="mt-3 text-xs text-navy-400">{item.createdAt}</p>
+                <p className="mt-3 text-xs text-navy-400">{formatFaDateTime(item.createdAt)}</p>
               </Link>
             </li>
           ))}

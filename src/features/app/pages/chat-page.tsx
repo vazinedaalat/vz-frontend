@@ -8,6 +8,7 @@ import { ArrowRight, FolderOpen, MessageCirclePlus, Shield } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/lib/format'
+import { formatFaDateTime } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
 import {
@@ -229,7 +230,7 @@ export default function ChatPage() {
                       )}
                     </div>
                     <p className="mt-2 text-xs text-navy-500">
-                      {chat.lawyerName} · {chat.updatedAt}
+                      {chat.lawyerName} · {formatFaDateTime(chat.updatedAt)}
                     </p>
                     {chat.messages.at(-1) ? (
                       <p className="mt-2 line-clamp-2 text-xs leading-6 text-navy-600">
@@ -312,7 +313,7 @@ export default function ChatPage() {
                           <StatusChip label={ticket.statusLabel} status={ticket.status} />
                         </div>
                         <p className="mt-2 text-xs text-navy-500">
-                          {ticket.category} · {ticket.updatedAt}
+                          {ticket.category} · {formatFaDateTime(ticket.updatedAt)}
                         </p>
                         {ticket.messages.at(-1) ? (
                           <p className="mt-2 line-clamp-2 text-xs leading-6 text-navy-600">
@@ -397,7 +398,7 @@ export default function ChatPage() {
                           message.sender === 'user' ? 'text-white/55' : 'text-navy-400',
                         )}
                       >
-                        {message.createdAt}
+                        {formatFaDateTime(message.createdAt)}
                       </p>
                     </div>
                   ))}

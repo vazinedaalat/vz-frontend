@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { CreditCard, CalendarDays, Clock3 } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { formatFaNumber, toPersianDigits, asciiDigitsField } from '@/lib/format'
-import { formatJalaliLabel, jalaliFromDate, startOfLocalDay } from '@/lib/jalali'
+import { formatJalaliLabel, formatFaDateTime, jalaliFromDate, startOfLocalDay } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
 import {
@@ -351,7 +351,7 @@ export default function ConsultationPage() {
                     {slot.status === 'available' ? 'آزاد' : slot.status === 'done' ? 'انجام‌شده' : 'رزرو شده'}
                   </span>
                 </div>
-                <p className="mt-3 text-sm text-navy-600">{slot.startsAt}</p>
+                <p className="mt-3 text-sm text-navy-600">{formatFaDateTime(slot.startsAt)}</p>
                 <p className="mt-2 text-sm font-semibold text-navy-900">
                   {slot.price === 0 ? (
                     <span className="text-gold-700">رایگان</span>
@@ -430,7 +430,7 @@ function BookingSummary({
         <li className="flex justify-between gap-3">
           <span className="text-navy-500">روز</span>
           <span className="font-medium">
-            {dateKey ? toPersianDigits(formatJalaliLabel(dateKey)) : '—'}
+            {dateKey ? formatJalaliLabel(dateKey) : '—'}
           </span>
         </li>
         {time !== undefined ? (

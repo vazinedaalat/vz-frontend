@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { formatFaDate } from '@/lib/jalali'
 import type { SpecialOffer } from '../types'
 
 interface OfferBannerProps {
@@ -27,7 +28,7 @@ export function OfferBanner({ offers }: OfferBannerProps) {
           <h3 className="font-display mt-4 text-lg font-bold">{offer.title}</h3>
           <p className="mt-2 text-sm leading-7 text-white/75">{offer.subtitle}</p>
           <div className="mt-4 flex items-center justify-between text-xs text-white/60">
-            <span>تا {offer.expiresAt}</span>
+            <span>تا {formatFaDate(offer.expiresAt)}</span>
             <span className="font-semibold text-gold-300">{offer.ctaLabel}</span>
           </div>
         </Link>

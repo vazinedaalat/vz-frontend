@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui'
 import { isMockEnabled } from '@/config/env'
+import { formatFaDate } from '@/lib/jalali'
 import { appKeys, fetchMyDiscounts } from '../api'
 import { getDiscountCodes } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
@@ -76,7 +77,7 @@ export default function DiscountsPage() {
                 <span>
                   مصرف: {item.usedCount}/{item.maxUsage}
                 </span>
-                <span>انقضا: {item.expiresAt}</span>
+                <span>انقضا: {formatFaDate(item.expiresAt)}</span>
                 <span>{item.isActive ? 'فعال' : 'منقضی / تمام‌شده'}</span>
               </div>
             </article>

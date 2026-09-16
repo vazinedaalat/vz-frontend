@@ -5,6 +5,7 @@ import { MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { toPersianDigits, formatFaNumber } from '@/lib/format'
+import { formatFaDateTime } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
 import {
@@ -180,7 +181,7 @@ export default function CaseDetailPage() {
                 <div>
                   <h3 className="font-semibold text-navy-900">{stage.title}</h3>
                   <p className="mt-1 text-sm leading-7 text-navy-600">{stage.description}</p>
-                  {stage.at ? <p className="mt-1 text-xs text-navy-400">{stage.at}</p> : null}
+                  {stage.at ? <p className="mt-1 text-xs text-navy-400">{formatFaDateTime(stage.at)}</p> : null}
                 </div>
               </li>
             ))}
@@ -191,7 +192,7 @@ export default function CaseDetailPage() {
           <section className="rounded-[1.5rem] border border-navy-200 bg-navy-900 p-6 text-white shadow-lift">
             <h2 className="font-display text-lg font-bold">اقدام بعدی</h2>
             <p className="mt-3 text-sm leading-7 text-white/80">{item.nextAction}</p>
-            <p className="mt-4 text-xs text-white/50">آخرین به‌روزرسانی: {item.updatedAt}</p>
+            <p className="mt-4 text-xs text-white/50">آخرین به‌روزرسانی: {formatFaDateTime(item.updatedAt)}</p>
             <Button asChild variant="accent" className="mt-5 w-full" size="lg">
               <Link to={`/app/cases/${item.id}/chat`}>
                 <MessageCircle className="size-4" aria-hidden />
@@ -213,7 +214,7 @@ export default function CaseDetailPage() {
                   <li key={note.id} className="rounded-xl border border-navy-100 bg-navy-50/70 p-3">
                     <p className="text-sm font-semibold">{note.title}</p>
                     <p className="mt-1 text-xs leading-6 text-navy-600">{note.body}</p>
-                    <p className="mt-2 text-[0.7rem] text-navy-400">{note.createdAt}</p>
+                    <p className="mt-2 text-[0.7rem] text-navy-400">{formatFaDateTime(note.createdAt)}</p>
                   </li>
                 ))}
               </ul>

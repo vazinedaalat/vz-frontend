@@ -4,6 +4,7 @@ import { Bell, FileText, FolderPlus, MessagesSquare } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { env, isMockEnabled } from '@/config/env'
 import { formatFaNumber } from '@/lib/format'
+import { formatFaDate, formatFaDateTime } from '@/lib/jalali'
 import { appKeys, fetchHomeBanners, fetchHomeBlog, fetchHomeOffers } from '../api'
 import { fetchCases } from '../api/cases'
 import { fetchConsultationBookings } from '../api/consultation'
@@ -176,7 +177,7 @@ export default function AppHomePage() {
                       {item.status === 'available' ? 'آزاد' : 'رزرو شده'}
                     </span>
                   </div>
-                  <p className="mt-3 text-sm text-navy-600">{item.startsAt}</p>
+                  <p className="mt-3 text-sm text-navy-600">{formatFaDateTime(item.startsAt)}</p>
                 </article>
               ))}
             </div>
@@ -195,7 +196,7 @@ export default function AppHomePage() {
                   <h3 className="font-display mt-1 text-base font-bold">{item.title}</h3>
                   <p className="mt-2 text-sm leading-7 text-navy-600">{item.excerpt}</p>
                   <p className="mt-3 text-xs text-navy-400">
-                    {item.publishedAt} · {formatFaNumber(item.readMinutes)} دقیقه مطالعه
+                    {formatFaDate(item.publishedAt)} · {formatFaNumber(item.readMinutes)} دقیقه مطالعه
                   </p>
                 </article>
               ))}

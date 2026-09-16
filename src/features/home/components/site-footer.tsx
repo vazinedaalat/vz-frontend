@@ -1,6 +1,7 @@
 import { Mail, MapPin, Phone } from 'lucide-react'
 import { Container } from '@/components/shared/container'
 import { toPersianDigits } from '@/lib/format'
+import { jalaliFromDate } from '@/lib/jalali'
 import { scrollToSection } from '@/utils/scroll'
 import {
   BRAND,
@@ -11,7 +12,7 @@ import {
 import { BrandMark } from './brand-mark'
 
 export function SiteFooter() {
-  const year = toPersianDigits(new Date().getFullYear())
+  const year = toPersianDigits(jalaliFromDate(new Date()).jy)
 
   return (
     <footer className="border-t border-navy-800 bg-navy-900 text-white">

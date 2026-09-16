@@ -6,6 +6,7 @@ import { FileStack, ScrollText } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { toPersianDigits, asciiDigitsField, asciiAmountField } from '@/lib/format'
+import { formatFaDateTime } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
 import { appKeys, createDocumentRequest, fetchDocuments } from '../api'
@@ -210,7 +211,7 @@ export default function DocumentRequestPage() {
               >
                 <span className="font-medium text-navy-900">{doc.claimTitle}</span>
                 <span className="text-xs text-navy-500">
-                  {doc.status} · {doc.createdAt}
+                  {doc.status} · {formatFaDateTime(doc.createdAt)}
                 </span>
               </li>
             ))}

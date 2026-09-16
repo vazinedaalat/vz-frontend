@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatFaDateTime } from '@/lib/jalali'
 import { ChatAttachmentList, ChatComposer } from './chat-composer'
 import type { ChatMessage, ChatSendPayload } from '../types'
 
@@ -83,7 +84,7 @@ export function ChatThreadPanel({
                   message.sender === 'user' ? 'text-white/55' : 'text-navy-400',
                 )}
               >
-                {message.createdAt}
+                {formatFaDateTime(message.createdAt)}
               </p>
             </div>
           ))
