@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { Label } from '@/components/ui'
+import { ErrorBadge } from '@/components/shared/error-badge'
 
 interface FieldProps {
   label: string
@@ -22,11 +23,7 @@ export function Field({ label, htmlFor, error, hint, required, className, childr
       </Label>
       {children}
       {hint && !error ? <p className="text-xs leading-6 text-navy-500">{hint}</p> : null}
-      {error ? (
-        <p className="text-xs leading-6 text-destructive" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {error ? <ErrorBadge>{error}</ErrorBadge> : null}
     </div>
   )
 }

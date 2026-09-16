@@ -10,7 +10,7 @@ describe('API Errors', () => {
   it('creates NetworkError', () => {
     const err = new NetworkError()
     expect(err.code).toBe('NETWORK_ERROR')
-    expect(err.message).toContain('Network')
+    expect(err.message).toContain('ارتباط')
   })
 
   it('creates AuthenticationError', () => {

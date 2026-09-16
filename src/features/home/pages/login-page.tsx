@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowUpLeft, Phone } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
+import { ErrorBadge } from '@/components/shared/error-badge'
 import { isMockEnabled } from '@/config/env'
 import { BrandMark } from '@/features/home/components/brand-mark'
 import { CONTACT_INFO, CTA } from '@/features/home/constants'
@@ -87,9 +88,9 @@ export default function LoginPage() {
           <p className="mt-4 rounded-xl border border-gold-300 bg-gold-100 px-3 py-2 text-xs text-gold-800">{info}</p>
         ) : null}
         {error ? (
-          <p className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive" role="alert">
+          <ErrorBadge variant="page" className="mt-4 rounded-xl px-3 py-2 text-xs">
             {error}
-          </p>
+          </ErrorBadge>
         ) : null}
 
         {step === 'phone' ? (

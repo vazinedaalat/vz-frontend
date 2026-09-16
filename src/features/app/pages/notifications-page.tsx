@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui'
+import { ErrorBadge } from '@/components/shared/error-badge'
 import { isMockEnabled } from '@/config/env'
 import { formatFaDateTime } from '@/lib/jalali'
 import { AppError } from '@/services/api/errors'
@@ -62,9 +63,9 @@ export default function NotificationsPage() {
       />
 
       {error ? (
-        <p className="mb-4 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+        <ErrorBadge variant="page" className="mb-4 rounded-xl px-3 py-2 text-xs">
           {error}
-        </p>
+        </ErrorBadge>
       ) : null}
 
       {isLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}

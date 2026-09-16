@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FileStack, ScrollText } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
+import { ErrorBadge } from '@/components/shared/error-badge'
 import { cn } from '@/lib/utils'
 import { toPersianDigits, asciiDigitsField, asciiAmountField } from '@/lib/format'
 import { formatFaDateTime } from '@/lib/jalali'
@@ -191,14 +192,7 @@ export default function DocumentRequestPage() {
         </div>
       ) : null}
 
-      {apiError ? (
-        <div
-          className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-          role="alert"
-        >
-          {apiError}
-        </div>
-      ) : null}
+      {apiError ? <ErrorBadge variant="page">{apiError}</ErrorBadge> : null}
 
       {!isMockEnabled && documents.length > 0 ? (
         <section className="rounded-[1.5rem] border border-navy-200 bg-white p-5 shadow-soft sm:p-6">
@@ -221,12 +215,9 @@ export default function DocumentRequestPage() {
 
       <form onSubmit={onSubmit} className="space-y-6" noValidate>
         {formErrorBanner ? (
-          <div
-            className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-            role="alert"
-          >
+          <ErrorBadge variant="page">
             لطفاً فیلدهای الزامی را کامل کنید، قوانین ارسال را بپذیرید و مدارک را آپلود کنید.
-          </div>
+          </ErrorBadge>
         ) : null}
 
         <section className="rounded-[1.5rem] border border-navy-200 bg-white p-5 shadow-soft sm:p-7">
@@ -252,11 +243,7 @@ export default function DocumentRequestPage() {
               </label>
             ))}
           </div>
-          {errors.documentType ? (
-            <p className="mt-2 text-xs text-destructive" role="alert">
-              {errors.documentType.message}
-            </p>
-          ) : null}
+          {errors.documentType ? <ErrorBadge className="mt-2">{errors.documentType.message}</ErrorBadge> : null}
         </section>
 
         <section className="space-y-5 rounded-[1.5rem] border border-navy-200 bg-white p-5 shadow-soft sm:p-7">
@@ -399,9 +386,7 @@ export default function DocumentRequestPage() {
             <span className="text-sm leading-7 text-navy-700">
               قوانین ارسال فایل و روش‌های ارسال مدارک را خوانده‌ام و می‌پذیرم.
               {errors.acceptFileRules ? (
-                <span className="mt-1 block text-xs text-destructive" role="alert">
-                  {errors.acceptFileRules.message}
-                </span>
+                <ErrorBadge className="mt-1">{errors.acceptFileRules.message}</ErrorBadge>
               ) : null}
             </span>
           </label>

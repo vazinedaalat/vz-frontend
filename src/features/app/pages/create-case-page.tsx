@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, FolderCheck } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
+import { ErrorBadge } from '@/components/shared/error-badge'
 import { isMockEnabled } from '@/config/env'
 import { asciiDigitsField } from '@/lib/format'
 import { AppError } from '@/services/api/errors'
@@ -225,14 +226,7 @@ export default function CreateCasePage() {
 
       <CaseWizardSteps current={step} />
 
-      {apiError ? (
-        <div
-          className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-          role="alert"
-        >
-          {apiError}
-        </div>
-      ) : null}
+      {apiError ? <ErrorBadge variant="page">{apiError}</ErrorBadge> : null}
 
       {step === 'intake' || step === 'upload' ? <CaseFormHelpBanner /> : null}
 
@@ -249,12 +243,9 @@ export default function CreateCasePage() {
             noValidate
           >
             {intakeErrorBanner ? (
-              <div
-                className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-                role="alert"
-              >
+              <ErrorBadge variant="page">
                 لطفاً فیلدهای الزامی را کامل کنید تا بتوانید به مرحله آپلود مدارک بروید.
-              </div>
+              </ErrorBadge>
             ) : null}
 
             <section className="rounded-[1.5rem] border border-navy-200 bg-white p-5 shadow-soft sm:p-7">
@@ -470,9 +461,7 @@ export default function CreateCasePage() {
                 <span className="text-sm leading-7 text-navy-700">
                   قوانین ارسال فایل و روش‌های ارسال را خوانده‌ام و می‌پذیرم.
                   {errors.acceptFileRules ? (
-                    <span className="mt-1 block text-xs text-destructive" role="alert">
-                      {errors.acceptFileRules.message}
-                    </span>
+                    <ErrorBadge className="mt-1">{errors.acceptFileRules.message}</ErrorBadge>
                   ) : null}
                 </span>
               </label>

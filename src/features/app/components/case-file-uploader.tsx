@@ -1,5 +1,6 @@
 import { useRef, useState, type DragEvent } from 'react'
 import { FileUp, Trash2 } from 'lucide-react'
+import { ErrorBadge, ErrorBadgeList } from '@/components/shared/error-badge'
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/lib/format'
 import { CASE_FILE_ACCEPT, CASE_FILE_MAX_COUNT } from '../constants/case-intake'
@@ -107,16 +108,8 @@ export function CaseFileUploader({ files, onChange, error }: CaseFileUploaderPro
         </ul>
       ) : null}
 
-      {localErrors.map((message) => (
-        <p key={message} className="text-xs text-destructive" role="alert">
-          {message}
-        </p>
-      ))}
-      {error ? (
-        <p className="text-xs text-destructive" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <ErrorBadgeList messages={localErrors} />
+      {error ? <ErrorBadge>{error}</ErrorBadge> : null}
     </div>
   )
 }

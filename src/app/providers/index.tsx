@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { ThemeProvider } from './theme-provider'
 import { QueryProvider } from './query-provider'
+import { Toaster } from '@/components/ui/toaster'
 import { useAuthStore } from '@/features/app/store/auth-store'
 
 function SessionHydrator({ children }: { children: React.ReactNode }) {
@@ -17,7 +18,10 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <QueryProvider>
       <ThemeProvider>
-        <SessionHydrator>{children}</SessionHydrator>
+        <SessionHydrator>
+          {children}
+          <Toaster />
+        </SessionHydrator>
       </ThemeProvider>
     </QueryProvider>
   )

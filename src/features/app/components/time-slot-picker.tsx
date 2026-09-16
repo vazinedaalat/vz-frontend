@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/lib/format'
+import { ErrorBadge } from '@/components/shared/error-badge'
 import { getAvailableTimeSlots, isTimeSlotBooked } from '../lib/consultation-availability'
 import type { ConsultationAvailability } from '../types'
 
@@ -51,11 +52,7 @@ export function TimeSlotPicker({ dateKey, availability, value, onChange, error }
       {available.length === 0 ? (
         <p className="text-xs text-navy-500">در این روز ساعت آزادی باقی نمانده است.</p>
       ) : null}
-      {error ? (
-        <p className="text-xs text-destructive" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {error ? <ErrorBadge>{error}</ErrorBadge> : null}
     </div>
   )
 }

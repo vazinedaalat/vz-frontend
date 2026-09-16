@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CreditCard, CalendarDays, Clock3 } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
+import { ErrorBadge } from '@/components/shared/error-badge'
 import { formatFaNumber, toPersianDigits, asciiDigitsField } from '@/lib/format'
 import { formatJalaliLabel, formatFaDateTime, jalaliFromDate, startOfLocalDay } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
@@ -147,14 +148,7 @@ export default function ConsultationPage() {
         </div>
       ) : null}
 
-      {apiError ? (
-        <div
-          className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-          role="alert"
-        >
-          {apiError}
-        </div>
-      ) : null}
+      {apiError ? <ErrorBadge variant="page">{apiError}</ErrorBadge> : null}
 
       <form onSubmit={onSubmit} className="space-y-8">
         <section className="space-y-4">
@@ -176,11 +170,7 @@ export default function ConsultationPage() {
               />
             )}
           />
-          {errors.planId ? (
-            <p className="text-xs text-destructive" role="alert">
-              {errors.planId.message}
-            </p>
-          ) : null}
+          {errors.planId ? <ErrorBadge>{errors.planId.message}</ErrorBadge> : null}
         </section>
 
         <AnimatePresence mode="wait">
@@ -220,11 +210,7 @@ export default function ConsultationPage() {
                     />
                   )}
                 />
-                {errors.dateKey ? (
-                  <p className="text-xs text-destructive" role="alert">
-                    {errors.dateKey.message}
-                  </p>
-                ) : null}
+                {errors.dateKey ? <ErrorBadge>{errors.dateKey.message}</ErrorBadge> : null}
 
                 {selectedPlan.requiresTime && dateKey ? (
                   <motion.div

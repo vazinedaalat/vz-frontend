@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { FileText, Paperclip, SendHorizontal, X } from 'lucide-react'
 import { z } from 'zod'
 import { Button, Input } from '@/components/ui'
+import { ErrorBadge, ErrorBadgeList } from '@/components/shared/error-badge'
 import { toPersianDigits } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { CASE_FILE_ACCEPT, CHAT_FILE_MAX_COUNT } from '../constants/case-intake'
@@ -133,15 +134,9 @@ export function ChatComposer({
         PDF، تصویر یا ZIP · حداکثر {toPersianDigits(CHAT_FILE_MAX_COUNT)} فایل در هر پیام
       </p>
 
-      {fileErrors.map((message) => (
-        <p key={message} className="mt-1 text-xs text-destructive" role="alert">
-          {message}
-        </p>
-      ))}
+      <ErrorBadgeList className="mt-1" messages={fileErrors} />
       {submitError || form.formState.errors.body ? (
-        <p className="mt-1 text-xs text-destructive" role="alert">
-          {submitError ?? form.formState.errors.body?.message}
-        </p>
+        <ErrorBadge className="mt-1">{submitError ?? form.formState.errors.body?.message}</ErrorBadge>
       ) : null}
     </form>
   )

@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, FolderOpen, MessageCirclePlus, Shield } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
+import { ErrorBadge } from '@/components/shared/error-badge'
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/lib/format'
 import { formatFaDateTime } from '@/lib/jalali'
@@ -168,9 +169,9 @@ export default function ChatPage() {
         />
 
         {apiError ? (
-          <p className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+          <ErrorBadge variant="page" className="mt-3 rounded-xl px-3 py-2 text-xs">
             {apiError}
-          </p>
+          </ErrorBadge>
         ) : null}
 
         <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl border border-navy-200 bg-white p-1.5 shadow-soft">
