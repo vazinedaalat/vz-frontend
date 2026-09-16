@@ -23,10 +23,12 @@ import { consultationRequestSchema, type ConsultationRequestValues } from '../sc
 import { getConsultationAvailability, getConsultations } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
 import { BookingCalendar } from '../components/booking-calendar'
+import { BookingCodeDisplay } from '../components/booking-code-display'
 import { ConsultationPlanCards } from '../components/consultation-plan-cards'
 import { Field } from '../components/field'
 import { PageHeader } from '../components/page-header'
 import { TimeSlotPicker } from '../components/time-slot-picker'
+import type { BookingSlot } from '../api/consultation'
 import type { ConsultationAvailability, ConsultationPlanId } from '../types'
 
 const EMPTY_AVAILABILITY: ConsultationAvailability = {
@@ -38,6 +40,7 @@ const EMPTY_AVAILABILITY: ConsultationAvailability = {
 export default function ConsultationPage() {
   const queryClient = useQueryClient()
   const [submitted, setSubmitted] = useState(false)
+  const [lastBooking, setLastBooking] = useState<BookingSlot | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
   const [viewMonth, setViewMonth] = useState(() => jalaliFromDate(startOfLocalDay()))
 
@@ -90,12 +93,13 @@ export default function ConsultationPage() {
     mutationFn: async (values: ConsultationRequestValues) => {
       const booking = await createConsultationBooking(values)
       if (selectedPlan?.requiresPayment) {
-        await payConsultationBooking(booking.id)
+        return payConsultationBooking(booking.id)
       }
       return booking
     },
-    onSuccess: async () => {
+    onSuccess: async (booking) => {
       setApiError(null)
+      setLastBooking(booking)
       setSubmitted(true)
       await queryClient.invalidateQueries({ queryKey: appKeys.consultation.bookings })
       await queryClient.invalidateQueries({ queryKey: appKeys.consultation.availability(planId) })
@@ -117,6 +121,20 @@ export default function ConsultationPage() {
   const onSubmit = handleSubmit(async (values) => {
     setApiError(null)
     if (isMockEnabled) {
+      const mockCode = `VZB-DEMO-${String(Math.floor(100000 + Math.random() * 900000))}`
+      setLastBooking({
+        id: `mock-${Date.now()}`,
+        bookingCode: mockCode,
+        topic: values.topic,
+        planId: values.planId,
+        mode: 'video',
+        modeLabel: selectedPlan?.channelLabel ?? 'مشاوره',
+        lawyerName: selectedPlan?.lawyerName ?? 'وزین عدالت',
+        startsAt: values.time ? `${values.dateKey} · ${values.time}` : values.dateKey,
+        durationMinutes: selectedPlan?.durationMinutes ?? 30,
+        price: selectedPlan?.price ?? 0,
+        status: 'booked',
+      })
       setSubmitted(true)
       reset({
         planId: undefined,
@@ -143,8 +161,14 @@ export default function ConsultationPage() {
       />
 
       {submitted ? (
-        <div className="rounded-2xl border border-gold-300 bg-gold-100 px-4 py-3 text-sm text-gold-800">
-          رزرو ثبت شد. در نسخه کامل، تایید زمان و لینک پرداخت از طریق پیامک ارسال می‌شود.
+        <div className="space-y-4">
+          {lastBooking?.bookingCode ? (
+            <BookingCodeDisplay code={lastBooking.bookingCode} variant="hero" />
+          ) : null}
+          <div className="rounded-2xl border border-gold-300 bg-gold-100 px-4 py-3 text-sm leading-7 text-gold-800">
+            رزرو با موفقیت ثبت شد. کد بالا را برای پیگیری نزد خود نگه دارید؛ تایید زمان از طریق پنل و پیامک اعلام
+            می‌شود.
+          </div>
         </div>
       ) : null}
 
@@ -165,6 +189,7 @@ export default function ConsultationPage() {
                   setValue('dateKey', '')
                   setValue('time', '')
                   setSubmitted(false)
+                  setLastBooking(null)
                   setApiError(null)
                 }}
               />
@@ -325,20 +350,21 @@ export default function ConsultationPage() {
         {existing.length > 0 ? (
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {existing.map((slot) => (
-              <article key={slot.id} className="rounded-2xl border border-navy-200 bg-white p-5 shadow-soft">
+              <article key={slot.id} className="flex h-full flex-col gap-4 rounded-2xl border border-navy-200 bg-white p-5 shadow-soft">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="font-semibold text-navy-900">{slot.topic}</h3>
                     <p className="mt-1 text-xs text-navy-500">
                       {slot.lawyerName} · {slot.modeLabel}
                     </p>
                   </div>
-                  <span className="text-xs font-semibold text-gold-700">
+                  <span className="shrink-0 text-xs font-semibold text-gold-700">
                     {slot.status === 'available' ? 'آزاد' : slot.status === 'done' ? 'انجام‌شده' : 'رزرو شده'}
                   </span>
                 </div>
-                <p className="mt-3 text-sm text-navy-600">{formatFaDateTime(slot.startsAt)}</p>
-                <p className="mt-2 text-sm font-semibold text-navy-900">
+                <p className="text-sm text-navy-600">{formatFaDateTime(slot.startsAt)}</p>
+                {slot.bookingCode ? <BookingCodeDisplay code={slot.bookingCode} /> : null}
+                <p className="mt-auto text-sm font-semibold text-navy-900">
                   {slot.price === 0 ? (
                     <span className="text-gold-700">رایگان</span>
                   ) : slot.discountedPrice ? (

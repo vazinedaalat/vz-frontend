@@ -174,6 +174,8 @@ export interface ConsultationAvailability {
 
 export interface ConsultationSlot {
   id: string
+  /** Unique public code from backend, e.g. `VZB-A1B2-123456`. */
+  bookingCode: string
   topic: string
   planId?: ConsultationPlanId
   mode: ConsultationMode

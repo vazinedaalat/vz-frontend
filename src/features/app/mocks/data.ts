@@ -259,6 +259,7 @@ const MOCK_CASE_CHATS: CaseChatThread[] = [
 const MOCK_CONSULTATIONS: ConsultationSlot[] = [
   {
     id: 'con-1',
+    bookingCode: 'VZB-A91C-482731',
     topic: 'مشاوره دعاوی ملکی',
     planId: 'specialist-online',
     mode: 'video',
@@ -272,6 +273,7 @@ const MOCK_CONSULTATIONS: ConsultationSlot[] = [
   },
   {
     id: 'con-2',
+    bookingCode: 'VZB-A91C-109284',
     topic: 'مشاوره قرارداد تجاری',
     planId: 'free-online',
     mode: 'chat',
@@ -284,6 +286,7 @@ const MOCK_CONSULTATIONS: ConsultationSlot[] = [
   },
   {
     id: 'con-3',
+    bookingCode: 'VZB-A91C-775019',
     topic: 'مشاوره فوق‌تخصصی',
     planId: 'dargahi-premium',
     mode: 'in-person',

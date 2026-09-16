@@ -22,6 +22,7 @@ import { AppEmptyState } from '../components/app-empty-state'
 import { CaseCard } from '../components/case-card'
 import { HomeHeroBanner } from '../components/home-hero-banner'
 import { OfferBanner } from '../components/offer-banner'
+import { BookingCodeDisplay } from '../components/booking-code-display'
 import { PageHeader } from '../components/page-header'
 
 export default function AppHomePage() {
@@ -178,6 +179,11 @@ export default function AppHomePage() {
                     </span>
                   </div>
                   <p className="mt-3 text-sm text-navy-600">{formatFaDateTime(item.startsAt)}</p>
+                  {item.bookingCode ? (
+                    <div className="mt-3">
+                      <BookingCodeDisplay code={item.bookingCode} />
+                    </div>
+                  ) : null}
                 </article>
               ))}
             </div>
