@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
 import { ProtectedRoute } from './protected-route'
+import { ScrollToTop } from './scroll-to-top'
 import { useAuthStore } from '@/features/app/store/auth-store'
 import { AppShell } from '@/features/app/components/app-shell'
 
@@ -47,53 +48,67 @@ const routerBasename = (() => {
   return base.endsWith('/') ? base.slice(0, -1) : base
 })()
 
+function RootLayout() {
+  return (
+    <>
+      <ScrollToTop />
+      <Outlet />
+    </>
+  )
+}
+
 const router = createBrowserRouter(
   [
-  {
-    path: '/',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <MarketingHomePage />
-      </Suspense>
-    ),
-  },
-  {
-    path: '/login',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <LoginPage />
-      </Suspense>
-    ),
-  },
-  {
-    path: '/app',
-    element: <AuthGate />,
-    children: [
-      {
-        element: <AppShell />,
-        children: [
-          { index: true, element: <AppHomePage /> },
-          { path: 'consultation', element: <ConsultationPage /> },
-          { path: 'cases', element: <CasesPage /> },
-          { path: 'cases/new', element: <CreateCasePage /> },
-          { path: 'cases/:caseId', element: <CaseDetailPage /> },
-          { path: 'cases/:caseId/chat', element: <CaseChatPage /> },
-          { path: 'documents', element: <DocumentRequestPage /> },
-          { path: 'notifications', element: <NotificationsPage /> },
-          { path: 'discounts', element: <DiscountsPage /> },
-          { path: 'chat', element: <ChatPage /> },
-        ],
-      },
-    ],
-  },
-  {
-    path: '*',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <NotFoundPage />
-      </Suspense>
-    ),
-  },
+    {
+      element: <RootLayout />,
+      children: [
+        {
+          path: '/',
+          element: (
+            <Suspense fallback={<PageLoader />}>
+              <MarketingHomePage />
+            </Suspense>
+          ),
+        },
+        {
+          path: '/login',
+          element: (
+            <Suspense fallback={<PageLoader />}>
+              <LoginPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: '/app',
+          element: <AuthGate />,
+          children: [
+            {
+              element: <AppShell />,
+              children: [
+                { index: true, element: <AppHomePage /> },
+                { path: 'consultation', element: <ConsultationPage /> },
+                { path: 'cases', element: <CasesPage /> },
+                { path: 'cases/new', element: <CreateCasePage /> },
+                { path: 'cases/:caseId', element: <CaseDetailPage /> },
+                { path: 'cases/:caseId/chat', element: <CaseChatPage /> },
+                { path: 'documents', element: <DocumentRequestPage /> },
+                { path: 'notifications', element: <NotificationsPage /> },
+                { path: 'discounts', element: <DiscountsPage /> },
+                { path: 'chat', element: <ChatPage /> },
+              ],
+            },
+          ],
+        },
+        {
+          path: '*',
+          element: (
+            <Suspense fallback={<PageLoader />}>
+              <NotFoundPage />
+            </Suspense>
+          ),
+        },
+      ],
+    },
   ],
   { basename: routerBasename },
 )
