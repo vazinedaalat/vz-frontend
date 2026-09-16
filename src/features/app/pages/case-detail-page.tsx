@@ -1,6 +1,5 @@
-import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -8,23 +7,13 @@ import { toPersianDigits, formatFaNumber } from '@/lib/format'
 import { formatFaDateTime } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
-import {
-  appKeys,
-  fetchCaseById,
-  fetchCaseChat,
-  fetchNotifications,
-  markChatRead,
-  sendCaseChatMessage,
-} from '../api'
-import { getCaseById, getCaseChatByCaseId, getNotifications } from '../mocks/data'
+import { appKeys, fetchCaseById, fetchNotifications } from '../api'
+import { getCaseById, getNotifications } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
-import { ChatThreadPanel } from '../components/chat-thread-panel'
 import { PageHeader } from '../components/page-header'
-import type { ChatMessage, ChatSendPayload } from '../types'
 
 export default function CaseDetailPage() {
   const { caseId = '' } = useParams()
-  const queryClient = useQueryClient()
 
   const {
     data: item,
@@ -40,54 +29,6 @@ export default function CaseDetailPage() {
     queryKey: appKeys.notifications,
     queryFn: isMockEnabled ? async () => getNotifications() : fetchNotifications,
     select: (items) => items.filter((n) => n.caseId === caseId),
-  })
-
-  const { data: thread } = useQuery({
-    queryKey: appKeys.chats.byCase(caseId),
-    queryFn: () =>
-      isMockEnabled ? Promise.resolve(getCaseChatByCaseId(caseId)) : fetchCaseChat(caseId),
-    enabled: Boolean(caseId),
-  })
-
-  useEffect(() => {
-    if (isMockEnabled || !thread?.id) return
-    void markChatRead(thread.id).catch(() => {
-      // non-blocking
-    })
-  }, [thread?.id])
-
-  const sendMutation = useMutation({
-    mutationFn: async ({ body, attachments }: ChatSendPayload) => {
-      if (isMockEnabled) {
-        const message: ChatMessage = {
-          id: `cm-${Date.now()}`,
-          sender: 'user',
-          body,
-          createdAt: 'اکنون',
-          attachments: attachments.length > 0 ? attachments : undefined,
-        }
-        return message
-      }
-      const files = attachments.map((a) => a.file).filter(Boolean) as File[]
-      return sendCaseChatMessage(caseId, body, files)
-    },
-    onSuccess: async (message) => {
-      if (isMockEnabled) {
-        queryClient.setQueryData(appKeys.chats.byCase(caseId), (prev: typeof thread) =>
-          prev
-            ? {
-                ...prev,
-                updatedAt: 'اکنون',
-                unreadCount: 0,
-                messages: [...prev.messages, message],
-              }
-            : prev,
-        )
-        return
-      }
-      await queryClient.invalidateQueries({ queryKey: appKeys.chats.byCase(caseId) })
-      await queryClient.invalidateQueries({ queryKey: appKeys.chats.all })
-    },
   })
 
   if (caseLoading) {
@@ -110,10 +51,6 @@ export default function CaseDetailPage() {
         }
       />
     )
-  }
-
-  const onSend = (payload: ChatSendPayload) => {
-    sendMutation.mutate(payload)
   }
 
   return (
@@ -181,7 +118,9 @@ export default function CaseDetailPage() {
                 <div>
                   <h3 className="font-semibold text-navy-900">{stage.title}</h3>
                   <p className="mt-1 text-sm leading-7 text-navy-600">{stage.description}</p>
-                  {stage.at ? <p className="mt-1 text-xs text-navy-400">{formatFaDateTime(stage.at)}</p> : null}
+                  {stage.at ? (
+                    <p className="mt-1 text-xs text-navy-400">{formatFaDateTime(stage.at)}</p>
+                  ) : null}
                 </div>
               </li>
             ))}
@@ -224,27 +163,6 @@ export default function CaseDetailPage() {
           </section>
         </div>
       </div>
-
-      {thread ? (
-        <div className="space-y-3">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <h2 className="font-display text-lg font-bold text-navy-900">چت پیگیری پرونده</h2>
-              <p className="mt-1 text-sm text-navy-600">هر پرونده کانال اختصاصی پیام با وکیل مسئول دارد.</p>
-            </div>
-            <Button variant="outline" size="sm" className="hidden sm:inline-flex" asChild>
-              <Link to={`/app/cases/${item.id}/chat`}>نمای تمام‌صفحه</Link>
-            </Button>
-          </div>
-          <ChatThreadPanel
-            title={item.title}
-            subtitle={`${item.caseNumber} · ${item.lawyerName}`}
-            messages={thread.messages}
-            onSend={onSend}
-            className="min-h-[24rem]"
-          />
-        </div>
-      ) : null}
     </div>
   )
 }
