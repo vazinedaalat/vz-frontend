@@ -53,15 +53,15 @@ export function ChatThreadPanel({
           ? [
               'max-md:fixed max-md:inset-x-0 max-md:top-14 max-md:bottom-[4.5rem] max-md:z-30',
               'max-md:rounded-t-[1.35rem] max-md:border-x-0 max-md:border-b-0 max-md:shadow-lift',
-              'md:static md:inset-auto md:z-auto md:min-h-[32rem] md:rounded-[1.5rem]',
+              'md:static md:inset-auto md:z-auto md:h-[min(70vh,42rem)] md:max-h-[min(70vh,42rem)] md:rounded-[1.5rem]',
             ].join(' ')
-          : 'min-h-[28rem] rounded-[1.5rem]',
+          : 'h-[min(70vh,36rem)] max-h-[70vh] rounded-[1.5rem]',
         className,
       )}
     >
       <header className="relative z-20 flex shrink-0 items-start gap-2.5 border-b border-navy-100 bg-white/95 px-3 py-3 backdrop-blur-xl sm:gap-3 sm:px-5 sm:py-3.5">
         {headerStart}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 overflow-hidden">
           <h2 className="font-display truncate text-base font-bold text-navy-900 sm:text-lg">
             {toPersianDigits(title)}
           </h2>
@@ -70,9 +70,9 @@ export function ChatThreadPanel({
             <span className="truncate">{toPersianDigits(subtitle)}</span>
           </p>
           {lastActivity ? (
-            <p className="mt-1.5 flex items-center gap-1.5 text-[0.7rem] text-navy-400">
+            <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[0.7rem] text-navy-400">
               <Clock3 className="size-3 shrink-0 text-gold-600" aria-hidden />
-              <span>آخرین فعالیت: {formatFaDateTime(lastActivity)}</span>
+              <span className="truncate">آخرین فعالیت: {formatFaDateTime(lastActivity)}</span>
             </p>
           ) : null}
         </div>
@@ -81,7 +81,7 @@ export function ChatThreadPanel({
       <div
         ref={scrollerRef}
         className={cn(
-          'relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 sm:px-5',
+          'relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-3 py-4 sm:px-5',
           'bg-navy-50/50 bg-[radial-gradient(circle_at_1px_1px,var(--color-navy-200)_1px,transparent_0)] bg-size-[18px_18px]',
         )}
       >
@@ -93,7 +93,7 @@ export function ChatThreadPanel({
             <p className="text-sm leading-7 text-navy-500">{emptyHint}</p>
           </div>
         ) : (
-          <div className="mx-auto flex w-full max-w-2xl flex-col gap-2.5">
+          <div className="mx-auto flex w-full min-w-0 max-w-2xl flex-col gap-2.5">
             {messages.map((message, index) => {
               const prev = messages[index - 1]
               const showMeta = !prev || prev.sender !== message.sender
@@ -104,7 +104,9 @@ export function ChatThreadPanel({
         )}
       </div>
 
-      <ChatComposer onSend={onSend} placeholder={placeholder} />
+      <div className="shrink-0">
+        <ChatComposer onSend={onSend} placeholder={placeholder} />
+      </div>
     </section>
   )
 }
@@ -116,18 +118,20 @@ function ChatBubble({ message, showMeta }: { message: ChatMessage; showMeta: boo
 
   if (isSystem) {
     return (
-      <div className="mx-auto max-w-[92%] rounded-2xl border border-navy-100 bg-white/90 px-3.5 py-2.5 text-center text-xs leading-6 text-navy-500 shadow-soft">
-        {message.body ? <p>{message.body}</p> : null}
+      <div className="mx-auto w-full min-w-0 max-w-[92%] rounded-2xl border border-navy-100 bg-white/90 px-3.5 py-2.5 text-center text-xs leading-6 text-navy-500 shadow-soft">
+        {message.body ? (
+          <p className="break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{message.body}</p>
+        ) : null}
         <p className="mt-1 text-[0.65rem] text-navy-400">{formatFaDateTime(message.createdAt)}</p>
       </div>
     )
   }
 
   return (
-    <div className={cn('flex w-full', isUser ? 'justify-end' : 'justify-start')}>
+    <div className={cn('flex w-full min-w-0', isUser ? 'justify-end' : 'justify-start')}>
       <div
         className={cn(
-          'max-w-[85%] px-3.5 py-2.5 text-sm leading-7 shadow-soft sm:max-w-[75%]',
+          'min-w-0 max-w-[min(85%,22rem)] px-3.5 py-2.5 text-sm leading-7 shadow-soft sm:max-w-[min(75%,28rem)]',
           isUser && 'rounded-2xl rounded-es-md bg-navy-900 text-white',
           isAdmin && 'rounded-2xl rounded-ee-md border border-gold-200/80 bg-gold-100 text-navy-900',
         )}
@@ -135,7 +139,9 @@ function ChatBubble({ message, showMeta }: { message: ChatMessage; showMeta: boo
         {isAdmin && showMeta ? (
           <p className="mb-1 text-[0.65rem] font-semibold text-gold-700">پاسخ وکیل / کارشناس</p>
         ) : null}
-        {message.body ? <p className="whitespace-pre-wrap break-words">{message.body}</p> : null}
+        {message.body ? (
+          <p className="break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{message.body}</p>
+        ) : null}
         {message.attachments?.length ? (
           <ChatAttachmentList attachments={message.attachments} tone={isUser ? 'dark' : 'light'} />
         ) : null}

@@ -345,7 +345,7 @@ export default function ChatPage() {
                 onSend={sendMessage}
                 placeholder="پیام پشتیبانی را بنویسید…"
                 className={cn(
-                  'md:min-h-[32rem]',
+                  'md:h-[min(70vh,42rem)] md:max-h-[min(70vh,42rem)]',
                   mobilePane !== 'thread' && 'hidden md:flex',
                 )}
                 headerStart={

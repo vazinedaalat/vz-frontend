@@ -140,7 +140,7 @@ export default function CaseChatPage() {
         updatedAt={thread.updatedAt}
         messages={thread.messages}
         onSend={onSend}
-        className="md:min-h-[min(70vh,40rem)]"
+        className="md:h-[min(70vh,42rem)] md:max-h-[min(70vh,42rem)]"
         headerStart={
           <Button variant="ghost" size="icon" className="mt-0.5 shrink-0 rounded-2xl md:hidden" asChild>
             <Link to={`/app/cases/${legalCase.id}`} aria-label="بازگشت به پرونده">
