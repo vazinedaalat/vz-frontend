@@ -1,4 +1,5 @@
 import { apiRequest } from '@/services/api'
+import { normalizeLegalCase } from '../lib/case-process'
 import type { CreateCaseValues } from '../schemas'
 import type { CasePrepaymentInvoice, LegalCase } from '../types'
 
@@ -6,12 +7,8 @@ export type CasePrepaymentInvoiceApi = CasePrepaymentInvoice & {
   paymentStatus?: 'pending' | 'paid' | 'failed' | 'waived'
 }
 
-function normalizeCase(item: LegalCase & { lawyerName?: string | null; nextAction?: string | null }): LegalCase {
-  return {
-    ...item,
-    lawyerName: item.lawyerName ?? '—',
-    nextAction: item.nextAction ?? '',
-  }
+function normalizeCase(item: Parameters<typeof normalizeLegalCase>[0]): LegalCase {
+  return normalizeLegalCase(item)
 }
 
 export function fetchCases() {

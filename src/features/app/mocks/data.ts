@@ -1,6 +1,7 @@
 import { withMockData } from '@/lib/mock'
 import { addDays, startOfLocalDay, toDateKey } from '@/lib/jalali'
 import { slotKey } from '../lib/consultation-availability'
+import { normalizeLegalCase } from '../lib/case-process'
 import type {
   AppUser,
   BlogCard,
@@ -458,7 +459,7 @@ export function getDiscountCodes(): DiscountCode[] {
 }
 
 export function getCases(): LegalCase[] {
-  return withMockData(() => MOCK_CASES, [])
+  return withMockData(() => MOCK_CASES.map((item) => normalizeLegalCase(item)), [])
 }
 
 export function getCaseById(id: string): LegalCase | undefined {
