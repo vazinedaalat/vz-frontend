@@ -362,7 +362,13 @@ export default function ConsultationPage() {
                     </p>
                   </div>
                   <span className="shrink-0 text-xs font-semibold text-gold-700">
-                    {slot.status === 'available' ? 'آزاد' : slot.status === 'done' ? 'انجام‌شده' : 'رزرو شده'}
+                    {slot.status === 'available'
+                      ? 'آزاد'
+                      : slot.status === 'done'
+                        ? 'انجام‌شده'
+                        : slot.status === 'expired'
+                          ? 'منقضی'
+                          : 'رزرو شده'}
                   </span>
                 </div>
                 <p className="text-sm break-words text-navy-600">{formatFaDateTime(slot.startsAt)}</p>

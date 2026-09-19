@@ -156,7 +156,13 @@ export default function AppHomePage() {
                       </p>
                     </div>
                     <span className="text-xs font-semibold text-gold-700">
-                      {item.status === 'available' ? 'آزاد' : 'رزرو شده'}
+                      {item.status === 'available'
+                        ? 'آزاد'
+                        : item.status === 'done'
+                          ? 'انجام‌شده'
+                          : item.status === 'expired'
+                            ? 'منقضی'
+                            : 'رزرو شده'}
                     </span>
                   </div>
                   <p className="mt-3 text-sm text-navy-600">{formatFaDateTime(item.startsAt)}</p>

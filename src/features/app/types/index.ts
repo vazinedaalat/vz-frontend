@@ -185,7 +185,7 @@ export interface ConsultationSlot {
   durationMinutes: number
   price: number
   discountedPrice?: number
-  status: 'available' | 'booked' | 'done'
+  status: 'available' | 'booked' | 'done' | 'expired'
 }
 
 export interface BlogCard {
