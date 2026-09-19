@@ -1,6 +1,7 @@
 import { apiRequest } from '@/services/api'
 import type {
   ConsultationAvailability,
+  ConsultationBookingStatus,
   ConsultationPlan,
   ConsultationPlanId,
   ConsultationSlot,
@@ -11,10 +12,22 @@ export type BookingSlot = ConsultationSlot & {
   paymentStatus?: 'pending' | 'paid' | 'failed' | 'waived'
 }
 
+const KNOWN_STATUSES = new Set<ConsultationBookingStatus>([
+  'available',
+  'booked',
+  'done',
+  'cancelled',
+  'expired',
+])
+
 function normalizeBooking(item: BookingSlot): BookingSlot {
+  const status = KNOWN_STATUSES.has(item.status as ConsultationBookingStatus)
+    ? (item.status as ConsultationBookingStatus)
+    : 'booked'
   return {
     ...item,
     bookingCode: item.bookingCode?.trim() || item.id,
+    status,
   }
 }
 

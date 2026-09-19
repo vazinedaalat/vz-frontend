@@ -20,6 +20,7 @@ import {
 import { useAuthStore } from '../store/auth-store'
 import { AppEmptyState } from '../components/app-empty-state'
 import { BookingCodeDisplay } from '../components/booking-code-display'
+import { BookingStatusChip } from '../components/booking-status-chip'
 import { CaseCard } from '../components/case-card'
 import { HomeHeroBanner } from '../components/home-hero-banner'
 import { HomeServiceShortcuts } from '../components/home-service-shortcuts'
@@ -155,15 +156,7 @@ export default function AppHomePage() {
                         {item.lawyerName} · {item.modeLabel} · {item.durationMinutes} دقیقه
                       </p>
                     </div>
-                    <span className="text-xs font-semibold text-gold-700">
-                      {item.status === 'available'
-                        ? 'آزاد'
-                        : item.status === 'done'
-                          ? 'انجام‌شده'
-                          : item.status === 'expired'
-                            ? 'منقضی'
-                            : 'رزرو شده'}
-                    </span>
+                    <BookingStatusChip status={item.status} />
                   </div>
                   <p className="mt-3 text-sm text-navy-600">{formatFaDateTime(item.startsAt)}</p>
                   {item.bookingCode ? (

@@ -24,6 +24,7 @@ import { getConsultationAvailability, getConsultations } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
 import { BookingCalendar } from '../components/booking-calendar'
 import { BookingCodeDisplay } from '../components/booking-code-display'
+import { BookingStatusChip } from '../components/booking-status-chip'
 import { ConsultationPlanCards } from '../components/consultation-plan-cards'
 import { Field } from '../components/field'
 import { PageHeader } from '../components/page-header'
@@ -361,15 +362,7 @@ export default function ConsultationPage() {
                       {slot.lawyerName} · {slot.modeLabel}
                     </p>
                   </div>
-                  <span className="shrink-0 text-xs font-semibold text-gold-700">
-                    {slot.status === 'available'
-                      ? 'آزاد'
-                      : slot.status === 'done'
-                        ? 'انجام‌شده'
-                        : slot.status === 'expired'
-                          ? 'منقضی'
-                          : 'رزرو شده'}
-                  </span>
+                  <BookingStatusChip status={slot.status} />
                 </div>
                 <p className="text-sm break-words text-navy-600">{formatFaDateTime(slot.startsAt)}</p>
                 {slot.bookingCode ? <BookingCodeDisplay code={slot.bookingCode} /> : null}

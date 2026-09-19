@@ -172,6 +172,13 @@ export interface ConsultationAvailability {
   timeSlots: string[]
 }
 
+export type ConsultationBookingStatus =
+  | 'available'
+  | 'booked'
+  | 'done'
+  | 'cancelled'
+  | 'expired'
+
 export interface ConsultationSlot {
   id: string
   /** Unique public code from backend, e.g. `VZB-A1B2-123456`. */
@@ -185,7 +192,7 @@ export interface ConsultationSlot {
   durationMinutes: number
   price: number
   discountedPrice?: number
-  status: 'available' | 'booked' | 'done' | 'expired'
+  status: ConsultationBookingStatus
 }
 
 export interface BlogCard {

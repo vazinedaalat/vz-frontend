@@ -5,6 +5,11 @@ import {
   isTimeSlotBooked,
   slotKey,
 } from '@/features/app/lib/consultation-availability'
+import {
+  BOOKING_STATUS_LABEL,
+  bookingStatusChipClass,
+  bookingStatusLabel,
+} from '@/features/app/lib/booking-status'
 import type { ConsultationAvailability } from '@/features/app/types'
 import { consultationRequestSchema } from '@/features/app/schemas'
 
@@ -50,5 +55,24 @@ describe('consultationRequestSchema', () => {
       dateKey: '2026-09-20',
     })
     expect(inPerson.success).toBe(false)
+  })
+})
+
+describe('booking status labels', () => {
+  it('covers all backend statuses including cancelled', () => {
+    expect(bookingStatusLabel('cancelled')).toBe('لغو شده')
+    expect(bookingStatusLabel('expired')).toBe('منقضی')
+    expect(bookingStatusLabel('done')).toBe('انجام‌شده')
+    expect(bookingStatusLabel('booked')).toBe('رزرو شده')
+    expect(bookingStatusLabel('available')).toBe('آزاد')
+    expect(Object.keys(BOOKING_STATUS_LABEL)).toEqual(
+      expect.arrayContaining(['available', 'booked', 'done', 'cancelled', 'expired']),
+    )
+  })
+
+  it('uses distinct chip styles for cancelled vs booked', () => {
+    expect(bookingStatusChipClass('cancelled')).toContain('destructive')
+    expect(bookingStatusChipClass('booked')).toContain('gold')
+    expect(bookingStatusChipClass('expired')).toContain('navy')
   })
 })
