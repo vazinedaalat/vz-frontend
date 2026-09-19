@@ -7,6 +7,7 @@ export interface DocumentRequestListItem {
   documentType: DocumentRequestType
   plaintiffName: string
   claimTitle: string
+  /** Backend status key — display via documentStatusLabel (Persian). */
   status: string
   createdAt: string
   updatedAt: string

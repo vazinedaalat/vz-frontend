@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Bell } from 'lucide-react'
+import { Bell, FileText } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { env, isMockEnabled } from '@/config/env'
 import { formatFaNumber } from '@/lib/format'
@@ -8,6 +8,7 @@ import { formatFaDate, formatFaDateTime } from '@/lib/jalali'
 import { appKeys, fetchHomeBanners, fetchHomeBlog, fetchHomeOffers } from '../api'
 import { fetchCases } from '../api/cases'
 import { fetchConsultationBookings } from '../api/consultation'
+import { fetchDocuments } from '../api/documents'
 import { fetchNotifications } from '../api/notifications'
 import {
   getBlogCards,
@@ -22,10 +23,13 @@ import { AppEmptyState } from '../components/app-empty-state'
 import { BookingCodeDisplay } from '../components/booking-code-display'
 import { BookingStatusChip } from '../components/booking-status-chip'
 import { CaseCard } from '../components/case-card'
+import { DocumentRequestCard } from '../components/document-request-card'
+import { DocumentStatusChip } from '../components/document-status-chip'
 import { HomeHeroBanner } from '../components/home-hero-banner'
 import { HomeServiceShortcuts } from '../components/home-service-shortcuts'
 import { OfferBanner } from '../components/offer-banner'
 import { PageHeader } from '../components/page-header'
+import { isDocumentPending } from '../lib/document-status'
 
 export default function AppHomePage() {
   const user = useAuthStore((s) => s.user)
@@ -54,6 +58,11 @@ export default function AppHomePage() {
     queryKey: appKeys.notifications,
     queryFn: isMockEnabled ? async () => getNotifications() : fetchNotifications,
   })
+  const documentsQuery = useQuery({
+    queryKey: appKeys.documents,
+    queryFn: fetchDocuments,
+    enabled: !isMockEnabled,
+  })
 
   const banners = bannersQuery.data ?? []
   const offers = offersQuery.data ?? []
@@ -61,6 +70,7 @@ export default function AppHomePage() {
   const consultations = (bookingsQuery.data ?? []).filter((item) => item.status !== 'done')
   const blogs = blogsQuery.data ?? []
   const unread = (notificationsQuery.data ?? []).filter((item) => !item.read).length
+  const pendingDocuments = (documentsQuery.data ?? []).filter((doc) => isDocumentPending(doc.status))
   const loading =
     bannersQuery.isLoading ||
     offersQuery.isLoading ||
@@ -133,6 +143,52 @@ export default function AppHomePage() {
             action={
               <Button variant="accent" asChild>
                 <Link to="/app/cases/new">ایجاد پرونده</Link>
+              </Button>
+            }
+          />
+        )}
+      </section>
+
+      <section className="space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="font-display text-lg font-bold">اسناد در انتظار</h2>
+            <p className="mt-0.5 text-sm text-navy-500">وضعیت درخواست‌های سند به‌صورت فارسی</p>
+          </div>
+          <Link to="/app/documents" className="shrink-0 text-sm font-medium text-gold-700 hover:text-gold-600">
+            مشاهده همه
+          </Link>
+        </div>
+
+        {!isMockEnabled && documentsQuery.isLoading ? (
+          <p className="text-sm text-navy-500">در حال بارگذاری اسناد…</p>
+        ) : pendingDocuments.length > 0 ? (
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-gold-200/80 bg-gold-100/50 px-4 py-3">
+              <FileText className="size-4 shrink-0 text-gold-700" aria-hidden />
+              <p className="text-sm text-navy-800">
+                <span className="font-semibold">{formatFaNumber(pendingDocuments.length)}</span>
+                {' '}درخواست در جریان است
+              </p>
+              <div className="ms-auto flex flex-wrap gap-1.5">
+                {pendingDocuments.slice(0, 3).map((doc) => (
+                  <DocumentStatusChip key={doc.id} status={doc.status} />
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {pendingDocuments.slice(0, 4).map((doc) => (
+                <DocumentRequestCard key={doc.id} item={doc} compact />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <AppEmptyState
+            title="اسناد در انتظاری ندارید"
+            description="پس از ثبت درخواست سند، وضعیت آن اینجا نمایش داده می‌شود."
+            action={
+              <Button variant="outline" asChild>
+                <Link to="/app/documents">درخواست سند</Link>
               </Button>
             }
           />

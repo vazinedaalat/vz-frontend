@@ -27,6 +27,15 @@ export type DocumentRequestType =
   | 'brief'
   | 'power-of-attorney'
 
+/** Aligns with admin / Nest document request status values. */
+export type DocumentRequestStatus =
+  | 'submitted'
+  | 'in_progress'
+  | 'review'
+  | 'ready'
+  | 'delivered'
+  | 'rejected'
+
 export type TicketStatus = 'open' | 'pending' | 'answered' | 'closed'
 
 export type CreateCaseWizardStep = 'intake' | 'upload' | 'prepayment' | 'completed'

@@ -6,8 +6,7 @@ import { FileStack, ScrollText } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { ErrorBadge } from '@/components/shared/error-badge'
 import { cn } from '@/lib/utils'
-import { toPersianDigits, asciiDigitsField, asciiAmountField } from '@/lib/format'
-import { formatFaDateTime } from '@/lib/jalali'
+import { toPersianDigits, asciiDigitsField, asciiAmountField, formatFaNumber } from '@/lib/format'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
 import { appKeys, createDocumentRequest, fetchDocuments } from '../api'
@@ -20,9 +19,16 @@ import { DOCUMENT_FILE_RULE_SECTIONS } from '../constants/case-intake'
 import { CaseFileUploader } from '../components/case-file-uploader'
 import { CaseFormHelpBanner } from '../components/case-form-help-banner'
 import { CaseRulesDropdowns } from '../components/case-rules-dropdowns'
+import { DocumentRequestCard } from '../components/document-request-card'
+import { DocumentStatusChip } from '../components/document-status-chip'
 import { Field } from '../components/field'
 import { PageHeader } from '../components/page-header'
-import type { CaseFileMeta } from '../types'
+import {
+  DOCUMENT_STATUS_LABEL,
+  isDocumentPending,
+  normalizeDocumentStatus,
+} from '../lib/document-status'
+import type { CaseFileMeta, DocumentRequestStatus } from '../types'
 
 export default function DocumentRequestPage() {
   const queryClient = useQueryClient()
@@ -32,11 +38,21 @@ export default function DocumentRequestPage() {
   const [formErrorBanner, setFormErrorBanner] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
 
-  const { data: documents = [] } = useQuery({
+  const { data: documents = [], isLoading: documentsLoading } = useQuery({
     queryKey: appKeys.documents,
     queryFn: fetchDocuments,
     enabled: !isMockEnabled,
   })
+
+  const pendingDocuments = documents.filter((doc) => isDocumentPending(doc.status))
+  const statusCounts = documents.reduce(
+    (acc, doc) => {
+      const key = normalizeDocumentStatus(doc.status)
+      acc[key] = (acc[key] ?? 0) + 1
+      return acc
+    },
+    {} as Partial<Record<DocumentRequestStatus, number>>,
+  )
 
   const {
     register,
@@ -194,22 +210,60 @@ export default function DocumentRequestPage() {
 
       {apiError ? <ErrorBadge variant="page">{apiError}</ErrorBadge> : null}
 
-      {!isMockEnabled && documents.length > 0 ? (
-        <section className="rounded-[1.5rem] border border-navy-200 bg-white p-5 shadow-soft sm:p-6">
-          <h2 className="font-display text-base font-bold text-navy-900">درخواست‌های قبلی</h2>
-          <ul className="mt-4 space-y-2">
-            {documents.slice(0, 5).map((doc) => (
-              <li
-                key={doc.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-navy-100 bg-navy-50/60 px-3 py-2.5 text-sm"
-              >
-                <span className="font-medium text-navy-900">{doc.claimTitle}</span>
-                <span className="text-xs text-navy-500">
-                  {doc.status} · {formatFaDateTime(doc.createdAt)}
-                </span>
-              </li>
-            ))}
-          </ul>
+      {!isMockEnabled ? (
+        <section className="space-y-4" aria-labelledby="document-requests-heading">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold tracking-wide text-gold-700">پیگیری اسناد</p>
+              <h2 id="document-requests-heading" className="font-display mt-1 text-lg font-bold text-navy-900 sm:text-xl">
+                درخواست‌های قبلی
+              </h2>
+              <p className="mt-1 text-sm text-navy-600">
+                وضعیت هر سند به‌صورت فارسی و به‌روز نمایش داده می‌شود.
+              </p>
+            </div>
+            {pendingDocuments.length > 0 ? (
+              <div className="rounded-xl border border-gold-200 bg-gold-100/70 px-3 py-2 text-sm text-gold-800">
+                <span className="font-semibold">{formatFaNumber(pendingDocuments.length)}</span>
+                {' '}اسناد در انتظار
+              </div>
+            ) : null}
+          </div>
+
+          {documents.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(DOCUMENT_STATUS_LABEL) as DocumentRequestStatus[]).map((key) => {
+                const count = statusCounts[key] ?? 0
+                if (count === 0) return null
+                return (
+                  <div
+                    key={key}
+                    className="inline-flex items-center gap-2 rounded-xl border border-navy-100 bg-white px-3 py-1.5 shadow-soft"
+                  >
+                    <DocumentStatusChip status={key} />
+                    <span className="text-xs font-medium text-navy-600">{formatFaNumber(count)}</span>
+                  </div>
+                )
+              })}
+            </div>
+          ) : null}
+
+          {documentsLoading ? (
+            <p className="text-sm text-navy-500">در حال بارگذاری درخواست‌ها…</p>
+          ) : documents.length > 0 ? (
+            <ul className="grid gap-3 sm:gap-4">
+              {documents.map((doc) => (
+                <li key={doc.id}>
+                  <DocumentRequestCard item={doc} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-navy-200 bg-navy-50/40 px-5 py-8 text-center">
+              <p className="font-medium text-navy-800">هنوز درخواستی ثبت نشده</p>
+              <p className="mt-1 text-sm text-navy-500">پس از ارسال فرم، وضعیت اینجا نمایش داده می‌شود.</p>
+            </div>
+          )}
         </section>
       ) : null}
 
