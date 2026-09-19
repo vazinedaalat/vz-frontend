@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Bell, FileText, FolderPlus, MessagesSquare } from 'lucide-react'
+import { Bell } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { env, isMockEnabled } from '@/config/env'
 import { formatFaNumber } from '@/lib/format'
@@ -19,10 +19,11 @@ import {
 } from '../mocks/data'
 import { useAuthStore } from '../store/auth-store'
 import { AppEmptyState } from '../components/app-empty-state'
+import { BookingCodeDisplay } from '../components/booking-code-display'
 import { CaseCard } from '../components/case-card'
 import { HomeHeroBanner } from '../components/home-hero-banner'
+import { HomeServiceShortcuts } from '../components/home-service-shortcuts'
 import { OfferBanner } from '../components/offer-banner'
-import { BookingCodeDisplay } from '../components/booking-code-display'
 import { PageHeader } from '../components/page-header'
 
 export default function AppHomePage() {
@@ -66,8 +67,10 @@ export default function AppHomePage() {
     bookingsQuery.isLoading
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10">
       {banners.length > 0 ? <HomeHeroBanner slides={banners} /> : null}
+
+      <HomeServiceShortcuts />
 
       <PageHeader
         eyebrow={env.VITE_APP_ENV === 'production' ? 'پنل موکل' : 'پنل موکل · توسعه'}
@@ -107,28 +110,6 @@ export default function AppHomePage() {
             description="پیشنهادهای ویژه از سرور بارگذاری می‌شوند."
           />
         )}
-      </section>
-
-      <section className="grid gap-3 sm:grid-cols-3">
-        {[
-          { to: '/app/consultation', label: 'درخواست مشاوره', icon: MessagesSquare },
-          { to: '/app/cases/new', label: 'ایجاد پرونده', icon: FolderPlus },
-          { to: '/app/documents', label: 'درخواست سند', icon: FileText },
-        ].map((item) => {
-          const Icon = item.icon
-          return (
-            <Link
-              key={item.to}
-              to={item.to}
-              className="flex items-center gap-3 rounded-2xl border border-navy-200 bg-white p-4 shadow-soft transition-all hover:border-gold-400 hover:shadow-lift"
-            >
-              <span className="grid size-10 place-items-center rounded-xl bg-navy-900 text-gold-300">
-                <Icon className="size-4" />
-              </span>
-              <span className="text-sm font-semibold">{item.label}</span>
-            </Link>
-          )
-        })}
       </section>
 
       <section className="space-y-4">
