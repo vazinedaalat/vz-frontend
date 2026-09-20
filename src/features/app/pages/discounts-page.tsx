@@ -45,76 +45,97 @@ export default function DiscountsPage() {
 
       {codes.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {codes.map((item) => (
-            <article
-              key={item.id}
-              className={cn(
-                'rounded-[1.5rem] border p-5 shadow-soft',
-                item.isActive ? 'border-navy-200 bg-white' : 'border-navy-100 bg-navy-50 opacity-70',
-              )}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="mb-1 flex flex-wrap gap-2">
-                    {item.audience === 'user' ? (
-                      <span className="rounded-lg bg-gold-100 px-2 py-0.5 text-[11px] font-medium text-gold-800">
-                        اختصاصی شما
-                      </span>
-                    ) : (
-                      <span className="rounded-lg bg-navy-100 px-2 py-0.5 text-[11px] font-medium text-navy-700">
-                        سراسری
-                      </span>
-                    )}
+          {codes.map((item) => {
+            const sectionLabel =
+              item.applicableTo || SECTION_HINT[item.section] || item.section
+            const planLabel = item.planIds?.length
+              ? item.planIds.join('، ')
+              : 'همه پلن‌های پولی'
+            const expiryLabel = item.expiresAtLabel || formatFaDate(item.expiresAt)
+
+            return (
+              <article
+                key={item.id}
+                className={cn(
+                  'min-w-0 overflow-hidden rounded-[1.5rem] border p-4 shadow-soft sm:p-5',
+                  item.isActive
+                    ? 'border-navy-200 bg-white'
+                    : 'border-navy-100 bg-navy-50 opacity-70',
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1">
+                      {item.audience === 'user' ? (
+                        <span className="inline-block max-w-full truncate rounded-lg bg-gold-100 px-2 py-0.5 text-[11px] font-medium text-gold-800">
+                          اختصاصی شما
+                        </span>
+                      ) : (
+                        <span className="inline-block max-w-full truncate rounded-lg bg-navy-100 px-2 py-0.5 text-[11px] font-medium text-navy-700">
+                          سراسری
+                        </span>
+                      )}
+                    </div>
+                    <h3
+                      className="font-display truncate text-base font-bold text-navy-900 sm:text-lg md:whitespace-normal md:break-words"
+                      title={item.title}
+                    >
+                      {item.title}
+                    </h3>
+                    <p
+                      className="mt-1 line-clamp-2 text-sm leading-6 text-navy-600 md:line-clamp-none md:leading-7"
+                      title={item.description}
+                    >
+                      {item.description}
+                    </p>
                   </div>
-                  <h3 className="font-display text-lg font-bold">{item.title}</h3>
-                  <p className="mt-1 text-sm text-navy-600">{item.description}</p>
-                </div>
-                <span className="font-display text-2xl font-extrabold text-gold-600">{item.percent}٪</span>
-              </div>
-
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <code
-                  className="rounded-xl bg-navy-900 px-3 py-2 text-sm tracking-wider text-gold-300"
-                  dir="ltr"
-                >
-                  {item.code}
-                </code>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={!item.isActive}
-                  onClick={() => copyCode(item.code)}
-                >
-                  {copied === item.code ? 'کپی شد' : 'کپی کد'}
-                </Button>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-navy-500">
-                <span>
-                  بخش:{' '}
-                  {item.applicableTo ||
-                    SECTION_HINT[item.section] ||
-                    item.section}
-                </span>
-                {item.section === 'consultation' ? (
-                  <span>
-                    پلن:{' '}
-                    {item.planIds?.length
-                      ? item.planIds.join('، ')
-                      : 'همه پلن‌های پولی'}
+                  <span className="font-display shrink-0 text-xl font-extrabold text-gold-600 sm:text-2xl">
+                    {item.percent}٪
                   </span>
-                ) : null}
-                <span>
-                  مصرف: {item.usedCount}/{item.maxUsage}
-                </span>
-                <span>
-                  انقضا: {item.expiresAtLabel || formatFaDate(item.expiresAt)}
-                </span>
-                <span>{item.isActive ? 'فعال' : 'منقضی / تمام‌شده'}</span>
-              </div>
-            </article>
-          ))}
+                </div>
+
+                <div className="mt-4 flex min-w-0 items-center gap-2 sm:mt-5 sm:gap-3">
+                  <code
+                    className="min-w-0 flex-1 truncate rounded-xl bg-navy-900 px-3 py-2 text-xs tracking-wider text-gold-300 sm:text-sm"
+                    dir="ltr"
+                    title={item.code}
+                  >
+                    {item.code}
+                  </code>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    disabled={!item.isActive}
+                    onClick={() => copyCode(item.code)}
+                  >
+                    {copied === item.code ? 'کپی شد' : 'کپی کد'}
+                  </Button>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-navy-500 sm:flex sm:flex-wrap sm:gap-x-4 sm:gap-y-1">
+                  <span className="min-w-0 truncate" title={`بخش: ${sectionLabel}`}>
+                    بخش: {sectionLabel}
+                  </span>
+                  {item.section === 'consultation' ? (
+                    <span className="min-w-0 truncate" title={`پلن: ${planLabel}`}>
+                      پلن: {planLabel}
+                    </span>
+                  ) : null}
+                  <span className="min-w-0 truncate">
+                    مصرف: {item.usedCount}/{item.maxUsage}
+                  </span>
+                  <span className="min-w-0 truncate" title={`انقضا: ${expiryLabel}`}>
+                    انقضا: {expiryLabel}
+                  </span>
+                  <span className="min-w-0 truncate col-span-2 sm:col-span-1">
+                    {item.isActive ? 'فعال' : 'منقضی / تمام‌شده'}
+                  </span>
+                </div>
+              </article>
+            )
+          })}
         </div>
       ) : !isLoading ? (
         <AppEmptyState
