@@ -2,7 +2,6 @@ export const appKeys = {
   all: ['app'] as const,
   home: {
     banners: ['app', 'home', 'banners'] as const,
-    offers: ['app', 'home', 'offers'] as const,
     blog: ['app', 'home', 'blog'] as const,
   },
   catalog: ['app', 'catalog', 'case-intake'] as const,
