@@ -19,7 +19,7 @@ interface ChatThreadPanelProps {
   updatedAt?: string
   /** Mobile immersive fill above bottom nav with clipped bottom edge. */
   immersive?: boolean
-  /** Support tickets currently have no multipart API — hide paperclip there. */
+  /** Hide paperclip when attachments are not supported for this thread. */
   allowAttachments?: boolean
 }
 

@@ -19,7 +19,7 @@ interface ChatComposerProps {
   placeholder?: string
   inputId?: string
   className?: string
-  /** When false, hides the paperclip control (e.g. support tickets without file API). */
+  /** When false, hides the paperclip control. */
   allowAttachments?: boolean
 }
 

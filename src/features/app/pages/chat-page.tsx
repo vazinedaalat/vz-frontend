@@ -84,9 +84,9 @@ export default function ChatPage() {
   })
 
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ body }: ChatSendPayload) => {
+    mutationFn: async ({ body, attachments }: ChatSendPayload) => {
       if (!activeId) throw new Error('no ticket')
-      return sendSupportTicketMessage(activeId, body)
+      return sendSupportTicketMessage(activeId, body, attachments)
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: appKeys.support })
@@ -343,8 +343,8 @@ export default function ChatPage() {
                 updatedAt={active.updatedAt}
                 messages={active.messages}
                 onSend={sendMessage}
-                allowAttachments={false}
-                placeholder="پیام پشتیبانی را بنویسید…"
+                allowAttachments
+                placeholder="پیام یا فایل پشتیبانی را بنویسید…"
                 className={cn(
                   'md:h-[min(70vh,42rem)] md:max-h-[min(70vh,42rem)]',
                   mobilePane !== 'thread' && 'hidden md:flex',
