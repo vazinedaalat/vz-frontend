@@ -126,6 +126,19 @@ export interface DiscountCode {
   isActive: boolean
 }
 
+/** Response of `POST /discounts/validate` — preview only; does not consume the code. */
+export interface DiscountValidationResult {
+  code: string
+  percent: number
+  title: string
+  section: string
+  applicableTo: string
+  context: string
+  discountId?: string
+}
+
+export type DiscountSection = 'consultation' | 'documents' | 'declaration' | 'cases'
+
 export interface CaseStage {
   id: string
   title: string

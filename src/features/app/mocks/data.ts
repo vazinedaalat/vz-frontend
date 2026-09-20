@@ -1,7 +1,9 @@
 import { withMockData } from '@/lib/mock'
+import { ValidationError } from '@/services/api/errors'
 import { addDays, startOfLocalDay, toDateKey } from '@/lib/jalali'
 import { slotKey } from '../lib/consultation-availability'
 import { normalizeLegalCase } from '../lib/case-process'
+import { normalizeDiscountCode } from '../lib/discount-preview'
 import type {
   AppUser,
   BlogCard,
@@ -11,6 +13,7 @@ import type {
   ConsultationAvailability,
   ConsultationSlot,
   DiscountCode,
+  DiscountValidationResult,
   HomeHeroBannerSlide,
   LegalCase,
   SpecialOffer,
@@ -471,6 +474,47 @@ export function getSpecialOffers(): SpecialOffer[] {
 
 export function getDiscountCodes(): DiscountCode[] {
   return withMockData(() => MOCK_DISCOUNTS, [])
+}
+
+/** Local stand-in for `POST /discounts/validate` when mock mode is on. */
+export function mockValidateDiscountCode(
+  code: string,
+  section: string,
+  planId?: string,
+): DiscountValidationResult {
+  const normalized = normalizeDiscountCode(code)
+  if (normalized.length < 2) {
+    throw new ValidationError('کد تخفیف نامعتبر است')
+  }
+
+  const found = MOCK_DISCOUNTS.find((item) => item.code.toUpperCase() === normalized)
+  if (!found) {
+    throw new ValidationError('کد تخفیف نامعتبر است')
+  }
+  if (!found.isActive) {
+    throw new ValidationError('کد تخفیف منقضی یا نامعتبر است')
+  }
+  if (found.section !== section) {
+    throw new ValidationError('این کد برای این بخش قابل استفاده نیست')
+  }
+  if (section === 'consultation') {
+    if (!planId) {
+      throw new ValidationError('برای اعتبارسنجی کد مشاوره، پلن را انتخاب کنید')
+    }
+    if (found.planIds?.length && !found.planIds.includes(planId)) {
+      throw new ValidationError('این کد برای پلن انتخاب‌شده معتبر نیست')
+    }
+  }
+
+  return {
+    code: found.code,
+    percent: found.percent,
+    title: found.title,
+    section: found.section,
+    applicableTo: found.applicableTo,
+    context: found.section,
+    discountId: found.id,
+  }
 }
 
 export function getCases(): LegalCase[] {

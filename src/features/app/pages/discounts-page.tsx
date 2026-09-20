@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui'
 import { isMockEnabled } from '@/config/env'
@@ -94,7 +95,7 @@ export default function DiscountsPage() {
                   </span>
                 </div>
 
-                <div className="mt-4 flex min-w-0 items-center gap-2 sm:mt-5 sm:gap-3">
+                <div className="mt-4 flex min-w-0 flex-wrap items-center gap-2 sm:mt-5 sm:gap-3">
                   <code
                     className="min-w-0 flex-1 truncate rounded-xl bg-navy-900 px-3 py-2 text-xs tracking-wider text-gold-300 sm:text-sm"
                     dir="ltr"
@@ -112,6 +113,11 @@ export default function DiscountsPage() {
                   >
                     {copied === item.code ? 'کپی شد' : 'کپی کد'}
                   </Button>
+                  {item.isActive && item.section === 'consultation' ? (
+                    <Button type="button" variant="accent" size="sm" className="shrink-0" asChild>
+                      <Link to="/app/consultation">استفاده در رزرو</Link>
+                    </Button>
+                  ) : null}
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-navy-500 sm:flex sm:flex-wrap sm:gap-x-4 sm:gap-y-1">

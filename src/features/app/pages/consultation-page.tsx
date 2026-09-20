@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { CreditCard, CalendarDays, Clock3 } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { ErrorBadge } from '@/components/shared/error-badge'
-import { formatFaNumber, toPersianDigits, asciiDigitsField } from '@/lib/format'
+import { formatFaNumber, toPersianDigits } from '@/lib/format'
 import { formatJalaliLabel, formatFaDateTime, jalaliFromDate, startOfLocalDay } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
@@ -26,9 +26,15 @@ import { BookingCalendar } from '../components/booking-calendar'
 import { BookingCodeDisplay } from '../components/booking-code-display'
 import { BookingStatusChip } from '../components/booking-status-chip'
 import { ConsultationPlanCards } from '../components/consultation-plan-cards'
+import { DiscountCodeField } from '../components/discount-code-field'
 import { Field } from '../components/field'
 import { PageHeader } from '../components/page-header'
 import { TimeSlotPicker } from '../components/time-slot-picker'
+import { useDiscountValidation } from '../hooks/use-discount-validation'
+import {
+  computeDiscountAmount,
+  computeDiscountedPrice,
+} from '../lib/discount-preview'
 import type { BookingSlot } from '../api/consultation'
 import type { ConsultationAvailability, ConsultationPlanId } from '../types'
 
@@ -68,6 +74,12 @@ export default function ConsultationPage() {
   const planId = watch('planId') as ConsultationPlanId | undefined
   const dateKey = watch('dateKey')
   const time = watch('time')
+  const discountCode = watch('discountCode') ?? ''
+
+  const discount = useDiscountValidation({
+    section: 'consultation',
+    planId,
+  })
 
   const { data: plans = CONSULTATION_PLANS } = useQuery({
     queryKey: appKeys.consultation.plans,
@@ -102,6 +114,7 @@ export default function ConsultationPage() {
       setApiError(null)
       setLastBooking(booking)
       setSubmitted(true)
+      discount.clear()
       await queryClient.invalidateQueries({ queryKey: appKeys.consultation.bookings })
       await queryClient.invalidateQueries({ queryKey: appKeys.consultation.availability(planId) })
       reset({
@@ -123,6 +136,8 @@ export default function ConsultationPage() {
     setApiError(null)
     if (isMockEnabled) {
       const mockCode = `VZB-DEMO-${String(Math.floor(100000 + Math.random() * 900000))}`
+      const percent = discount.preview?.percent
+      const basePrice = selectedPlan?.price ?? 0
       setLastBooking({
         id: `mock-${Date.now()}`,
         bookingCode: mockCode,
@@ -133,10 +148,15 @@ export default function ConsultationPage() {
         lawyerName: selectedPlan?.lawyerName ?? 'وزین عدالت',
         startsAt: values.time ? `${values.dateKey} · ${values.time}` : values.dateKey,
         durationMinutes: selectedPlan?.durationMinutes ?? 30,
-        price: selectedPlan?.price ?? 0,
+        price: basePrice,
+        discountedPrice:
+          percent != null && basePrice > 0
+            ? computeDiscountedPrice(basePrice, percent)
+            : undefined,
         status: 'booked',
       })
       setSubmitted(true)
+      discount.clear()
       reset({
         planId: undefined,
         topic: '',
@@ -189,6 +209,8 @@ export default function ConsultationPage() {
                   field.onChange(next)
                   setValue('dateKey', '')
                   setValue('time', '')
+                  setValue('discountCode', '')
+                  discount.clear()
                   setSubmitted(false)
                   setLastBooking(null)
                   setApiError(null)
@@ -287,14 +309,28 @@ export default function ConsultationPage() {
                   </Field>
 
                   {!selectedPlan.isFree ? (
-                    <Field label="کد تخفیف (اختیاری)" htmlFor="discountCode" error={errors.discountCode?.message}>
-                      <Input
-                        id="discountCode"
-                        placeholder="VAZIN40"
-                        className="uppercase"
-                        {...register('discountCode', asciiDigitsField)}
-                      />
-                    </Field>
+                    <DiscountCodeField
+                      value={discountCode}
+                      onChange={(next) => {
+                        setValue('discountCode', next, { shouldDirty: true })
+                        discount.syncWithInput(next)
+                      }}
+                      fieldError={errors.discountCode?.message}
+                      validateError={discount.error}
+                      isValidating={discount.isValidating}
+                      isApplied={discount.isApplied}
+                      previewPercent={discount.preview?.percent}
+                      previewTitle={discount.preview?.title}
+                      basePrice={selectedPlan.price}
+                      disabled={submitting}
+                      onValidate={() => {
+                        void discount.validate(discountCode)
+                      }}
+                      onClear={() => {
+                        discount.clear()
+                        setValue('discountCode', '')
+                      }}
+                    />
                   ) : null}
 
                   <BookingSummary
@@ -305,6 +341,7 @@ export default function ConsultationPage() {
                     price={selectedPlan.price}
                     isFree={selectedPlan.isFree}
                     requiresPayment={selectedPlan.requiresPayment}
+                    discountPercent={discount.isApplied ? discount.preview?.percent : undefined}
                   />
 
                   <Button
@@ -312,12 +349,14 @@ export default function ConsultationPage() {
                     variant="accent"
                     size="lg"
                     className="w-full"
-                    disabled={submitting}
+                    disabled={submitting || discount.isValidating}
                   >
                     {selectedPlan.requiresPayment ? (
                       <>
                         <CreditCard className="size-4" aria-hidden />
-                        پرداخت و ثبت رزرو
+                        {discount.isApplied
+                          ? 'پرداخت با تخفیف و ثبت رزرو'
+                          : 'پرداخت و ثبت رزرو'}
                       </>
                     ) : (
                       <>
@@ -420,6 +459,7 @@ function BookingSummary({
   price,
   isFree,
   requiresPayment,
+  discountPercent,
 }: {
   planTitle: string
   lawyerName: string
@@ -428,7 +468,12 @@ function BookingSummary({
   price: number
   isFree: boolean
   requiresPayment: boolean
+  discountPercent?: number
 }) {
+  const hasDiscount = !isFree && discountPercent != null && discountPercent > 0
+  const payable = hasDiscount ? computeDiscountedPrice(price, discountPercent) : price
+  const savings = hasDiscount ? computeDiscountAmount(price, discountPercent) : 0
+
   return (
     <div className="min-w-0 rounded-2xl border border-navy-100 bg-navy-50/70 p-3.5 sm:p-4">
       <p className="text-xs font-semibold text-gold-700">خلاصه رزرو</p>
@@ -453,10 +498,22 @@ function BookingSummary({
             <span className="font-medium">{time ? toPersianDigits(time) : '—'}</span>
           </li>
         ) : null}
+        {hasDiscount ? (
+          <>
+            <li className="flex justify-between gap-3">
+              <span className="shrink-0 text-navy-500">قیمت طرح</span>
+              <span className="text-left text-navy-500 line-through">{formatFaNumber(price)} تومان</span>
+            </li>
+            <li className="flex justify-between gap-3">
+              <span className="shrink-0 text-navy-500">تخفیف ({toPersianDigits(discountPercent)}٪)</span>
+              <span className="font-medium text-gold-700">−{formatFaNumber(savings)} تومان</span>
+            </li>
+          </>
+        ) : null}
         <li className="flex justify-between gap-3 border-t border-navy-200/80 pt-2">
           <span className="shrink-0 text-navy-500">{requiresPayment ? 'مبلغ قابل پرداخت' : 'هزینه'}</span>
           <span className="min-w-0 break-words text-left font-display font-bold text-navy-900">
-            {isFree ? 'رایگان' : `${formatFaNumber(price)} تومان`}
+            {isFree ? 'رایگان' : `${formatFaNumber(payable)} تومان`}
           </span>
         </li>
       </ul>
