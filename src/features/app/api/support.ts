@@ -1,6 +1,6 @@
 import { apiRequest } from '@/services/api'
 import type { TicketValues } from '../schemas'
-import type { CaseFileMeta, ChatMessage, SupportTicket } from '../types'
+import type { CaseFileMeta, SupportTicket } from '../types'
 
 export function fetchSupportTickets() {
   return apiRequest<SupportTicket[]>({ method: 'GET', url: '/support/tickets' })

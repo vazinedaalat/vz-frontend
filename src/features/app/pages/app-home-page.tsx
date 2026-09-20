@@ -5,7 +5,7 @@ import { Button } from '@/components/ui'
 import { env, isMockEnabled } from '@/config/env'
 import { formatFaNumber } from '@/lib/format'
 import { formatFaDate, formatFaDateTime } from '@/lib/jalali'
-import { appKeys, fetchHomeBanners, fetchHomeBlog, fetchHomeOffers } from '../api'
+import { appKeys, fetchHomeBanners, fetchHomeBlog, fetchMyDiscounts } from '../api'
 import { fetchCases } from '../api/cases'
 import { fetchConsultationBookings } from '../api/consultation'
 import { fetchDocuments } from '../api/documents'
@@ -14,10 +14,11 @@ import {
   getBlogCards,
   getCases,
   getConsultations,
+  getDiscountCodes,
   getHomeHeroBanners,
   getNotifications,
-  getSpecialOffers,
 } from '../mocks/data'
+import { discountsToSpecialOffers } from '../lib/discount-offers'
 import { useAuthStore } from '../store/auth-store'
 import { AppEmptyState } from '../components/app-empty-state'
 import { BookingCodeDisplay } from '../components/booking-code-display'
@@ -38,9 +39,9 @@ export default function AppHomePage() {
     queryKey: appKeys.home.banners,
     queryFn: isMockEnabled ? async () => getHomeHeroBanners() : fetchHomeBanners,
   })
-  const offersQuery = useQuery({
-    queryKey: appKeys.home.offers,
-    queryFn: isMockEnabled ? async () => getSpecialOffers() : fetchHomeOffers,
+  const discountsQuery = useQuery({
+    queryKey: appKeys.discounts,
+    queryFn: isMockEnabled ? async () => getDiscountCodes() : fetchMyDiscounts,
   })
   const casesQuery = useQuery({
     queryKey: appKeys.cases.all,
@@ -65,7 +66,7 @@ export default function AppHomePage() {
   })
 
   const banners = bannersQuery.data ?? []
-  const offers = offersQuery.data ?? []
+  const offers = discountsToSpecialOffers(discountsQuery.data ?? [])
   const cases = casesQuery.data ?? []
   const consultations = (bookingsQuery.data ?? []).filter((item) => item.status !== 'done')
   const blogs = blogsQuery.data ?? []
@@ -73,7 +74,7 @@ export default function AppHomePage() {
   const pendingDocuments = (documentsQuery.data ?? []).filter((doc) => isDocumentPending(doc.status))
   const loading =
     bannersQuery.isLoading ||
-    offersQuery.isLoading ||
+    discountsQuery.isLoading ||
     casesQuery.isLoading ||
     bookingsQuery.isLoading
 
@@ -117,8 +118,8 @@ export default function AppHomePage() {
           <OfferBanner offers={offers} />
         ) : (
           <AppEmptyState
-            title="پیشنهادی فعال نیست"
-            description="پیشنهادهای ویژه از سرور بارگذاری می‌شوند."
+            title="کد تخفیف فعالی نیست"
+            description="کدهای تخفیف اختصاصی و سراسری شما اینجا نمایش داده می‌شوند."
           />
         )}
       </section>
