@@ -19,6 +19,8 @@ interface ChatComposerProps {
   placeholder?: string
   inputId?: string
   className?: string
+  /** When false, hides the paperclip control (e.g. support tickets without file API). */
+  allowAttachments?: boolean
 }
 
 /** Docked chat composer — rounded top cut sits above the message stream like mobile chat apps. */
@@ -27,6 +29,7 @@ export function ChatComposer({
   placeholder = 'پیام خود را بنویسید…',
   inputId,
   className,
+  allowAttachments = true,
 }: ChatComposerProps) {
   const generatedId = useId()
   const fieldId = inputId ?? generatedId
@@ -139,25 +142,33 @@ export function ChatComposer({
           type="button"
           variant="ghost"
           size="icon"
-          className="size-11 shrink-0 rounded-[1.1rem] text-navy-600 hover:bg-navy-50 hover:text-navy-900"
+          className={cn(
+            'size-11 shrink-0 rounded-[1.1rem] text-navy-600 hover:bg-navy-50 hover:text-navy-900',
+            !allowAttachments && 'hidden',
+          )}
           aria-label="پیوست فایل"
           onClick={() => fileInputRef.current?.click()}
+          disabled={!allowAttachments}
         >
           <Paperclip className="size-4" />
         </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept={CASE_FILE_ACCEPT}
-          className="sr-only"
-          onChange={onFileChange}
-        />
+        {allowAttachments ? (
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept={CASE_FILE_ACCEPT}
+            className="sr-only"
+            onChange={onFileChange}
+          />
+        ) : null}
       </div>
 
-      <p className="mt-2.5 text-center text-[0.65rem] leading-5 text-navy-400">
-        PDF، تصویر یا ZIP · حداکثر {toPersianDigits(CHAT_FILE_MAX_COUNT)} فایل
-      </p>
+      {allowAttachments ? (
+        <p className="mt-2.5 text-center text-[0.65rem] leading-5 text-navy-400">
+          PDF، تصویر یا ZIP · حداکثر {toPersianDigits(CHAT_FILE_MAX_COUNT)} فایل
+        </p>
+      ) : null}
 
       <ErrorBadgeList className="mt-2" messages={fileErrors} />
       {submitError || form.formState.errors.body ? (
@@ -167,31 +178,4 @@ export function ChatComposer({
   )
 }
 
-export function ChatAttachmentList({
-  attachments,
-  tone = 'light',
-}: {
-  attachments: CaseFileMeta[]
-  tone?: 'light' | 'dark'
-}) {
-  if (attachments.length === 0) return null
-  return (
-    <ul className="mt-2 space-y-1.5">
-      {attachments.map((file) => (
-        <li
-          key={file.id}
-          className={cn(
-            'flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs',
-            tone === 'dark' ? 'bg-white/10 text-white' : 'border border-navy-200/80 bg-white/80 text-navy-800',
-          )}
-        >
-          <FileText className={cn('size-3.5 shrink-0', tone === 'dark' ? 'text-gold-300' : 'text-gold-700')} aria-hidden />
-          <span className="min-w-0 flex-1 truncate font-medium">{file.name}</span>
-          <span className={cn('shrink-0', tone === 'dark' ? 'text-white/50' : 'text-navy-400')}>
-            {toPersianDigits(formatFileSize(file.size))}
-          </span>
-        </li>
-      ))}
-    </ul>
-  )
-}
+export { ChatAttachmentList } from './chat-attachments'

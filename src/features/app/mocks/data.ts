@@ -207,6 +207,13 @@ const MOCK_CASE_CHATS: CaseChatThread[] = [
             size: 840_000,
             type: 'application/pdf',
           },
+          {
+            id: 'att-901-2',
+            name: 'رسید-پرداخت.jpg',
+            size: 220_000,
+            type: 'image/jpeg',
+            url: 'https://picsum.photos/seed/vz-docs/640/420',
+          },
         ],
       },
     ],

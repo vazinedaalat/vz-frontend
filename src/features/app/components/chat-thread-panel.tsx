@@ -19,6 +19,8 @@ interface ChatThreadPanelProps {
   updatedAt?: string
   /** Mobile immersive fill above bottom nav with clipped bottom edge. */
   immersive?: boolean
+  /** Support tickets currently have no multipart API — hide paperclip there. */
+  allowAttachments?: boolean
 }
 
 /** App-style message thread: sticky header, scroll body, docked composer with bottom cut. */
@@ -33,6 +35,7 @@ export function ChatThreadPanel({
   placeholder = 'پیام یا فایل پیگیری را ارسال کنید…',
   updatedAt,
   immersive = false,
+  allowAttachments = true,
 }: ChatThreadPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
@@ -105,7 +108,11 @@ export function ChatThreadPanel({
       </div>
 
       <div className="shrink-0">
-        <ChatComposer onSend={onSend} placeholder={placeholder} />
+        <ChatComposer
+          onSend={onSend}
+          placeholder={placeholder}
+          allowAttachments={allowAttachments}
+        />
       </div>
     </section>
   )
@@ -119,7 +126,7 @@ function ChatBubble({ message, showMeta }: { message: ChatMessage; showMeta: boo
   if (isSystem) {
     return (
       <div className="mx-auto w-full min-w-0 max-w-[92%] rounded-2xl border border-navy-100 bg-white/90 px-3.5 py-2.5 text-center text-xs leading-6 text-navy-500 shadow-soft">
-        {message.body ? (
+        {message.body && message.body !== '(فایل پیوست)' ? (
           <p className="break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{message.body}</p>
         ) : null}
         <p className="mt-1 text-[0.65rem] text-navy-400">{formatFaDateTime(message.createdAt)}</p>
@@ -139,7 +146,7 @@ function ChatBubble({ message, showMeta }: { message: ChatMessage; showMeta: boo
         {isAdmin && showMeta ? (
           <p className="mb-1 text-[0.65rem] font-semibold text-gold-700">پاسخ وکیل / کارشناس</p>
         ) : null}
-        {message.body ? (
+        {message.body && message.body !== '(فایل پیوست)' ? (
           <p className="break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{message.body}</p>
         ) : null}
         {message.attachments?.length ? (

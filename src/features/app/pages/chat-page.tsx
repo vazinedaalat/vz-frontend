@@ -343,6 +343,7 @@ export default function ChatPage() {
                 updatedAt={active.updatedAt}
                 messages={active.messages}
                 onSend={sendMessage}
+                allowAttachments={false}
                 placeholder="پیام پشتیبانی را بنویسید…"
                 className={cn(
                   'md:h-[min(70vh,42rem)] md:max-h-[min(70vh,42rem)]',

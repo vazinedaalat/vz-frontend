@@ -45,6 +45,8 @@ export interface CaseFileMeta {
   name: string
   size: number
   type: string
+  /** Public path or absolute URL from Nest (`/uploads/...`). */
+  url?: string
   /** Browser File retained for multipart upload before submit. */
   file?: File
 }
