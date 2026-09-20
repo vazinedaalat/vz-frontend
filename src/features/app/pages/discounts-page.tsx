@@ -9,6 +9,13 @@ import { AppEmptyState } from '../components/app-empty-state'
 import { PageHeader } from '../components/page-header'
 import { cn } from '@/lib/utils'
 
+const SECTION_HINT: Record<string, string> = {
+  consultation: 'مشاوره (پلن‌های پولی)',
+  documents: 'درخواست اسناد',
+  declaration: 'اظهارنامه',
+  cases: 'پرونده',
+}
+
 export default function DiscountsPage() {
   const { data: codes = [], isLoading } = useQuery({
     queryKey: appKeys.discounts,
@@ -31,7 +38,7 @@ export default function DiscountsPage() {
       <PageHeader
         eyebrow="کد تخفیف"
         title="کدهای تخفیف من"
-        description="کد را کپی کنید و هنگام رزرو مشاوره یا ثبت درخواست سند اعمال کنید."
+        description="کدهای سراسری و اختصاصی شما. هر کد فقط در بخش خودش قابل استفاده است."
       />
 
       {isLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
@@ -48,6 +55,17 @@ export default function DiscountsPage() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
+                  <div className="mb-1 flex flex-wrap gap-2">
+                    {item.audience === 'user' ? (
+                      <span className="rounded-lg bg-gold-100 px-2 py-0.5 text-[11px] font-medium text-gold-800">
+                        اختصاصی شما
+                      </span>
+                    ) : (
+                      <span className="rounded-lg bg-navy-100 px-2 py-0.5 text-[11px] font-medium text-navy-700">
+                        سراسری
+                      </span>
+                    )}
+                  </div>
                   <h3 className="font-display text-lg font-bold">{item.title}</h3>
                   <p className="mt-1 text-sm text-navy-600">{item.description}</p>
                 </div>
@@ -73,11 +91,26 @@ export default function DiscountsPage() {
               </div>
 
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-navy-500">
-                <span>قابل استفاده در: {item.applicableTo}</span>
+                <span>
+                  بخش:{' '}
+                  {item.applicableTo ||
+                    SECTION_HINT[item.section] ||
+                    item.section}
+                </span>
+                {item.section === 'consultation' ? (
+                  <span>
+                    پلن:{' '}
+                    {item.planIds?.length
+                      ? item.planIds.join('، ')
+                      : 'همه پلن‌های پولی'}
+                  </span>
+                ) : null}
                 <span>
                   مصرف: {item.usedCount}/{item.maxUsage}
                 </span>
-                <span>انقضا: {formatFaDate(item.expiresAt)}</span>
+                <span>
+                  انقضا: {item.expiresAtLabel || formatFaDate(item.expiresAt)}
+                </span>
                 <span>{item.isActive ? 'فعال' : 'منقضی / تمام‌شده'}</span>
               </div>
             </article>
@@ -86,7 +119,7 @@ export default function DiscountsPage() {
       ) : !isLoading ? (
         <AppEmptyState
           title="کد تخفیفی موجود نیست"
-          description="کدهای تخفیف از سرویس کمپین دریافت می‌شوند."
+          description="کدهای سراسری فعال و کدهای اختصاصی شما اینجا نمایش داده می‌شوند."
         />
       ) : null}
     </div>

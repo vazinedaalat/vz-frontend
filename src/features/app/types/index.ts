@@ -116,7 +116,11 @@ export interface DiscountCode {
   maxUsage: number
   usedCount: number
   expiresAt: string
+  expiresAtLabel?: string | null
+  section: string
   applicableTo: string
+  planIds?: string[]
+  audience?: 'global' | 'user'
   isActive: boolean
 }
 
