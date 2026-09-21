@@ -243,6 +243,8 @@ export interface CaseNotification {
   createdAt: string
   read: boolean
   kind: 'status' | 'document' | 'hearing' | 'message'
+  /** personal inbox row vs global announcement */
+  source?: 'personal' | 'announcement'
 }
 
 export interface ChatMessage {
