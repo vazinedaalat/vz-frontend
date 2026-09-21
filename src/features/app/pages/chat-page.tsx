@@ -52,6 +52,8 @@ export default function ChatPage() {
 
   const active = tickets.find((item) => item.id === activeId) ?? null
 
+  const caseUnreadTotal = caseChats.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0)
+
   useEffect(() => {
     if (activeId) return
     if (tickets[0]) setActiveId(tickets[0].id)
@@ -182,7 +184,11 @@ export default function ChatPage() {
             )}
           >
             چت پرونده‌ها
-            {caseChats.length > 0 ? (
+            {caseUnreadTotal > 0 ? (
+              <span className="mr-1 rounded-full bg-gold-400 px-1.5 py-0.5 text-[0.65rem] font-bold text-navy-900">
+                {toPersianDigits(caseUnreadTotal)} خوانده‌نشده
+              </span>
+            ) : caseChats.length > 0 ? (
               <span className="mr-1 text-xs opacity-80">({toPersianDigits(caseChats.length)})</span>
             ) : null}
           </button>

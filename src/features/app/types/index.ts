@@ -170,7 +170,9 @@ export interface CaseChatThread {
   caseNumber: string
   lawyerName: string
   updatedAt: string
+  /** Unread messages from admin (client view). */
   unreadCount: number
+  unreadForUser?: number
   messages: ChatMessage[]
 }
 

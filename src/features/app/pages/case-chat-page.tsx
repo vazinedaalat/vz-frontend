@@ -45,10 +45,15 @@ export default function CaseChatPage() {
 
   useEffect(() => {
     if (isMockEnabled || !thread?.id) return
-    void markChatRead(thread.id).catch(() => {
-      // non-blocking
-    })
-  }, [thread?.id])
+    void markChatRead(thread.id)
+      .then(async () => {
+        await queryClient.invalidateQueries({ queryKey: appKeys.chats.all })
+        await queryClient.invalidateQueries({ queryKey: appKeys.chats.byCase(caseId) })
+      })
+      .catch(() => {
+        // non-blocking
+      })
+  }, [thread?.id, caseId, queryClient])
 
   const sendMutation = useMutation({
     mutationFn: async ({ body, attachments }: ChatSendPayload) => {
