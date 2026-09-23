@@ -19,7 +19,7 @@ export function HomeServiceShortcuts({ className }: HomeServiceShortcutsProps) {
         className,
       )}
     >
-      <ul className="grid grid-cols-4 gap-y-4 gap-x-1 sm:grid-cols-4 sm:gap-x-2 md:grid-cols-7 md:gap-y-3">
+      <ul className="grid grid-cols-4 gap-x-1 gap-y-4 sm:gap-x-2 md:gap-y-3 lg:grid-cols-8">
         {APP_HOME_SERVICES.map((service) => {
           const Icon = service.icon
           return (

@@ -6,6 +6,7 @@ import {
   MessageCircle,
   MessagesSquare,
   Percent,
+  UserRound,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -25,4 +26,5 @@ export const APP_HOME_SERVICES: readonly AppHomeService[] = [
   { id: 'chat', label: 'پیام‌ها', to: '/app/chat', icon: MessageCircle },
   { id: 'notifications', label: 'اطلاعیه‌ها', to: '/app/notifications', icon: Bell },
   { id: 'discounts', label: 'تخفیف‌ها', to: '/app/discounts', icon: Percent },
+  { id: 'profile', label: 'مشخصات من', to: '/app/profile', icon: UserRound },
 ] as const
