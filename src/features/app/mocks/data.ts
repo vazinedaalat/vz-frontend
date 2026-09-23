@@ -363,6 +363,7 @@ function buildMockAvailability(today = startOfLocalDay()): ConsultationAvailabil
 const MOCK_BLOGS: BlogCard[] = [
   {
     id: 'blog-1',
+    slug: 'ezharnameh-vs-dadkhast',
     title: 'تفاوت اظهارنامه و دادخواست چیست؟',
     excerpt: 'اظهارنامه ابزار اخطار رسمی قبل از دعواست؛ دادخواست شروع رسیدگی در دادگاه.',
     category: 'آموزش حقوقی',
@@ -371,6 +372,7 @@ const MOCK_BLOGS: BlogCard[] = [
   },
   {
     id: 'blog-2',
+    slug: 'sana-dadkhast-checklist',
     title: 'مدارک لازم برای ثبت دادخواست در ثنا',
     excerpt: 'حساب ثنا، مدارک هویتی، منضمات دعوا و پرداخت هزینه؛ چک‌لیست عملی.',
     category: 'راهنما',
@@ -379,6 +381,7 @@ const MOCK_BLOGS: BlogCard[] = [
   },
   {
     id: 'blog-3',
+    slug: 'online-case-tracking',
     title: 'چگونه وضعیت پرونده را آنلاین پیگیری کنیم؟',
     excerpt: 'از ابلاغ الکترونیک تا گزارش مرحله‌ای وکیل؛ مسیر شفاف پیگیری برای موکل.',
     category: 'اپلیکیشن',

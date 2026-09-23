@@ -223,10 +223,11 @@ interface AppUser {
 #### کارت بلاگ (`BlogCard`)
 
 ```ts
-{ id, title, excerpt, category, readMinutes, publishedAt }
+{ id, slug?, title, excerpt, category, readMinutes, publishedAt }
 ```
 
-**API:** `GET /home/blog` یا اتصال به CMS
+**API:** `GET /home/blog` — جزئیات کامل مارکتینگ در [`docs/BLOG_API.md`](./BLOG_API.md) (`GET /blog/:slug`).
+کارت‌های `/app` به `/blog/:slug` (یا `id`) لینک می‌شوند.
 
 #### خلاصه پرونده / مشاوره روی هوم
 

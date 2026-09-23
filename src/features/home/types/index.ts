@@ -11,7 +11,7 @@ export type ServiceId =
 
 export interface NavLink {
   label: string
-  /** In-page anchor, e.g. `#services`. */
+  /** In-page anchor (`#services`) or absolute path (`/blog`). */
   href: string
 }
 

@@ -229,11 +229,15 @@ export interface ConsultationSlot {
 
 export interface BlogCard {
   id: string
+  /** Prefer for `/blog/:slug`; falls back to `id` when absent. */
+  slug?: string
   title: string
   excerpt: string
   category: string
   readMinutes: number
   publishedAt: string
+  coverImage?: string | null
+  authorName?: string | null
 }
 
 export interface CaseNotification {

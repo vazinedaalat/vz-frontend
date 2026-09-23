@@ -230,19 +230,33 @@ export default function AppHomePage() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="font-display text-lg font-bold">از بلاگ حقوقی</h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-display text-lg font-bold">از بلاگ حقوقی</h2>
+            <Link to="/blog" className="text-xs font-semibold text-gold-700 hover:text-gold-800">
+              همه مطالب
+            </Link>
+          </div>
           {blogs.length > 0 ? (
             <div className="space-y-3">
-              {blogs.map((item) => (
-                <article key={item.id} className="rounded-2xl border border-navy-200 bg-white p-4 shadow-soft">
-                  <p className="text-[0.7rem] font-semibold text-gold-700">{item.category}</p>
-                  <h3 className="font-display mt-1 text-base font-bold">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-navy-600">{item.excerpt}</p>
-                  <p className="mt-3 text-xs text-navy-400">
-                    {formatFaDate(item.publishedAt)} · {formatFaNumber(item.readMinutes)} دقیقه مطالعه
-                  </p>
-                </article>
-              ))}
+              {blogs.map((item) => {
+                const to = `/blog/${item.slug?.trim() || item.id}`
+                return (
+                  <Link
+                    key={item.id}
+                    to={to}
+                    className="block rounded-2xl border border-navy-200 bg-white p-4 shadow-soft transition-shadow hover:shadow-lift"
+                  >
+                    <article>
+                      <p className="text-[0.7rem] font-semibold text-gold-700">{item.category}</p>
+                      <h3 className="font-display mt-1 text-base font-bold text-navy-900">{item.title}</h3>
+                      <p className="mt-2 text-sm leading-7 text-navy-600">{item.excerpt}</p>
+                      <p className="mt-3 text-xs text-navy-400">
+                        {formatFaDate(item.publishedAt)} · {formatFaNumber(item.readMinutes)} دقیقه مطالعه
+                      </p>
+                    </article>
+                  </Link>
+                )
+              })}
             </div>
           ) : (
             <AppEmptyState title="مطلبی موجود نیست" description="محتوای بلاگ از سرور می‌آید." />

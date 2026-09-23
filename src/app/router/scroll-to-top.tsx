@@ -1,17 +1,27 @@
 import { useLayoutEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { scrollToSection } from '@/utils/scroll'
 
-/** Jump to the top of the window whenever the route pathname changes. */
+/** Jump to top on pathname change; honor hash anchors after navigation. */
 export function ScrollToTop() {
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
 
   useLayoutEffect(() => {
     const html = document.documentElement
     const previous = html.style.scrollBehavior
     html.style.scrollBehavior = 'auto'
-    window.scrollTo(0, 0)
+
+    if (hash) {
+      const id = hash.replace(/^#/, '')
+      requestAnimationFrame(() => {
+        scrollToSection(id)
+      })
+    } else {
+      window.scrollTo(0, 0)
+    }
+
     html.style.scrollBehavior = previous
-  }, [pathname])
+  }, [pathname, hash])
 
   return null
 }

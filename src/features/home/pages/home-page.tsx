@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { BlogSection } from '@/features/blog'
 import { SiteHeader } from '../components/site-header'
 import { HeroSection } from '../components/hero-section'
 import { AboutSection } from '../components/about-section'
@@ -31,6 +32,7 @@ export default function HomePage() {
         <ProcessSection />
         <WhyUsSection />
         <TeamSection />
+        <BlogSection />
         <CtaSection />
       </main>
       <SiteFooter />

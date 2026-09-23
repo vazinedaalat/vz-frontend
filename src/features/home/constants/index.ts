@@ -52,19 +52,25 @@ export const SECTION_IDS = {
   process: 'process',
   whyUs: 'why-us',
   team: 'team',
+  blog: 'blog',
   contact: 'contact',
 } as const
+
+export const BLOG_PATH = '/blog' as const
 
 export const NAV_LINKS: readonly NavLink[] = [
   { label: 'خانه', href: `#${SECTION_IDS.home}` },
   { label: 'درباره ما', href: `#${SECTION_IDS.about}` },
   { label: 'خدمات', href: `#${SECTION_IDS.services}` },
   { label: 'مراحل کار', href: `#${SECTION_IDS.process}` },
+  { label: 'بلاگ', href: BLOG_PATH },
   { label: 'تماس', href: `#${SECTION_IDS.contact}` },
 ]
 
-/** Stable list of in-page section ids used by the sticky header. */
-export const NAV_SECTION_IDS: readonly string[] = NAV_LINKS.map((link) => link.href.slice(1))
+/** In-page section ids used by the sticky header scroll spy (hash links only). */
+export const NAV_SECTION_IDS: readonly string[] = NAV_LINKS.filter((link) =>
+  link.href.startsWith('#')
+).map((link) => link.href.slice(1))
 
 export const LOGIN_PATH = '/login' as const
 

@@ -1,4 +1,5 @@
 import { Mail, MapPin, Phone } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Container } from '@/components/shared/container'
 import { toPersianDigits } from '@/lib/format'
 import { jalaliFromDate } from '@/lib/jalali'
@@ -9,17 +10,21 @@ import {
   FOOTER_HIGHLIGHTS,
   NAV_LINKS,
 } from '../constants'
+import { isHashNavHref, resolveMarketingNavHref } from '../lib/nav'
 import { BrandMark } from './brand-mark'
 
 export function SiteFooter() {
   const year = toPersianDigits(jalaliFromDate(new Date()).jy)
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const onHome = pathname === '/'
 
   return (
     <footer className="border-t border-navy-800 bg-navy-900 text-white">
       <Container className="py-16 lg:py-20">
         <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr_1fr] lg:gap-16">
           <div>
-            <BrandMark tone="dark" />
+            <BrandMark tone="dark" href={onHome ? '#home' : '/'} />
             <p className="mt-6 max-w-sm text-sm leading-7 text-white/80">
               {BRAND.sloganSupport}
             </p>
@@ -39,19 +44,40 @@ export function SiteFooter() {
           <div>
             <h2 className="font-display text-lg font-bold text-white">دسترسی سریع</h2>
             <nav className="mt-5 flex flex-col gap-2" aria-label="لینک‌های فوتر">
-              {NAV_LINKS.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={(event) => {
-                    event.preventDefault()
-                    scrollToSection(link.href.slice(1))
-                  }}
-                  className="w-fit text-sm text-white/75 transition-colors hover:text-gold-300"
-                >
-                  {link.label}
-                </a>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const resolved = resolveMarketingNavHref(link.href, pathname)
+
+                if (isHashNavHref(link.href)) {
+                  return (
+                    <a
+                      key={link.href}
+                      href={resolved}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        const id = link.href.slice(1)
+                        if (onHome) {
+                          scrollToSection(id)
+                          return
+                        }
+                        navigate({ pathname: '/', hash: id })
+                      }}
+                      className="w-fit text-sm text-white/75 transition-colors hover:text-gold-300"
+                    >
+                      {link.label}
+                    </a>
+                  )
+                }
+
+                return (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className="w-fit text-sm text-white/75 transition-colors hover:text-gold-300"
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
             </nav>
           </div>
 

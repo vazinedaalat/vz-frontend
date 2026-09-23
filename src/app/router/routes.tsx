@@ -8,6 +8,8 @@ import { AppShell } from '@/features/app/components/app-shell'
 const MarketingHomePage = lazy(() => import('@/features/home/pages/home-page'))
 const LoginPage = lazy(() => import('@/features/home/pages/login-page'))
 const NotFoundPage = lazy(() => import('@/features/home/pages/not-found-page'))
+const BlogListPage = lazy(() => import('@/features/blog/pages/blog-list-page'))
+const BlogPostPage = lazy(() => import('@/features/blog/pages/blog-post-page'))
 
 const AppHomePage = lazy(() => import('@/features/app/pages/app-home-page'))
 const ConsultationPage = lazy(() => import('@/features/app/pages/consultation-page'))
@@ -76,6 +78,22 @@ const router = createBrowserRouter(
           element: (
             <Suspense fallback={<PageLoader />}>
               <LoginPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: '/blog',
+          element: (
+            <Suspense fallback={<PageLoader />}>
+              <BlogListPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: '/blog/:slug',
+          element: (
+            <Suspense fallback={<PageLoader />}>
+              <BlogPostPage />
             </Suspense>
           ),
         },
