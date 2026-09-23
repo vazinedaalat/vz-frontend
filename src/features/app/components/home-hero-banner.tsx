@@ -81,9 +81,9 @@ export function HomeHeroBanner({ slides }: HomeHeroBannerProps) {
         aria-hidden
       />
 
-      <div className="relative grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-        {/* Media: first on mobile for a cinematic open */}
-        <div className="relative order-1 aspect-[16/10] overflow-hidden sm:aspect-[16/9] lg:order-2 lg:aspect-auto lg:min-h-full">
+      <div className="relative grid lg:h-[24rem] lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] xl:h-[26rem]">
+        {/* Media: fixed aspect / fixed panel — image covers, container never grows with photo size */}
+        <div className="relative order-1 aspect-[16/10] overflow-hidden sm:aspect-[16/9] lg:order-2 lg:aspect-auto lg:h-full lg:min-h-0">
           <div
             className="pointer-events-none absolute inset-y-0 inset-s-0 z-10 hidden w-36 bg-linear-to-e from-navy-900 to-transparent lg:block"
             aria-hidden
@@ -102,7 +102,7 @@ export function HomeHeroBanner({ slides }: HomeHeroBannerProps) {
               height={720}
               decoding="async"
               draggable={false}
-              className="absolute inset-0 h-full w-full object-cover object-center select-none lg:min-h-70 lg:object-[center_35%]"
+              className="absolute inset-0 size-full object-cover object-center select-none lg:object-[center_35%]"
               initial={reduceMotion ? false : { opacity: 0, scale: 1.06 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={reduceMotion ? undefined : { opacity: 0, scale: 1.02 }}
@@ -133,8 +133,8 @@ export function HomeHeroBanner({ slides }: HomeHeroBannerProps) {
           ) : null}
         </div>
 
-        {/* Copy */}
-        <div className="relative z-10 order-2 flex flex-col justify-center px-4 py-5 sm:px-8 sm:py-9 lg:order-1 lg:min-h-80 lg:px-10 lg:py-12">
+        {/* Copy — stable height so slide text length does not resize the banner shell */}
+        <div className="relative z-10 order-2 flex min-h-[13.5rem] flex-col justify-center px-4 py-5 sm:min-h-[15rem] sm:px-8 sm:py-9 lg:order-1 lg:h-full lg:min-h-0 lg:overflow-hidden lg:px-10 lg:py-10">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={slide.id}
@@ -142,16 +142,16 @@ export function HomeHeroBanner({ slides }: HomeHeroBannerProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
               transition={{ duration: 0.4, ease: EASE }}
-              className="flex flex-col"
+              className="flex min-h-0 flex-col"
               aria-live="polite"
             >
               <p className="font-display text-[0.7rem] font-semibold tracking-wide text-gold-400 sm:text-sm">
                 {slide.eyebrow}
               </p>
-              <h2 className="font-display mt-2 max-w-xl text-[1.35rem] leading-[1.4] font-extrabold text-balance text-white sm:mt-3 sm:text-3xl sm:leading-[1.35] lg:text-[2.05rem]">
+              <h2 className="font-display mt-2 line-clamp-2 max-w-xl text-[1.35rem] leading-[1.4] font-extrabold text-balance text-white sm:mt-3 sm:text-3xl sm:leading-[1.35] lg:text-[2.05rem]">
                 {slide.title}
               </h2>
-              <p className="mt-2.5 line-clamp-3 max-w-lg text-[0.8125rem] leading-7 text-white/75 sm:mt-4 sm:line-clamp-none sm:text-base sm:leading-8">
+              <p className="mt-2.5 line-clamp-2 max-w-lg text-[0.8125rem] leading-7 text-white/75 sm:mt-4 sm:line-clamp-3 sm:text-base sm:leading-8">
                 {slide.description}
               </p>
               <div className="mt-5 sm:mt-7">
@@ -163,7 +163,7 @@ export function HomeHeroBanner({ slides }: HomeHeroBannerProps) {
           </AnimatePresence>
 
           {count > 1 ? (
-            <div className="mt-5 hidden items-center gap-3 sm:mt-8 lg:flex">
+            <div className="mt-5 hidden items-center gap-3 sm:mt-8 lg:mt-auto lg:flex lg:pt-4">
               <BannerProgress
                 slides={slides}
                 index={index}
