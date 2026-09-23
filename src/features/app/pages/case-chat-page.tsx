@@ -17,6 +17,7 @@ import { getCaseById, getCaseChatByCaseId } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
 import { ChatThreadPanel } from '../components/chat-thread-panel'
 import { PageHeader } from '../components/page-header'
+import { caseLawyerOrStatusLabel, isLawyerAssigned } from '../lib/case-process'
 import type { CaseChatThread, ChatMessage, ChatSendPayload } from '../types'
 
 export default function CaseChatPage() {
@@ -121,7 +122,11 @@ export default function CaseChatPage() {
         <PageHeader
           eyebrow={toPersianDigits(legalCase.caseNumber)}
           title="چت پیگیری پرونده"
-          description={`${legalCase.title} · وکیل مسئول: ${legalCase.lawyerName}`}
+          description={`${legalCase.title} · ${
+            isLawyerAssigned(legalCase.lawyerName)
+              ? `وکیل مسئول: ${legalCase.lawyerName}`
+              : `وضعیت: ${legalCase.statusLabel}`
+          }`}
           action={
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" asChild>
@@ -141,7 +146,7 @@ export default function CaseChatPage() {
       <ChatThreadPanel
         immersive
         title={legalCase.title}
-        subtitle={`${toPersianDigits(legalCase.caseNumber)} · ${legalCase.lawyerName}`}
+        subtitle={`${toPersianDigits(legalCase.caseNumber)} · ${caseLawyerOrStatusLabel(legalCase)}`}
         updatedAt={thread.updatedAt}
         messages={thread.messages}
         onSend={onSend}

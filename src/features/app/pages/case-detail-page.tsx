@@ -10,6 +10,7 @@ import { getCaseById, getNotifications } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
 import { CaseProcessPanel } from '../components/case-process-panel'
 import { PageHeader } from '../components/page-header'
+import { caseNextActionLabel, isLawyerAssigned } from '../lib/case-process'
 
 export default function CaseDetailPage() {
   const { caseId = '' } = useParams()
@@ -52,12 +53,17 @@ export default function CaseDetailPage() {
     )
   }
 
+  const metaLine = isLawyerAssigned(item.lawyerName)
+    ? `${item.category} · وکیل مسئول: ${item.lawyerName}`
+    : `${item.category} · وضعیت: ${item.statusLabel}`
+  const nextAction = caseNextActionLabel(item)
+
   return (
     <div className="space-y-8">
       <PageHeader
         eyebrow={item.caseNumber}
         title={item.title}
-        description={`${item.category} · وکیل مسئول: ${item.lawyerName}`}
+        description={metaLine}
         action={
           <div className="flex flex-wrap gap-2">
             <Button variant="accent" asChild>
@@ -79,7 +85,7 @@ export default function CaseDetailPage() {
         <div className="space-y-6">
           <section className="rounded-[1.5rem] border border-navy-200 bg-navy-900 p-6 text-white shadow-lift">
             <h2 className="font-display text-lg font-bold">اقدام بعدی</h2>
-            <p className="mt-3 text-sm leading-7 text-white/80">{item.nextAction}</p>
+            <p className="mt-3 text-sm leading-7 text-white/80">{nextAction}</p>
             <p className="mt-4 text-xs text-white/50">آخرین به‌روزرسانی: {formatFaDateTime(item.updatedAt)}</p>
             <Button asChild variant="accent" className="mt-5 w-full" size="lg">
               <Link to={`/app/cases/${item.id}/chat`}>

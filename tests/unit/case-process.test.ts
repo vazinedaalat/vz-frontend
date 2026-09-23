@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  caseLawyerOrStatusLabel,
+  caseNextActionLabel,
   caseProcessProgress,
+  isLawyerAssigned,
   normalizeCaseStatus,
   normalizeLegalCase,
   reconcileCaseStages,
@@ -59,10 +62,28 @@ describe('case-process', () => {
     const normalized = normalizeLegalCase(raw)
     expect(normalized.status).toBe('follow-up')
     expect(normalized.statusLabel).toBe('پیگیری')
-    expect(normalized.lawyerName).toBe('در انتظار تخصیص')
+    expect(normalized.lawyerName).toBe('')
     expect(normalized.progress).toBe(67)
     expect(normalized.stages.filter((s) => s.completed)).toHaveLength(4)
     expect(normalized.nextAction).toBe('')
     expect(normalized.chatId).toBe('')
+  })
+
+  it('prefers statusLabel over lawyer / nextAction placeholders', () => {
+    expect(isLawyerAssigned('در انتظار تخصیص')).toBe(false)
+    expect(isLawyerAssigned('منتظر تخصیص وکیل')).toBe(false)
+    expect(isLawyerAssigned('دکتر وزیری')).toBe(true)
+
+    const item = {
+      status: 'follow-up' as const,
+      statusLabel: 'پیگیری',
+      lawyerName: 'در انتظار تخصیص',
+      nextAction: 'منتظر تخصیص وکیل',
+    }
+    expect(caseLawyerOrStatusLabel(item)).toBe('پیگیری')
+    expect(caseNextActionLabel(item)).toBe('پیگیری')
+    expect(
+      caseLawyerOrStatusLabel({ ...item, lawyerName: 'دکتر وزیری' }),
+    ).toBe('دکتر وزیری')
   })
 })

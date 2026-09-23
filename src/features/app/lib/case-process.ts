@@ -39,6 +39,33 @@ export function caseStatusLabel(status: CaseStatus | string | null | undefined):
   return CASE_STATUS_LABEL[key]
 }
 
+/** True when API returned a real lawyer name (not the default assignment placeholder). */
+export function isLawyerAssigned(lawyerName: string | null | undefined): boolean {
+  const name = lawyerName?.trim() ?? ''
+  if (!name || name === '—' || name === '-') return false
+  return !/تخصیص/.test(name)
+}
+
+/**
+ * Secondary line on case cards / headers:
+ * show assigned lawyer when present, otherwise the API case status label.
+ */
+export function caseLawyerOrStatusLabel(
+  item: Pick<LegalCase, 'lawyerName' | 'statusLabel' | 'status'>,
+): string {
+  if (isLawyerAssigned(item.lawyerName)) return item.lawyerName.trim()
+  return item.statusLabel?.trim() || caseStatusLabel(item.status)
+}
+
+/** Next-action copy — never show the generic “awaiting lawyer” placeholder. */
+export function caseNextActionLabel(
+  item: Pick<LegalCase, 'nextAction' | 'statusLabel' | 'status'>,
+): string {
+  const action = item.nextAction?.trim() ?? ''
+  if (action && !/تخصیص/.test(action)) return action
+  return item.statusLabel?.trim() || caseStatusLabel(item.status)
+}
+
 /**
  * Index of the active stage for a case status (0..5).
  * `closed` is past the last stage (all complete).
@@ -112,7 +139,7 @@ export function normalizeLegalCase(
     status,
     statusLabel: item.statusLabel?.trim() || caseStatusLabel(status),
     progress: caseProcessProgress(item.progress, processStages),
-    lawyerName: item.lawyerName?.trim() || 'در انتظار تخصیص',
+    lawyerName: item.lawyerName?.trim() || '',
     nextAction: item.nextAction ?? '',
     chatId: item.chatId ?? '',
     stages,

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { formatFaNumber } from '@/lib/format'
+import { caseLawyerOrStatusLabel } from '../lib/case-process'
 import type { LegalCase } from '../types'
 
 interface CaseCardProps {
@@ -9,6 +10,8 @@ interface CaseCardProps {
 }
 
 export function CaseCard({ item }: CaseCardProps) {
+  const statusLine = caseLawyerOrStatusLabel(item)
+
   return (
     <article className="flex h-full flex-col gap-4 rounded-[1.5rem] border border-navy-200 bg-white p-5 shadow-soft transition-all hover:border-gold-300 hover:shadow-lift">
       <Link to={`/app/cases/${item.id}`} className="group block min-w-0">
@@ -34,7 +37,9 @@ export function CaseCard({ item }: CaseCardProps) {
           </div>
         </div>
 
-        <p className="mt-3 text-xs text-navy-500">{item.lawyerName}</p>
+        <p className="mt-3 truncate text-xs text-navy-500" title={statusLine}>
+          {statusLine}
+        </p>
       </Link>
 
       <div className="mt-auto grid grid-cols-1 gap-2 border-t border-navy-100 pt-4 sm:grid-cols-2">
