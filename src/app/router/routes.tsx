@@ -19,6 +19,7 @@ const DocumentRequestPage = lazy(() => import('@/features/app/pages/document-req
 const NotificationsPage = lazy(() => import('@/features/app/pages/notifications-page'))
 const DiscountsPage = lazy(() => import('@/features/app/pages/discounts-page'))
 const ChatPage = lazy(() => import('@/features/app/pages/chat-page'))
+const ProfilePage = lazy(() => import('@/features/app/pages/profile-page'))
 
 function PageLoader() {
   return (
@@ -95,6 +96,7 @@ const router = createBrowserRouter(
                 { path: 'notifications', element: <NotificationsPage /> },
                 { path: 'discounts', element: <DiscountsPage /> },
                 { path: 'chat', element: <ChatPage /> },
+                { path: 'profile', element: <ProfilePage /> },
               ],
             },
           ],

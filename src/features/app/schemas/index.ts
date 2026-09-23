@@ -149,6 +149,20 @@ export const documentRequestSchema = documentRequestFieldsSchema.extend({
   }),
 })
 
+export const updateProfileSchema = z.object({
+  fullName: z
+    .string()
+    .trim()
+    .min(3, 'نام و نام خانوادگی را کامل وارد کنید')
+    .max(100, 'نام بیش از حد طولانی است'),
+  nationalId: asciiDigitString(
+    z.union([
+      z.literal(''),
+      z.string().regex(/^\d{10}$/, 'کد ملی باید ۱۰ رقم باشد'),
+    ]),
+  ),
+})
+
 export const ticketSchema = z.object({
   subject: z.string().min(5, 'موضوع تیکت را وارد کنید'),
   category: z.enum(['عمومی', 'مالی', 'فنی', 'پرونده']),
@@ -164,4 +178,5 @@ export type CreateCaseIntakeValues = z.infer<typeof createCaseIntakeSchema>
 export type CreateCaseValues = z.infer<typeof createCaseSchema>
 export type DocumentRequestFieldsValues = z.infer<typeof documentRequestFieldsSchema>
 export type DocumentRequestValues = z.infer<typeof documentRequestSchema>
+export type UpdateProfileValues = z.infer<typeof updateProfileSchema>
 export type TicketValues = z.infer<typeof ticketSchema>

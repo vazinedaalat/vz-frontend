@@ -32,6 +32,19 @@ export function fetchMeApi() {
   return apiRequest<AppUser>({ method: 'GET', url: '/auth/me' })
 }
 
+export interface UpdateProfilePayload {
+  fullName: string
+  /** Omit or leave empty to keep the existing national ID. */
+  nationalId?: string
+}
+
+export function updateProfileApi(payload: UpdateProfilePayload) {
+  const body: UpdateProfilePayload = { fullName: payload.fullName.trim() }
+  const nationalId = payload.nationalId?.trim()
+  if (nationalId) body.nationalId = nationalId
+  return apiRequest<AppUser>({ method: 'PATCH', url: '/auth/me', data: body })
+}
+
 export function logoutApi(refreshToken?: string | null) {
   return apiRequest<{ ok: true }>({
     method: 'POST',

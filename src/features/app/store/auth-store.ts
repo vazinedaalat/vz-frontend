@@ -3,8 +3,8 @@ import { persist } from 'zustand/middleware'
 import { isMockEnabled } from '@/config/env'
 import { clearTokens, getRefreshToken, setTokens } from '@/services/api/token'
 import { AppError } from '@/services/api/errors'
-import { fetchMeApi, logoutApi, requestOtpApi, verifyOtpApi } from '../api/auth'
-import { getMockUser } from '../mocks/data'
+import { fetchMeApi, logoutApi, requestOtpApi, updateProfileApi, verifyOtpApi } from '../api/auth'
+import { getMockUser, updateMockUser } from '../mocks/data'
 import type { AppUser } from '../types'
 
 interface AuthState {
@@ -18,6 +18,9 @@ interface AuthState {
     phone: string,
     code: string,
   ) => Promise<{ ok: true } | { ok: false; message: string }>
+  updateProfile: (
+    values: { fullName: string; nationalId?: string },
+  ) => Promise<{ ok: true; user: AppUser } | { ok: false; message: string }>
   hydrateSession: () => Promise<void>
   logout: () => Promise<void>
 }
@@ -68,6 +71,7 @@ export const useAuthStore = create<AuthState>()(
                 fullName: 'کاربر وزین عدالت',
                 phone,
                 nationalIdMasked: '۰۰۰******۰۰',
+                hasNationalId: false,
               }
           set({ user, isAuthenticated: true, phonePending: null })
           return { ok: true }
@@ -82,6 +86,40 @@ export const useAuthStore = create<AuthState>()(
           return {
             ok: false,
             message: toErrorMessage(error, 'تایید کد ناموفق بود.'),
+          }
+        }
+      },
+
+      updateProfile: async (values) => {
+        if (isMockEnabled) {
+          const current = get().user
+          if (!current) {
+            return { ok: false, message: 'نشست کاربر یافت نشد.' }
+          }
+          const nationalId = values.nationalId?.trim()
+          const next: AppUser = {
+            ...current,
+            fullName: values.fullName.trim(),
+            ...(nationalId
+              ? {
+                  nationalIdMasked: `${nationalId.slice(0, 3)}******${nationalId.slice(-2)}`,
+                  hasNationalId: true,
+                }
+              : {}),
+          }
+          updateMockUser(next)
+          set({ user: next })
+          return { ok: true, user: next }
+        }
+
+        try {
+          const user = await updateProfileApi(values)
+          set({ user })
+          return { ok: true, user }
+        } catch (error) {
+          return {
+            ok: false,
+            message: toErrorMessage(error, 'ذخیره مشخصات ناموفق بود.'),
           }
         }
       },

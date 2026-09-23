@@ -27,6 +27,7 @@ const MOCK_USER: AppUser = {
   fullName: 'علی رضایی',
   phone: '09121234567',
   nationalIdMasked: '۰۰۱******۴۵',
+  hasNationalId: true,
 }
 
 const MOCK_OFFERS: SpecialOffer[] = [
@@ -461,7 +462,14 @@ const MOCK_TICKETS: SupportTicket[] = [
 ]
 
 export function getMockUser(): AppUser | null {
-  return withMockData(() => MOCK_USER, null)
+  return withMockData(() => ({ ...MOCK_USER }), null)
+}
+
+export function updateMockUser(patch: Partial<AppUser>): AppUser | null {
+  return withMockData(() => {
+    Object.assign(MOCK_USER, patch)
+    return { ...MOCK_USER }
+  }, null)
 }
 
 export function getHomeHeroBanners(): HomeHeroBannerSlide[] {

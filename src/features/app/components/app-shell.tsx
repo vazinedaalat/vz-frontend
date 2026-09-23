@@ -75,10 +75,16 @@ export function AppShell() {
           </nav>
 
           <div className="border-t border-navy-100 p-4">
-            <p className="truncate text-sm font-semibold">{user?.fullName ?? 'کاربر'}</p>
-            <p className="mt-1 text-xs text-navy-500" dir="ltr">
-              {user?.phone}
-            </p>
+            <NavLink
+              to="/app/profile"
+              className="block rounded-xl px-1 py-1 transition-colors hover:bg-navy-50"
+            >
+              <p className="truncate text-sm font-semibold">{user?.fullName ?? 'کاربر'}</p>
+              <p className="mt-1 text-xs text-navy-500" dir="ltr">
+                {user?.phone}
+              </p>
+              <p className="mt-1 text-[0.7rem] text-gold-700">ویرایش مشخصات</p>
+            </NavLink>
             {!isMockEnabled ? (
               <p className="mt-2 text-[0.7rem] leading-5 text-navy-400">
                 داده نمایشی در محیط تولید غیرفعال است.
@@ -171,7 +177,7 @@ export function AppShell() {
                     <p id={moreTitleId} className="font-display text-base font-bold text-navy-900">
                       سایر بخش‌ها
                     </p>
-                    <p className="mt-0.5 text-xs text-navy-500">اسناد، اطلاعیه‌ها و تخفیف‌ها</p>
+                    <p className="mt-0.5 text-xs text-navy-500">اسناد، اطلاعیه‌ها، تخفیف‌ها و مشخصات</p>
                   </div>
                   <Button type="button" variant="ghost" size="icon" aria-label="بستن" onClick={() => setMoreOpen(false)}>
                     <X className="size-5" />

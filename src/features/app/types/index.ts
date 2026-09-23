@@ -85,6 +85,8 @@ export interface AppUser {
   fullName: string
   phone: string
   nationalIdMasked: string
+  /** True when a full national ID is stored server-side (never returned in cleartext). */
+  hasNationalId?: boolean
 }
 
 export interface HomeHeroBannerSlide {

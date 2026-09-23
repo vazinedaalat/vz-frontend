@@ -6,6 +6,7 @@ import {
   MessageCircle,
   MessagesSquare,
   Percent,
+  UserRound,
 } from 'lucide-react'
 import type { NavItem } from '../types'
 
@@ -17,6 +18,7 @@ export const APP_NAV: readonly NavItem[] = [
   { label: 'پیام‌ها', to: '/app/chat', icon: MessageCircle },
   { label: 'اطلاعیه‌ها', to: '/app/notifications', icon: Bell },
   { label: 'تخفیف‌ها', to: '/app/discounts', icon: Percent },
+  { label: 'مشخصات من', to: '/app/profile', icon: UserRound },
 ] as const
 
 /** Primary bottom-bar destinations on small screens (includes chat). */
@@ -32,6 +34,7 @@ export const APP_MOBILE_MORE_NAV: readonly NavItem[] = [
   APP_NAV[3]!,
   APP_NAV[5]!,
   APP_NAV[6]!,
+  APP_NAV[7]!,
 ] as const
 
 export const DOCUMENT_TYPE_OPTIONS = [
