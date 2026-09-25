@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/lib/format'
 import { CASE_FILE_ACCEPT, CASE_FILE_MAX_COUNT } from '../constants/case-intake'
 import { formatFileSize, mergeCaseFiles } from '../lib/case-files'
+import { normalizeFileName } from '../lib/filename'
 import type { CaseFileMeta } from '../types'
 
 interface CaseFileUploaderProps {
@@ -92,12 +93,14 @@ export function CaseFileUploader({ files, onChange, error }: CaseFileUploaderPro
               className="flex items-center justify-between gap-3 rounded-xl border border-navy-200 bg-white px-3.5 py-3 shadow-soft"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-navy-900">{file.name}</p>
+                <p className="truncate text-sm font-medium text-navy-900" title={normalizeFileName(file.name)}>
+                  {normalizeFileName(file.name)}
+                </p>
                 <p className="mt-0.5 text-xs text-navy-500">{toPersianDigits(formatFileSize(file.size))}</p>
               </div>
               <button
                 type="button"
-                aria-label={`حذف ${file.name}`}
+                aria-label={`حذف ${normalizeFileName(file.name)}`}
                 className="inline-flex size-10 items-center justify-center rounded-xl border border-navy-200 text-navy-600 transition hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/40"
                 onClick={() => onChange(files.filter((item) => item.id !== file.id))}
               >

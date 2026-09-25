@@ -4,6 +4,7 @@ import { toPersianDigits } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { formatFileSize } from '../lib/case-files'
 import { isImageAttachment, resolveAttachmentUrl } from '../lib/chat-attachments'
+import { normalizeFileName } from '../lib/filename'
 import type { CaseFileMeta } from '../types'
 
 interface ChatAttachmentListProps {
@@ -32,20 +33,21 @@ export function ChatAttachmentList({ attachments, tone = 'light' }: ChatAttachme
           >
             {images.map((file) => {
               const href = resolveAttachmentUrl(file)
+              const displayName = normalizeFileName(file.name)
               return (
                 <li key={file.id}>
                   <button
                     type="button"
-                    onClick={() => setLightbox({ src: href, name: file.name })}
+                    onClick={() => setLightbox({ src: href, name: displayName })}
                     className={cn(
                       'group relative block w-full overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/50',
                       tone === 'dark' ? 'bg-white/10' : 'border border-navy-200/80 bg-navy-50',
                     )}
-                    aria-label={`مشاهده تصویر ${file.name}`}
+                    aria-label={`مشاهده تصویر ${displayName}`}
                   >
                     <img
                       src={href}
-                      alt={file.name}
+                      alt={displayName}
                       loading="lazy"
                       className="max-h-52 w-full object-cover transition-transform duration-200 group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                     />
@@ -93,6 +95,7 @@ function FileAttachmentRow({
   tone: 'light' | 'dark'
 }) {
   const href = resolveAttachmentUrl(file)
+  const displayName = normalizeFileName(file.name)
   const content = (
     <>
       <span
@@ -104,7 +107,9 @@ function FileAttachmentRow({
         <FileText className="size-3.5" aria-hidden />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-medium">{file.name}</span>
+        <span className="block truncate font-medium" title={displayName}>
+          {displayName}
+        </span>
         <span className={cn('block text-[0.65rem]', tone === 'dark' ? 'text-white/50' : 'text-navy-400')}>
           {toPersianDigits(formatFileSize(file.size))}
         </span>
@@ -134,11 +139,11 @@ function FileAttachmentRow({
     <li>
       <a
         href={href}
-        download={file.name}
+        download={displayName}
         target="_blank"
         rel="noopener noreferrer"
         className={className}
-        aria-label={`دانلود ${file.name}`}
+        aria-label={`دانلود ${displayName}`}
       >
         {content}
       </a>

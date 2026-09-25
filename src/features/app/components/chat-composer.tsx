@@ -9,6 +9,7 @@ import { toPersianDigits } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { CASE_FILE_ACCEPT, CHAT_FILE_MAX_COUNT } from '../constants/case-intake'
 import { formatFileSize, mergeCaseFiles } from '../lib/case-files'
+import { normalizeFileName } from '../lib/filename'
 import { chatMessageSchema } from '../schemas'
 import type { CaseFileMeta, ChatSendPayload } from '../types'
 
@@ -93,11 +94,13 @@ export function ChatComposer({
               <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-xl bg-gold-100 text-gold-700">
                 <FileText className="size-3.5" aria-hidden />
               </span>
-              <span className="truncate font-medium">{file.name}</span>
+              <span className="truncate font-medium" title={normalizeFileName(file.name)}>
+                {normalizeFileName(file.name)}
+              </span>
               <span className="shrink-0 text-navy-400">{toPersianDigits(formatFileSize(file.size))}</span>
               <button
                 type="button"
-                aria-label={`حذف ${file.name}`}
+                aria-label={`حذف ${normalizeFileName(file.name)}`}
                 className="inline-flex size-6 items-center justify-center rounded-lg text-navy-500 hover:bg-navy-50 hover:text-destructive"
                 onClick={() => setAttachments((prev) => prev.filter((item) => item.id !== file.id))}
               >

@@ -31,7 +31,7 @@ export function createCaseApi(payload: CreateCaseValues) {
 
 export function uploadCaseFilesApi(caseId: string, files: File[]) {
   const form = new FormData()
-  files.forEach((file) => form.append('files', file))
+  files.forEach((file) => form.append('files', file, file.name))
   return apiRequest<
     Array<{ id: string; name: string; size: number; type: string; url: string }>
   >({
