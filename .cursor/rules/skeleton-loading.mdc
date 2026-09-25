@@ -1,0 +1,38 @@
+---
+description: Professional delayed (lazy) layout skeletons for backend/Suspense loading — no bare loading text
+alwaysApply: true
+---
+
+# Skeleton Loading — وزین عدالت
+
+Whenever you add or touch **loading UI** for data from the backend / TanStack Query / `Suspense`, ship **layout-matching skeletons with lazy reveal** — not bare «در حال بارگذاری…» or a full-page spinner for in-page lists.
+
+Full skill: `skills/skeleton-loading.md`
+
+## Must
+
+1. **Shape match** the final UI (card grid → card bones; list → row bones; detail → header + body bones).
+2. **Lazy reveal (~180ms)** via shared hook — avoid flash on fast/cached responses.
+3. Use **shared** skeleton primitives (`components/shared` / `components/ui`) + brand tokens (`navy-*`, soft gold shimmer) — no hardcoded hex.
+4. Keep **shell / PageHeader / nav** visible; skeleton only the async region.
+5. `aria-busy` + Persian `aria-label`; bones `aria-hidden`; honor `prefers-reduced-motion`.
+6. Empty → empty state; error → error UI; refetch with data → keep content (no full skeleton wipe).
+
+## Must not
+
+- Replace list/detail loading with only a text line or lone spinner
+- Show skeleton for &lt; ~180ms pending (flicker)
+- Invent one-off gray pulse blocks per page when a shared recipe exists
+- Skeleton the entire app chrome on every `isFetching`
+
+## Recipes (quick)
+
+| UI | Skeleton |
+|----|----------|
+| Cases / discounts / bookings | card grid, `count ≈ pageSize` |
+| Notifications / tickets | stacked rows |
+| Blog | cover + title + excerpt |
+| Route `Suspense` | content shell inside layout, not endless blank spinner alone |
+
+Canonical details, hook naming, and anti-patterns: `skills/skeleton-loading.md`.
+Also: `skills/ui-system.md`, `skills/components.md`, `.cursor/rules/ui-craft.mdc`.

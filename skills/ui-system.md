@@ -26,6 +26,10 @@ Never implement the same component with two libraries.
 - Always provide visible focus states.
 - Forms must have associated labels.
 
+## Loading / skeletons
+- Backend and Suspense loading UI follows `skills/skeleton-loading.md` and `.cursor/rules/skeleton-loading.mdc`.
+- Prefer delayed layout-matching skeletons; do not ship bare «در حال بارگذاری…» for list/detail regions.
+
 ## SEO / GEO
 - Public marketing & blog pages follow `skills/seo-geo.md` and `.cursor/rules/seo-geo.mdc`.
 - Use `DocumentHead` + JSON-LD helpers in `src/lib/seo/`; never hardcode relative `og:image` URLs.

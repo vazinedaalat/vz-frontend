@@ -4,7 +4,7 @@
 - `components/ui/` → shadcn/ui base primitives (Button, Input, Card…)
 - `components/animated/` → Magic UI style animations / micro-interactions
 - `components/interactive/` → Aceternity-style advanced interactive UI
-- `components/shared/` → App-level shared (ErrorBoundary, EmptyState, LoadingSpinner)
+- `components/shared/` → App-level shared (ErrorBoundary, EmptyState, LoadingSpinner, Skeleton)
 - `features/[name]/components/` → Feature-specific only
 
 ## When NOT to create a new component
@@ -18,3 +18,4 @@
 - Naming: PascalCase, descriptive (`UserAvatar`, not `Avatar2`).
 - Never put data-fetching logic inside pure UI components.
 - Always check Accessibility (keyboard, ARIA, focus).
+- Loading placeholders: follow `skills/skeleton-loading.md` (lazy reveal, shape-matched bones).

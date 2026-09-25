@@ -7,8 +7,10 @@
 - Prefer CSS animations over JS when possible.
 - Debounce search inputs and expensive handlers.
 - Images: use proper formats and sizes (future: add image optimization pipeline).
+- Loading UX: delayed layout skeletons per `skills/skeleton-loading.md` — avoid CLS and loading flicker.
 
 ## Avoid
 - Premature `useMemo` / `useCallback` / `React.memo` unless measured.
 - Large barrel files that prevent tree-shaking.
 - Fetching data in components that don’t need it.
+- Full-page spinners for in-page async lists (use region skeletons instead).
