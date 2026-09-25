@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui'
 import { ErrorBadge } from '@/components/shared/error-badge'
 import { Pagination } from '@/components/shared/pagination'
+import { ListRowSkeletonStack } from '@/components/shared/skeletons'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { usePagination } from '@/hooks/use-pagination'
 import { isMockEnabled } from '@/config/env'
 import { formatFaDateTime } from '@/lib/jalali'
@@ -20,11 +22,12 @@ export default function NotificationsPage() {
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
 
-  const { data: items = [], isLoading } = useQuery({
+  const { data: items = [], isPending } = useQuery({
     queryKey: appKeys.notifications,
     queryFn: isMockEnabled ? async () => getNotifications() : fetchNotifications,
   })
 
+  const showSkeleton = useLazySkeleton(isPending)
   const pagination = usePagination(items, PAGE_SIZE)
 
   const markAll = useMutation({
@@ -74,9 +77,11 @@ export default function NotificationsPage() {
         </ErrorBadge>
       ) : null}
 
-      {isLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
+      {showSkeleton ? (
+        <ListRowSkeletonStack count={PAGE_SIZE} label="در حال بارگذاری اطلاعیه‌ها" />
+      ) : null}
 
-      {items.length > 0 ? (
+      {!showSkeleton && items.length > 0 ? (
         <div className="space-y-5">
           <ul id="notifications-list" className="space-y-3">
             {pagination.pageItems.map((item) => (
@@ -118,7 +123,9 @@ export default function NotificationsPage() {
             listId="notifications-list"
           />
         </div>
-      ) : !isLoading ? (
+      ) : null}
+
+      {!showSkeleton && !isPending && items.length === 0 ? (
         <AppEmptyState title="اطلاعیه‌ای نیست" description="اعلان‌ها از سرویس پیام‌رسانی دریافت می‌شوند." />
       ) : null}
     </div>

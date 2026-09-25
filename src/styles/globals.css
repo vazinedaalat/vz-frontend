@@ -249,3 +249,63 @@
   }
 }
 
+/* Skeleton shimmer — RTL (highlight moves right → left). Brand tokens only. */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.skeleton-bone {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.skeleton-bone--default {
+  background-color: var(--color-navy-100);
+  background-image: linear-gradient(
+    90deg,
+    var(--color-navy-100) 0%,
+    var(--color-navy-50) 45%,
+    color-mix(in oklab, var(--color-gold-100) 55%, white) 50%,
+    var(--color-navy-50) 55%,
+    var(--color-navy-100) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.35s ease-in-out infinite;
+}
+
+.skeleton-bone--on-dark {
+  background-color: rgb(255 255 255 / 0.1);
+  background-image: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0.08) 0%,
+    rgb(255 255 255 / 0.16) 45%,
+    rgb(255 255 255 / 0.22) 50%,
+    rgb(255 255 255 / 0.16) 55%,
+    rgb(255 255 255 / 0.08) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.35s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-bone--default,
+  .skeleton-bone--on-dark {
+    animation: none;
+    background-image: none;
+  }
+
+  .skeleton-bone--default {
+    background-color: var(--color-navy-100);
+  }
+
+  .skeleton-bone--on-dark {
+    background-color: rgb(255 255 255 / 0.12);
+  }
+}
+

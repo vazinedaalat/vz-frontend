@@ -2,6 +2,8 @@ import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { CaseDetailSkeleton } from '@/components/shared/skeletons'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { formatFaDateTime } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
@@ -17,7 +19,7 @@ export default function CaseDetailPage() {
 
   const {
     data: item,
-    isLoading: caseLoading,
+    isPending: casePending,
     error: caseError,
   } = useQuery({
     queryKey: appKeys.cases.detail(caseId),
@@ -31,11 +33,13 @@ export default function CaseDetailPage() {
     select: (items) => items.filter((n) => n.caseId === caseId),
   })
 
-  if (caseLoading) {
-    return <p className="text-sm text-navy-500">در حال بارگذاری…</p>
+  const showSkeleton = useLazySkeleton(casePending)
+
+  if (showSkeleton) {
+    return <CaseDetailSkeleton />
   }
 
-  if (!item || caseError) {
+  if (!casePending && (!item || caseError)) {
     return (
       <AppEmptyState
         title="پرونده پیدا نشد"
@@ -52,6 +56,8 @@ export default function CaseDetailPage() {
       />
     )
   }
+
+  if (!item) return null
 
   const metaLine = `${item.category} · وضعیت: ${item.statusLabel}`
   const nextAction = caseNextActionLabel(item)

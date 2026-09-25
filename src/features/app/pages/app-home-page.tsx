@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Bell, FileText } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { AppHomeSkeleton, DocumentCardSkeletonStack } from '@/components/shared/skeletons'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { env, isMockEnabled } from '@/config/env'
 import { formatFaNumber } from '@/lib/format'
 import { formatFaDate, formatFaDateTime } from '@/lib/jalali'
@@ -72,11 +74,18 @@ export default function AppHomePage() {
   const blogs = blogsQuery.data ?? []
   const unread = (notificationsQuery.data ?? []).filter((item) => !item.read).length
   const pendingDocuments = (documentsQuery.data ?? []).filter((doc) => isDocumentPending(doc.status))
-  const loading =
-    bannersQuery.isLoading ||
-    discountsQuery.isLoading ||
-    casesQuery.isLoading ||
-    bookingsQuery.isLoading
+  const corePending =
+    bannersQuery.isPending ||
+    discountsQuery.isPending ||
+    casesQuery.isPending ||
+    bookingsQuery.isPending
+
+  const showHomeSkeleton = useLazySkeleton(corePending)
+  const showDocumentsSkeleton = useLazySkeleton(documentsQuery.isPending && !isMockEnabled)
+
+  if (showHomeSkeleton) {
+    return <AppHomeSkeleton />
+  }
 
   return (
     <div className="space-y-8 sm:space-y-10">
@@ -102,10 +111,6 @@ export default function AppHomePage() {
           </Button>
         }
       />
-
-      {loading ? (
-        <p className="text-sm text-navy-500">در حال بارگذاری…</p>
-      ) : null}
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
@@ -161,8 +166,8 @@ export default function AppHomePage() {
           </Link>
         </div>
 
-        {!isMockEnabled && documentsQuery.isLoading ? (
-          <p className="text-sm text-navy-500">در حال بارگذاری اسناد…</p>
+        {showDocumentsSkeleton ? (
+          <DocumentCardSkeletonStack count={2} compact label="در حال بارگذاری اسناد" />
         ) : pendingDocuments.length > 0 ? (
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-gold-200/80 bg-gold-100/50 px-4 py-3">

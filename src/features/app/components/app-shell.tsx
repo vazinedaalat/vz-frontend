@@ -1,7 +1,8 @@
-import { useEffect, useId, useState } from 'react'
+import { Suspense, useEffect, useId, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { LogOut, Menu, Scale, X } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { AppRouteSkeleton } from '@/components/shared/skeletons'
 import { cn } from '@/lib/utils'
 import { isMockEnabled } from '@/config/env'
 import { APP_MOBILE_MORE_NAV, APP_MOBILE_PRIMARY_NAV, APP_NAV } from '../constants/nav'
@@ -114,7 +115,9 @@ export function AppShell() {
           </header>
 
           <main className="min-w-0 flex-1 overflow-x-clip px-4 py-6 pb-28 sm:px-6 lg:px-10 lg:py-8 lg:pb-10">
-            <Outlet />
+            <Suspense fallback={<AppRouteSkeleton />}>
+              <Outlet />
+            </Suspense>
           </main>
 
           <nav

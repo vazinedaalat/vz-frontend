@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
+import { MarketingRouteSkeleton } from '@/components/shared/skeletons'
 import { ProtectedRoute } from './protected-route'
 import { ScrollToTop } from './scroll-to-top'
 import { useAuthStore } from '@/features/app/store/auth-store'
@@ -23,24 +24,11 @@ const DiscountsPage = lazy(() => import('@/features/app/pages/discounts-page'))
 const ChatPage = lazy(() => import('@/features/app/pages/chat-page'))
 const ProfilePage = lazy(() => import('@/features/app/pages/profile-page'))
 
-function PageLoader() {
-  return (
-    <div className="flex h-screen items-center justify-center bg-navy-50">
-      <div
-        className="size-10 animate-spin rounded-full border-2 border-gold-500 border-t-transparent"
-        aria-label="در حال بارگذاری"
-      />
-    </div>
-  )
-}
-
 function AuthGate() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   return (
     <ProtectedRoute isAuthenticated={isAuthenticated}>
-      <Suspense fallback={<PageLoader />}>
-        <Outlet />
-      </Suspense>
+      <Outlet />
     </ProtectedRoute>
   )
 }
@@ -68,7 +56,7 @@ const router = createBrowserRouter(
         {
           path: '/',
           element: (
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MarketingRouteSkeleton />}>
               <MarketingHomePage />
             </Suspense>
           ),
@@ -76,7 +64,7 @@ const router = createBrowserRouter(
         {
           path: '/login',
           element: (
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MarketingRouteSkeleton />}>
               <LoginPage />
             </Suspense>
           ),
@@ -84,7 +72,7 @@ const router = createBrowserRouter(
         {
           path: '/blog',
           element: (
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MarketingRouteSkeleton />}>
               <BlogListPage />
             </Suspense>
           ),
@@ -92,7 +80,7 @@ const router = createBrowserRouter(
         {
           path: '/blog/:slug',
           element: (
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MarketingRouteSkeleton />}>
               <BlogPostPage />
             </Suspense>
           ),
@@ -122,7 +110,7 @@ const router = createBrowserRouter(
         {
           path: '*',
           element: (
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MarketingRouteSkeleton />}>
               <NotFoundPage />
             </Suspense>
           ),

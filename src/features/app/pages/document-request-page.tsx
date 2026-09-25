@@ -6,6 +6,8 @@ import { FileStack, ScrollText } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { ErrorBadge } from '@/components/shared/error-badge'
 import { Pagination } from '@/components/shared/pagination'
+import { DocumentCardSkeletonStack } from '@/components/shared/skeletons'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { usePagination } from '@/hooks/use-pagination'
 import { cn } from '@/lib/utils'
 import { toPersianDigits, asciiDigitsField, asciiAmountField, formatFaNumber } from '@/lib/format'
@@ -42,12 +44,13 @@ export default function DocumentRequestPage() {
   const [formErrorBanner, setFormErrorBanner] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
 
-  const { data: documents = [], isLoading: documentsLoading } = useQuery({
+  const { data: documents = [], isPending: documentsPending } = useQuery({
     queryKey: appKeys.documents,
     queryFn: fetchDocuments,
     enabled: !isMockEnabled,
   })
 
+  const showDocumentsSkeleton = useLazySkeleton(documentsPending)
   const documentsPagination = usePagination(documents, DOCUMENTS_PAGE_SIZE)
   const pendingDocuments = documents.filter((doc) => isDocumentPending(doc.status))
   const statusCounts = documents.reduce(
@@ -253,8 +256,8 @@ export default function DocumentRequestPage() {
             </div>
           ) : null}
 
-          {documentsLoading ? (
-            <p className="text-sm text-navy-500">در حال بارگذاری درخواست‌ها…</p>
+          {showDocumentsSkeleton ? (
+            <DocumentCardSkeletonStack count={DOCUMENTS_PAGE_SIZE} />
           ) : documents.length > 0 ? (
             <div className="space-y-4">
               <ul id="documents-list" className="grid gap-3 sm:gap-4">
@@ -274,12 +277,12 @@ export default function DocumentRequestPage() {
                 listId="documents-list"
               />
             </div>
-          ) : (
+          ) : !documentsPending ? (
             <div className="rounded-2xl border border-dashed border-navy-200 bg-navy-50/40 px-5 py-8 text-center">
               <p className="font-medium text-navy-800">هنوز درخواستی ثبت نشده</p>
               <p className="mt-1 text-sm text-navy-500">پس از ارسال فرم، وضعیت اینجا نمایش داده می‌شود.</p>
             </div>
-          )}
+          ) : null}
         </section>
       ) : null}
 

@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, FolderOpen } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { ChatThreadPanelSkeleton } from '@/components/shared/skeletons'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { toPersianDigits } from '@/lib/format'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
@@ -26,7 +28,7 @@ export default function CaseChatPage() {
 
   const {
     data: legalCase,
-    isLoading: caseLoading,
+    isPending: casePending,
   } = useQuery({
     queryKey: appKeys.cases.detail(caseId),
     queryFn: () => (isMockEnabled ? Promise.resolve(getCaseById(caseId)) : fetchCaseById(caseId)),
@@ -35,7 +37,7 @@ export default function CaseChatPage() {
 
   const {
     data: thread,
-    isLoading: chatLoading,
+    isPending: chatPending,
     error: chatError,
   } = useQuery({
     queryKey: appKeys.chats.byCase(caseId),
@@ -43,6 +45,8 @@ export default function CaseChatPage() {
       isMockEnabled ? Promise.resolve(getCaseChatByCaseId(caseId)) : fetchCaseChat(caseId),
     enabled: Boolean(caseId),
   })
+
+  const showSkeleton = useLazySkeleton(casePending || chatPending)
 
   useEffect(() => {
     if (isMockEnabled || !thread?.id) return
@@ -90,11 +94,11 @@ export default function CaseChatPage() {
     },
   })
 
-  if (caseLoading || chatLoading) {
-    return <p className="text-sm text-navy-500">در حال بارگذاری…</p>
+  if (showSkeleton) {
+    return <ChatThreadPanelSkeleton className="mx-auto max-w-3xl" label="در حال بارگذاری چت پرونده" />
   }
 
-  if (!legalCase || !thread || chatError) {
+  if (!casePending && !chatPending && (!legalCase || !thread || chatError)) {
     return (
       <AppEmptyState
         title="چت پرونده در دسترس نیست"
@@ -111,6 +115,8 @@ export default function CaseChatPage() {
       />
     )
   }
+
+  if (!legalCase || !thread) return null
 
   const onSend = (payload: ChatSendPayload) => {
     sendMutation.mutate(payload)

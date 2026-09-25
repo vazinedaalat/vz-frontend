@@ -3,7 +3,9 @@ import { ArrowUpLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Reveal } from '@/components/animated/reveal'
 import { Container } from '@/components/shared/container'
+import { BlogHomeStripSkeleton } from '@/components/shared/skeletons'
 import { Button } from '@/components/ui'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { SectionHeading } from '@/features/home/components/section-heading'
 import { SECTION_IDS } from '@/features/home/constants'
 import { fetchBlogList } from '../api/blog'
@@ -13,11 +15,12 @@ const HOME_BLOG_LIMIT = 3
 
 /** Marketing homepage blog strip — list preview + link to full archive. */
 export function BlogSection() {
-  const { data: posts = [], isLoading, isError } = useQuery({
+  const { data: posts = [], isPending, isError } = useQuery({
     queryKey: ['marketing', 'blog', 'list'],
     queryFn: fetchBlogList,
   })
 
+  const showSkeleton = useLazySkeleton(isPending)
   const preview = posts.slice(0, HOME_BLOG_LIMIT)
 
   return (
@@ -41,28 +44,19 @@ export function BlogSection() {
           </div>
         </Reveal>
 
-        {isLoading ? (
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:mt-14 lg:grid-cols-3 lg:gap-6" aria-busy="true">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-72 animate-pulse rounded-[1.5rem] border border-navy-100 bg-navy-50"
-              />
-            ))}
-          </div>
-        ) : null}
+        {showSkeleton ? <BlogHomeStripSkeleton count={HOME_BLOG_LIMIT} /> : null}
 
-        {isError ? (
+        {!showSkeleton && isError ? (
           <p className="mt-12 text-center text-sm text-navy-500" role="alert">
             بارگذاری مطالب بلاگ با خطا مواجه شد. لطفاً دوباره تلاش کنید.
           </p>
         ) : null}
 
-        {!isLoading && !isError && preview.length === 0 ? (
+        {!showSkeleton && !isPending && !isError && preview.length === 0 ? (
           <p className="mt-12 text-center text-sm text-navy-500">به‌زودی مطالب جدید منتشر می‌شود.</p>
         ) : null}
 
-        {!isLoading && preview.length > 0 ? (
+        {!showSkeleton && preview.length > 0 ? (
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:mt-14 lg:grid-cols-3 lg:gap-6">
             {preview.map((post, index) => (
               <BlogPostCard key={post.id} post={post} delay={index * 0.06} />

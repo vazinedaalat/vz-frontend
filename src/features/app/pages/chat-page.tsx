@@ -8,6 +8,8 @@ import { ArrowRight, FolderOpen, MessageCirclePlus } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { ErrorBadge } from '@/components/shared/error-badge'
 import { Pagination } from '@/components/shared/pagination'
+import { ChatThreadListSkeleton, SupportTicketListSkeleton } from '@/components/shared/skeletons'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { usePagination } from '@/hooks/use-pagination'
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/lib/format'
@@ -45,16 +47,18 @@ export default function ChatPage() {
   const [tab, setTab] = useState<ChatTab>('cases')
   const [apiError, setApiError] = useState<string | null>(null)
 
-  const { data: caseChats = [], isLoading: chatsLoading } = useQuery({
+  const { data: caseChats = [], isPending: chatsPending } = useQuery({
     queryKey: appKeys.chats.all,
     queryFn: isMockEnabled ? async () => getCaseChats() : fetchChats,
   })
 
-  const { data: tickets = [], isLoading: ticketsLoading } = useQuery({
+  const { data: tickets = [], isPending: ticketsPending } = useQuery({
     queryKey: appKeys.support,
     queryFn: isMockEnabled ? async () => getTickets() : fetchSupportTickets,
   })
 
+  const showChatsSkeleton = useLazySkeleton(chatsPending)
+  const showTicketsSkeleton = useLazySkeleton(ticketsPending)
   const caseChatsPagination = usePagination(caseChats, CASE_CHATS_PAGE_SIZE)
   const ticketsPagination = usePagination(tickets, TICKETS_PAGE_SIZE)
 
@@ -215,8 +219,8 @@ export default function ChatPage() {
 
       {tab === 'cases' ? (
         <div className={cn('space-y-3', mobilePane === 'thread' && 'hidden md:block')}>
-          {chatsLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
-          {caseChats.length > 0 ? (
+          {showChatsSkeleton ? <ChatThreadListSkeleton count={CASE_CHATS_PAGE_SIZE} /> : null}
+          {!showChatsSkeleton && caseChats.length > 0 ? (
             <div className="space-y-4">
               <ul id="case-chats-list" className="grid gap-3 md:grid-cols-2">
                 {caseChatsPagination.pageItems.map((chat) => (
@@ -263,7 +267,8 @@ export default function ChatPage() {
                 listId="case-chats-list"
               />
             </div>
-          ) : !chatsLoading ? (
+          ) : null}
+          {!showChatsSkeleton && !chatsPending && caseChats.length === 0 ? (
             <AppEmptyState
               title="چت پرونده‌ای نیست"
               description="با ایجاد پرونده، کانال چت پیگیری به‌صورت خودکار فعال می‌شود."
@@ -312,9 +317,9 @@ export default function ChatPage() {
                 </Button>
               </div>
 
-              {ticketsLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
+              {showTicketsSkeleton ? <SupportTicketListSkeleton count={TICKETS_PAGE_SIZE} /> : null}
 
-              {tickets.length > 0 ? (
+              {!showTicketsSkeleton && tickets.length > 0 ? (
                 <div className="space-y-4">
                   <ul id="support-tickets-list" className="space-y-2.5">
                     {ticketsPagination.pageItems.map((ticket) => (
@@ -356,7 +361,9 @@ export default function ChatPage() {
                     listId="support-tickets-list"
                   />
                 </div>
-              ) : !ticketsLoading ? (
+              ) : null}
+
+              {!showTicketsSkeleton && !ticketsPending && tickets.length === 0 ? (
                 <AppEmptyState title="تیکتی نیست" description="اولین تیکت را ثبت کنید تا گفتگو آغاز شود." />
               ) : null}
             </div>

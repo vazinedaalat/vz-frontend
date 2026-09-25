@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui'
 import { Pagination } from '@/components/shared/pagination'
+import { DiscountCardSkeletonGrid } from '@/components/shared/skeletons'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { usePagination } from '@/hooks/use-pagination'
 import { isMockEnabled } from '@/config/env'
 import { formatFaDate } from '@/lib/jalali'
@@ -22,11 +24,12 @@ const SECTION_HINT: Record<string, string> = {
 const PAGE_SIZE = 6
 
 export default function DiscountsPage() {
-  const { data: codes = [], isLoading } = useQuery({
+  const { data: codes = [], isPending } = useQuery({
     queryKey: appKeys.discounts,
     queryFn: isMockEnabled ? async () => getDiscountCodes() : fetchMyDiscounts,
   })
   const [copied, setCopied] = useState<string | null>(null)
+  const showSkeleton = useLazySkeleton(isPending)
   const pagination = usePagination(codes, PAGE_SIZE)
 
   const copyCode = async (code: string) => {
@@ -47,9 +50,9 @@ export default function DiscountsPage() {
         description="کدهای سراسری و اختصاصی شما. هر کد فقط در بخش خودش قابل استفاده است."
       />
 
-      {isLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
+      {showSkeleton ? <DiscountCardSkeletonGrid count={PAGE_SIZE} /> : null}
 
-      {codes.length > 0 ? (
+      {!showSkeleton && codes.length > 0 ? (
         <div className="space-y-5">
           <div id="discounts-list" className="grid gap-4 md:grid-cols-2">
             {pagination.pageItems.map((item) => {
@@ -159,7 +162,9 @@ export default function DiscountsPage() {
             listId="discounts-list"
           />
         </div>
-      ) : !isLoading ? (
+      ) : null}
+
+      {!showSkeleton && !isPending && codes.length === 0 ? (
         <AppEmptyState
           title="کد تخفیفی موجود نیست"
           description="کدهای سراسری فعال و کدهای اختصاصی شما اینجا نمایش داده می‌شوند."

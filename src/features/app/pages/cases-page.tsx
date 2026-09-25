@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui'
-import { Pagination } from '@/components/shared/pagination'
+import { CaseCardSkeletonGrid } from '@/components/shared/skeletons'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { usePagination } from '@/hooks/use-pagination'
 import { isMockEnabled } from '@/config/env'
 import { appKeys, fetchCases } from '../api'
@@ -9,15 +10,17 @@ import { getCases } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
 import { CaseCard } from '../components/case-card'
 import { PageHeader } from '../components/page-header'
+import { Pagination } from '@/components/shared/pagination'
 
 const PAGE_SIZE = 6
 
 export default function CasesPage() {
-  const { data: cases = [], isLoading } = useQuery({
+  const { data: cases = [], isPending } = useQuery({
     queryKey: appKeys.cases.all,
     queryFn: isMockEnabled ? async () => getCases() : fetchCases,
   })
 
+  const showSkeleton = useLazySkeleton(isPending)
   const pagination = usePagination(cases, PAGE_SIZE)
 
   return (
@@ -33,9 +36,9 @@ export default function CasesPage() {
         }
       />
 
-      {isLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
+      {showSkeleton ? <CaseCardSkeletonGrid count={PAGE_SIZE} /> : null}
 
-      {cases.length > 0 ? (
+      {!showSkeleton && cases.length > 0 ? (
         <div className="space-y-5">
           <div id="cases-list" className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {pagination.pageItems.map((item) => (
@@ -52,7 +55,9 @@ export default function CasesPage() {
             listId="cases-list"
           />
         </div>
-      ) : !isLoading ? (
+      ) : null}
+
+      {!showSkeleton && !isPending && cases.length === 0 ? (
         <AppEmptyState
           title="پرونده‌ای وجود ندارد"
           description="پرونده‌های شما از سرور بارگذاری می‌شوند."

@@ -7,6 +7,8 @@ import { CreditCard, CalendarDays, Clock3 } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { ErrorBadge } from '@/components/shared/error-badge'
 import { Pagination } from '@/components/shared/pagination'
+import { BookingCardSkeletonGrid } from '@/components/shared/skeletons'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { usePagination } from '@/hooks/use-pagination'
 import { formatFaNumber, toPersianDigits } from '@/lib/format'
 import { formatJalaliLabel, formatFaDateTime, jalaliFromDate, startOfLocalDay } from '@/lib/jalali'
@@ -99,11 +101,12 @@ export default function ConsultationPage() {
     enabled: Boolean(planId),
   })
 
-  const { data: existing = [], isLoading: bookingsLoading } = useQuery({
+  const { data: existing = [], isPending: bookingsPending } = useQuery({
     queryKey: appKeys.consultation.bookings,
     queryFn: isMockEnabled ? async () => getConsultations() : fetchConsultationBookings,
   })
 
+  const showBookingsSkeleton = useLazySkeleton(bookingsPending)
   const bookingsPagination = usePagination(existing, BOOKINGS_PAGE_SIZE)
   const selectedPlan = planId ? (plans.find((plan) => plan.id === planId) ?? null) : null
 
@@ -389,8 +392,8 @@ export default function ConsultationPage() {
 
       <section className="min-w-0 space-y-4">
         <h2 className="font-display text-lg font-bold text-navy-900">رزروهای شما</h2>
-        {bookingsLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
-        {existing.length > 0 ? (
+        {showBookingsSkeleton ? <BookingCardSkeletonGrid count={BOOKINGS_PAGE_SIZE} /> : null}
+        {!showBookingsSkeleton && existing.length > 0 ? (
           <div className="space-y-4">
             <div id="bookings-list" className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
               {bookingsPagination.pageItems.map((slot) => (
@@ -436,7 +439,8 @@ export default function ConsultationPage() {
               listId="bookings-list"
             />
           </div>
-        ) : !bookingsLoading ? (
+        ) : null}
+        {!showBookingsSkeleton && !bookingsPending && existing.length === 0 ? (
           <AppEmptyState
             title="رزروی نمایش داده نمی‌شود"
             description={

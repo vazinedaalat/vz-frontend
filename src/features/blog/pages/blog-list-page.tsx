@@ -6,7 +6,9 @@ import { Reveal } from '@/components/animated/reveal'
 import { Container } from '@/components/shared/container'
 import { DocumentHead } from '@/components/shared/document-head'
 import { Pagination } from '@/components/shared/pagination'
+import { BlogPostCardSkeletonGrid } from '@/components/shared/skeletons'
 import { Button } from '@/components/ui'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { usePagination } from '@/hooks/use-pagination'
 import { SiteFooter } from '@/features/home/components/site-footer'
 import { SiteHeader } from '@/features/home/components/site-header'
@@ -19,12 +21,13 @@ import { buildBlogListSeo } from '../lib/seo'
 const PAGE_SIZE = 6
 
 export default function BlogListPage() {
-  const { data: posts = [], isLoading, isError } = useQuery({
+  const { data: posts = [], isPending, isError } = useQuery({
     queryKey: ['marketing', 'blog', 'list'],
     queryFn: fetchBlogList,
   })
 
   const seo = useMemo(() => buildBlogListSeo(), [])
+  const showSkeleton = useLazySkeleton(isPending)
   const pagination = usePagination(posts, PAGE_SIZE)
 
   return (
@@ -74,28 +77,19 @@ export default function BlogListPage() {
             فهرست مطالب بلاگ
           </h2>
           <Container>
-            {isLoading ? (
-              <div className="grid gap-5 lg:grid-cols-2 lg:gap-6" aria-busy="true">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-64 animate-pulse rounded-[1.5rem] border border-navy-100 bg-white"
-                  />
-                ))}
-              </div>
-            ) : null}
+            {showSkeleton ? <BlogPostCardSkeletonGrid count={PAGE_SIZE} /> : null}
 
-            {isError ? (
+            {!showSkeleton && isError ? (
               <p className="text-center text-sm text-navy-500" role="alert">
                 بارگذاری مطالب بلاگ با خطا مواجه شد.
               </p>
             ) : null}
 
-            {!isLoading && !isError && posts.length === 0 ? (
+            {!showSkeleton && !isPending && !isError && posts.length === 0 ? (
               <p className="text-center text-sm text-navy-500">فعلاً مطلبی منتشر نشده است.</p>
             ) : null}
 
-            {!isLoading && pagination.pageItems.length > 0 ? (
+            {!showSkeleton && pagination.pageItems.length > 0 ? (
               <div className="space-y-8">
                 <div id="blog-list" className="grid gap-5 lg:grid-cols-2 lg:gap-6">
                   {pagination.pageItems.map((post, index) => (

@@ -5,7 +5,9 @@ import { Link, useParams } from 'react-router-dom'
 import { Reveal } from '@/components/animated/reveal'
 import { Container } from '@/components/shared/container'
 import { DocumentHead } from '@/components/shared/document-head'
+import { BlogPostDetailSkeleton } from '@/components/shared/skeletons'
 import { Button } from '@/components/ui'
+import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { SiteFooter } from '@/features/home/components/site-footer'
 import { SiteHeader } from '@/features/home/components/site-header'
 import { CTA, LOGIN_PATH } from '@/features/home/constants'
@@ -77,33 +79,29 @@ export default function BlogPostPage() {
   })
 
   const post = postQuery.data
+  const showSkeleton = useLazySkeleton(postQuery.isPending)
   const related =
     relatedQuery.data?.filter((item) => item.slug !== post?.slug && item.id !== post?.id).slice(0, 2) ??
     []
 
   const seo = useMemo(() => {
-    if (postQuery.isLoading) return null
+    if (postQuery.isPending) return null
     if (!post) return buildBlogNotFoundSeo(slug)
     return buildBlogPostSeo(post)
-  }, [post, postQuery.isLoading, slug])
+  }, [post, postQuery.isPending, slug])
 
   return (
     <div className="min-h-screen bg-navy-50 text-navy-900">
       {seo ? <DocumentHead {...seo} /> : null}
       <SiteHeader />
       <main>
-        {postQuery.isLoading ? (
+        {showSkeleton ? (
           <Container className="py-20">
-            <div className="mx-auto max-w-3xl space-y-4" aria-busy="true">
-              <div className="h-8 w-40 animate-pulse rounded-lg bg-navy-100" />
-              <div className="h-12 w-full animate-pulse rounded-xl bg-navy-100" />
-              <div className="aspect-[16/9] animate-pulse rounded-[1.5rem] bg-navy-100" />
-              <div className="h-40 animate-pulse rounded-xl bg-navy-100" />
-            </div>
+            <BlogPostDetailSkeleton />
           </Container>
         ) : null}
 
-        {!postQuery.isLoading && !post ? (
+        {!showSkeleton && !postQuery.isPending && !post ? (
           <Container className="py-20 text-center">
             <h1 className="font-display text-3xl font-extrabold text-navy-900">مطلب پیدا نشد</h1>
             <p className="mt-4 text-navy-600">این مطلب حذف شده یا آدرس آن اشتباه است.</p>
