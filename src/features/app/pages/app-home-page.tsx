@@ -210,7 +210,7 @@ export default function AppHomePage() {
                     <div>
                       <h3 className="font-semibold text-navy-900">{item.topic}</h3>
                       <p className="mt-1 text-xs text-navy-500">
-                        {item.lawyerName} · {item.modeLabel} · {item.durationMinutes} دقیقه
+                        {item.modeLabel} · {item.durationMinutes} دقیقه
                       </p>
                     </div>
                     <BookingStatusChip status={item.status} />

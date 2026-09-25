@@ -27,7 +27,6 @@ import { AppEmptyState } from '../components/app-empty-state'
 import { ChatThreadPanel } from '../components/chat-thread-panel'
 import { Field } from '../components/field'
 import { PageHeader } from '../components/page-header'
-import { isLawyerAssigned } from '../lib/case-process'
 import type { ChatMessage, ChatSendPayload, SupportTicket } from '../types'
 
 type MobilePane = 'list' | 'thread' | 'compose'
@@ -242,9 +241,7 @@ export default function ChatPage() {
                         )}
                       </div>
                       <p className="mt-2 text-xs text-navy-500">
-                        {isLawyerAssigned(chat.lawyerName)
-                          ? `${chat.lawyerName} · ${formatFaDateTime(chat.updatedAt)}`
-                          : formatFaDateTime(chat.updatedAt)}
+                        {formatFaDateTime(chat.updatedAt)}
                       </p>
                       {chat.messages.at(-1) ? (
                         <p className="mt-2 line-clamp-2 text-xs leading-6 text-navy-600">

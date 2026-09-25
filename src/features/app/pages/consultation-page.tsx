@@ -150,7 +150,6 @@ export default function ConsultationPage() {
         planId: values.planId,
         mode: 'video',
         modeLabel: selectedPlan?.channelLabel ?? 'مشاوره',
-        lawyerName: selectedPlan?.lawyerName ?? 'وزین عدالت',
         startsAt: values.time ? `${values.dateKey} · ${values.time}` : values.dateKey,
         durationMinutes: selectedPlan?.durationMinutes ?? 30,
         price: basePrice,
@@ -340,7 +339,6 @@ export default function ConsultationPage() {
 
                   <BookingSummary
                     planTitle={selectedPlan.title}
-                    lawyerName={selectedPlan.lawyerName}
                     dateKey={dateKey}
                     time={selectedPlan.requiresTime ? time : undefined}
                     price={selectedPlan.price}
@@ -404,7 +402,7 @@ export default function ConsultationPage() {
                     <div className="min-w-0">
                       <h3 className="font-semibold break-words text-navy-900">{slot.topic}</h3>
                       <p className="mt-1 text-xs break-words text-navy-500">
-                        {slot.lawyerName} · {slot.modeLabel}
+                        {slot.modeLabel}
                       </p>
                     </div>
                     <BookingStatusChip status={slot.status} />
@@ -469,7 +467,6 @@ function SectionTitle({ step, title, hint }: { step: string; title: string; hint
 
 function BookingSummary({
   planTitle,
-  lawyerName,
   dateKey,
   time,
   price,
@@ -478,7 +475,6 @@ function BookingSummary({
   discountPercent,
 }: {
   planTitle: string
-  lawyerName: string
   dateKey?: string
   time?: string
   price: number
@@ -497,10 +493,6 @@ function BookingSummary({
         <li className="flex justify-between gap-3">
           <span className="shrink-0 text-navy-500">طرح</span>
           <span className="min-w-0 break-words text-left font-medium">{planTitle}</span>
-        </li>
-        <li className="flex justify-between gap-3">
-          <span className="shrink-0 text-navy-500">مشاور</span>
-          <span className="min-w-0 break-words text-left font-medium">{lawyerName}</span>
         </li>
         <li className="flex justify-between gap-3">
           <span className="shrink-0 text-navy-500">روز</span>

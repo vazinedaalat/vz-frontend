@@ -10,7 +10,7 @@ import { getCaseById, getNotifications } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
 import { CaseProcessPanel } from '../components/case-process-panel'
 import { PageHeader } from '../components/page-header'
-import { caseNextActionLabel, isLawyerAssigned } from '../lib/case-process'
+import { caseNextActionLabel } from '../lib/case-process'
 
 export default function CaseDetailPage() {
   const { caseId = '' } = useParams()
@@ -53,9 +53,7 @@ export default function CaseDetailPage() {
     )
   }
 
-  const metaLine = isLawyerAssigned(item.lawyerName)
-    ? `${item.category} · وکیل مسئول: ${item.lawyerName}`
-    : `${item.category} · وضعیت: ${item.statusLabel}`
+  const metaLine = `${item.category} · وضعیت: ${item.statusLabel}`
   const nextAction = caseNextActionLabel(item)
 
   return (

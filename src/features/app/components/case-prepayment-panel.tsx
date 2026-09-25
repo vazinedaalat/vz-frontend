@@ -104,7 +104,7 @@ export function CasePrepaymentPanel({ waiting, invoice, paying, onPay }: CasePre
 
             <p className="flex items-start gap-2 text-xs leading-6 text-navy-500">
               <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-gold-600" aria-hidden />
-              پس از پرداخت موفق، مراحل بررسی مدارک، تخصیص وکیل و پیگیری پرونده فعال می‌شود.
+              پس از پرداخت موفق، مراحل بررسی مدارک و پیگیری پرونده فعال می‌شود.
             </p>
           </motion.div>
         ) : (

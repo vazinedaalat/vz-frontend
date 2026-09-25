@@ -148,7 +148,7 @@ export const DOCUMENT_FILE_RULE_SECTIONS: readonly CaseFileRuleSection[] = [
 export const MOCK_CASE_PREPAYMENT: CasePrepaymentInvoice = {
   id: 'inv-pre-1001',
   title: 'پیش‌فاکتور تشکیل پرونده',
-  description: 'بررسی اولیه مدارک، تشکیل پرونده داخلی و تخصیص وکیل مسئول',
+  description: 'بررسی اولیه مدارک، تشکیل پرونده داخلی و شروع مسیر پیگیری',
   amount: 2_500_000,
   currencyLabel: 'تومان',
   issuedAtLabel: 'همین لحظه',
@@ -156,6 +156,6 @@ export const MOCK_CASE_PREPAYMENT: CasePrepaymentInvoice = {
   items: [
     { label: 'پذیرش و تشکیل پرونده', amount: 900_000 },
     { label: 'بررسی اولیه مدارک', amount: 1_100_000 },
-    { label: 'هماهنگی وکیل مسئول', amount: 500_000 },
+    { label: 'هماهنگی پرونده', amount: 500_000 },
   ],
 }

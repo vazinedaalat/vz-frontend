@@ -250,7 +250,7 @@ interface AppUser {
   status: 'intake'|'consultation'|'formed'|'in-review'|'follow-up'|'notified'|'closed',
   statusLabel,      // متن فارسی برای UI
   progress,         // 0..100
-  lawyerName, updatedAt, nextAction,
+  updatedAt, nextAction,
   stages: [{ id, title, description, completed, at? }],
   chatId            // هر پرونده الزاماً یک چت پیگیری دارد
 }
@@ -337,7 +337,7 @@ interface AppUser {
 
 ```ts
 CaseChatThread {
-  id, caseId, caseTitle, caseNumber, lawyerName,
+  id, caseId, caseTitle, caseNumber,
   updatedAt, unreadCount, messages: ChatMessage[]
 }
 
@@ -414,7 +414,7 @@ CaseFileMeta { id, name, size, type }
 }
 ```
 
-لیست رزروهای من (`ConsultationSlot`): فیلدهای `id, topic, planId?, mode, modeLabel, lawyerName, startsAt, durationMinutes, price, discountedPrice?, status`.
+لیست رزروهای من (`ConsultationSlot`): فیلدهای `id, topic, planId?, mode, modeLabel, startsAt, durationMinutes, price, discountedPrice?, status`.
 
 **API پیشنهادی**
 

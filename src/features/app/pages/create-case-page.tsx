@@ -524,7 +524,7 @@ export default function CreateCasePage() {
             </span>
             <h2 className="font-display mt-5 text-2xl font-bold text-navy-900">پیش‌پرداخت انجام شد</h2>
             <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-navy-600">
-              پرونده وارد مسیر بررسی می‌شود و کانال چت پیگیری آن فعال است: تخصیص وکیل، بازبینی مدارک و
+              پرونده وارد مسیر بررسی می‌شود و کانال چت پیگیری آن فعال است: بازبینی مدارک و
               پیام‌رسانی در بخش پرونده‌ها.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">

@@ -157,7 +157,6 @@ export interface LegalCase {
   status: CaseStatus
   statusLabel: string
   progress: number
-  lawyerName: string
   updatedAt: string
   nextAction: string
   stages: CaseStage[]
@@ -170,7 +169,6 @@ export interface CaseChatThread {
   caseId: string
   caseTitle: string
   caseNumber: string
-  lawyerName: string
   updatedAt: string
   /** Unread messages from admin (client view). */
   unreadCount: number
@@ -190,7 +188,6 @@ export interface ConsultationPlan {
   requiresPayment: boolean
   price: number
   durationMinutes: number
-  lawyerName: string
   highlights: string[]
   badge?: string
 }
@@ -219,7 +216,6 @@ export interface ConsultationSlot {
   planId?: ConsultationPlanId
   mode: ConsultationMode
   modeLabel: string
-  lawyerName: string
   startsAt: string
   durationMinutes: number
   price: number
