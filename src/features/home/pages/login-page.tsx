@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowUpLeft, Phone } from 'lucide-react'
@@ -12,6 +12,7 @@ import { smsLoginOtpSchema, smsLoginPhoneSchema } from '@/features/app/schemas'
 import { useAuthStore } from '@/features/app/store/auth-store'
 import { Field } from '@/features/app/components/field'
 import { asciiDigitsField } from '@/lib/format'
+import { getAccessToken } from '@/services/api/token'
 import { z } from 'zod'
 
 type PhoneForm = z.infer<typeof smsLoginPhoneSchema>
@@ -22,10 +23,15 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const requestOtp = useAuthStore((s) => s.requestOtp)
   const verifyOtp = useAuthStore((s) => s.verifyOtp)
+  const hydrateSession = useAuthStore((s) => s.hydrateSession)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const [step, setStep] = useState<'phone' | 'otp'>('phone')
   const [phone, setPhone] = useState('')
   const [info, setInfo] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [checkingSession, setCheckingSession] = useState(
+    () => Boolean(getAccessToken()) || isAuthenticated,
+  )
 
   const phoneForm = useForm<PhoneForm>({
     resolver: zodResolver(smsLoginPhoneSchema),
@@ -36,6 +42,27 @@ export default function LoginPage() {
     resolver: zodResolver(smsLoginOtpSchema),
     defaultValues: { phone: '', code: '' },
   })
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function ensureSession() {
+      if (isMockEnabled) {
+        if (!cancelled) setCheckingSession(false)
+        return
+      }
+
+      // Token present → validate; stale persist without token → clear.
+      await hydrateSession()
+
+      if (!cancelled) setCheckingSession(false)
+    }
+
+    void ensureSession()
+    return () => {
+      cancelled = true
+    }
+  }, [hydrateSession])
 
   const submitPhone = phoneForm.handleSubmit(async (values) => {
     setError(null)
@@ -64,6 +91,18 @@ export default function LoginPage() {
     }
     navigate('/app', { replace: true })
   })
+
+  if (checkingSession) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-navy-50 px-5 py-10 text-sm text-navy-600">
+        در حال بررسی نشست…
+      </div>
+    )
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/app" replace />
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-navy-50 px-5 py-10">

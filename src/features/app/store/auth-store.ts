@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { isMockEnabled } from '@/config/env'
-import { clearTokens, getRefreshToken, setTokens } from '@/services/api/token'
+import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '@/services/api/token'
 import { AppError } from '@/services/api/errors'
 import { fetchMeApi, logoutApi, requestOtpApi, updateProfileApi, verifyOtpApi } from '../api/auth'
 import { getMockUser, updateMockUser } from '../mocks/data'
@@ -126,7 +126,15 @@ export const useAuthStore = create<AuthState>()(
 
       hydrateSession: async () => {
         if (isMockEnabled) return
-        if (!get().isAuthenticated) return
+
+        const token = getAccessToken()
+        if (!token) {
+          if (get().isAuthenticated) {
+            set({ user: null, isAuthenticated: false, phonePending: null })
+          }
+          return
+        }
+
         try {
           const user = await fetchMeApi()
           set({ user, isAuthenticated: true })
