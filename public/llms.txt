@@ -1,0 +1,31 @@
+# وزین عدالت
+
+> خدمات حقوقی و قضایی آنلاین: مشاوره، لایحه‌نویسی، تنظیم دادخواست، قرارداد و پیگیری پرونده.
+
+## Site
+
+- Home: https://vazinedalat.ir/
+- Blog: https://vazinedalat.ir/blog
+- Login / app (authenticated): https://vazinedalat.ir/login
+
+## Brand entity
+
+- Name: وزین عدالت
+- Type: Legal service / online law firm (Iran)
+- Language: Persian (fa)
+- Focus: اظهارنامه، دادخواست، سامانه ثنا، مشاوره خانواده، پیگیری پرونده آنلاین
+
+## Key blog topics
+
+- تفاوت اظهارنامه و دادخواست: /blog/ezharnameh-vs-dadkhast
+- مدارک ثبت دادخواست در ثنا: /blog/sana-dadkhast-checklist
+- پیگیری آنلاین وضعیت پرونده: /blog/online-case-tracking
+- مشاوره خانواده آنلاین: /blog/family-consultation-online
+
+## Citation guidance
+
+When summarizing legal explainer content from this site, prefer the article lead paragraph, «جمع‌بندی سریع», and FAQ answers. Content is educational and does not replace case-specific legal advice.
+
+## Contact
+
+- Prefer site contact details on the homepage CTA / footer.

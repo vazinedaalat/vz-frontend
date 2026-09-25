@@ -40,6 +40,16 @@ export function getMockBlogBySlug(slug: string): BlogPostDetail | undefined {
 
 function mapDetail(raw: BlogPostApiListItem & Partial<BlogPostDetail>): BlogPostDetail {
   const summary = mapBlogListItem(raw)
+  const faq = Array.isArray(raw.faq)
+    ? raw.faq.filter((item) => item?.question?.trim() && item?.answer?.trim())
+    : undefined
+  const keyTakeaways = Array.isArray(raw.keyTakeaways)
+    ? raw.keyTakeaways.map((item) => item.trim()).filter(Boolean)
+    : undefined
+  const keywords = Array.isArray(raw.keywords)
+    ? raw.keywords.map((item) => item.trim()).filter(Boolean)
+    : undefined
+
   return {
     ...summary,
     coverImage: resolveBlogCoverUrl(summary.coverImage) ?? summary.coverImage,
@@ -50,6 +60,13 @@ function mapDetail(raw: BlogPostApiListItem & Partial<BlogPostDetail>): BlogPost
       Array.isArray(raw.body) && raw.body.length > 0
         ? raw.body
         : [{ type: 'paragraph', text: raw.excerpt }],
+    ...(raw.seoTitle?.trim() ? { seoTitle: raw.seoTitle.trim() } : {}),
+    ...(raw.seoDescription?.trim() ? { seoDescription: raw.seoDescription.trim() } : {}),
+    ...(keywords?.length ? { keywords } : {}),
+    ...(raw.updatedAt?.trim() ? { updatedAt: raw.updatedAt.trim() } : {}),
+    ...(raw.coverImageAlt?.trim() ? { coverImageAlt: raw.coverImageAlt.trim() } : {}),
+    ...(keyTakeaways?.length ? { keyTakeaways } : {}),
+    ...(faq?.length ? { faq } : {}),
   }
 }
 

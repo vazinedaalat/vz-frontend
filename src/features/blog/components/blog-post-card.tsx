@@ -32,7 +32,7 @@ export function BlogPostCard({ post, featured = false, delay = 0, className }: B
           >
             <img
               src={post.coverImage}
-              alt=""
+              alt={post.title}
               className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
               loading="lazy"
             />

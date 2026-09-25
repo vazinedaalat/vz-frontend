@@ -7,6 +7,8 @@ const envSchema = z.object({
   VITE_ASSET_BASE_URL: z.string().url().optional().default('http://localhost:3000'),
   VITE_APP_ENV: z.enum(['development', 'staging', 'production']).default('development'),
   VITE_APP_NAME: z.string().default('وزین عدالت'),
+  /** Public site origin for canonical / Open Graph / JSON-LD (no trailing slash). */
+  VITE_SITE_URL: z.string().url().optional(),
   /**
    * When true (and not production), UI may fall back to local mock datasets.
    * Default false — prefer live Nest API.

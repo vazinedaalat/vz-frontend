@@ -1,5 +1,10 @@
 /** Blog content models for marketing site + app home cards. */
 
+export interface BlogFaqItem {
+  question: string
+  answer: string
+}
+
 export interface BlogPostSummary {
   id: string
   /** URL segment — prefer slug; fall back to id until Nest provides slug. */
@@ -26,9 +31,21 @@ export interface BlogPostDetail extends BlogPostSummary {
   body: BlogBodyBlock[]
   /** Sanitized rich HTML from admin TipTap (headings, lists, emphasis, spacing). */
   bodyHtml?: string
+  /** SEO overrides — fall back to title / excerpt when absent. */
+  seoTitle?: string
+  seoDescription?: string
+  keywords?: string[]
+  /** ISO date when content was last revised. */
+  updatedAt?: string
+  /** Accessible cover description (Persian). */
+  coverImageAlt?: string
+  /** GEO: scannable bullets shown near the top of the article. */
+  keyTakeaways?: string[]
+  /** GEO + FAQPage schema — also rendered in the article. */
+  faq?: BlogFaqItem[]
 }
 
-/** Raw list payload from Nest `GET /home/blog` / `GET /blog`. */
+/** Raw list/detail payload from Nest `GET /blog` / `GET /blog/:slug`. */
 export interface BlogPostApiListItem {
   id: string
   slug?: string
@@ -42,4 +59,11 @@ export interface BlogPostApiListItem {
   authorRole?: string | null
   bodyHtml?: string
   body?: BlogBodyBlock[]
+  seoTitle?: string | null
+  seoDescription?: string | null
+  keywords?: string[] | null
+  updatedAt?: string | null
+  coverImageAlt?: string | null
+  keyTakeaways?: string[] | null
+  faq?: BlogFaqItem[] | null
 }

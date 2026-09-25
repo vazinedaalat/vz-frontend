@@ -1,5 +1,13 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { DocumentHead } from '@/components/shared/document-head'
 import { BlogSection } from '@/features/blog'
+import {
+  absoluteUrl,
+  breadcrumbJsonLd,
+  organizationJsonLd,
+  SITE_SEO,
+  websiteJsonLd,
+} from '@/lib/seo'
 import { SiteHeader } from '../components/site-header'
 import { HeroSection } from '../components/hero-section'
 import { AboutSection } from '../components/about-section'
@@ -22,8 +30,35 @@ export default function HomePage() {
     })
   }
 
+  const seo = useMemo(
+    () => ({
+      title: SITE_SEO.defaultTitle,
+      description: SITE_SEO.defaultDescription,
+      canonicalPath: '/',
+      type: 'website' as const,
+      jsonLd: [
+        organizationJsonLd(),
+        websiteJsonLd(),
+        breadcrumbJsonLd([{ name: 'خانه', path: '/' }]),
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          '@id': `${absoluteUrl('/')}#webpage`,
+          name: SITE_SEO.defaultTitle,
+          description: SITE_SEO.defaultDescription,
+          url: absoluteUrl('/'),
+          inLanguage: SITE_SEO.language,
+          isPartOf: { '@id': `${absoluteUrl('/')}#website` },
+          about: { '@id': `${absoluteUrl('/')}#organization` },
+        },
+      ],
+    }),
+    []
+  )
+
   return (
     <div className="min-h-screen bg-navy-50 text-navy-900">
+      <DocumentHead {...seo} />
       <SiteHeader />
       <main>
         <HeroSection activeServiceId={activeServiceId} onSelectService={handleSelectService} />

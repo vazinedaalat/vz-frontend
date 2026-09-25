@@ -1,8 +1,10 @@
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowUpLeft, Clock3, UserRound } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { Reveal } from '@/components/animated/reveal'
 import { Container } from '@/components/shared/container'
+import { DocumentHead } from '@/components/shared/document-head'
 import { Button } from '@/components/ui'
 import { SiteFooter } from '@/features/home/components/site-footer'
 import { SiteHeader } from '@/features/home/components/site-header'
@@ -11,6 +13,8 @@ import { formatFaNumber } from '@/lib/format'
 import { formatFaDate } from '@/lib/jalali'
 import { fetchBlogBySlug, fetchBlogList } from '../api/blog'
 import { BlogPostCard } from '../components/blog-post-card'
+import { BlogFaqSection, BlogKeyTakeaways } from '../components/blog-seo-blocks'
+import { buildBlogNotFoundSeo, buildBlogPostSeo } from '../lib/seo'
 import { sanitizeBlogHtml } from '../lib/sanitize-blog-html'
 import type { BlogBodyBlock } from '../types'
 
@@ -77,8 +81,15 @@ export default function BlogPostPage() {
     relatedQuery.data?.filter((item) => item.slug !== post?.slug && item.id !== post?.id).slice(0, 2) ??
     []
 
+  const seo = useMemo(() => {
+    if (postQuery.isLoading) return null
+    if (!post) return buildBlogNotFoundSeo(slug)
+    return buildBlogPostSeo(post)
+  }, [post, postQuery.isLoading, slug])
+
   return (
     <div className="min-h-screen bg-navy-50 text-navy-900">
+      {seo ? <DocumentHead {...seo} /> : null}
       <SiteHeader />
       <main>
         {postQuery.isLoading ? (
@@ -104,7 +115,10 @@ export default function BlogPostPage() {
 
         {post ? (
           <>
-            <article>
+            <article itemScope itemType="https://schema.org/BlogPosting">
+              <meta itemProp="headline" content={post.title} />
+              <meta itemProp="datePublished" content={post.publishedAt} />
+              <meta itemProp="dateModified" content={post.updatedAt ?? post.publishedAt} />
               <header className="border-b border-navy-100 bg-white">
                 <Container className="py-12 lg:py-16">
                   <Reveal>
@@ -131,23 +145,48 @@ export default function BlogPostPage() {
                           <Clock3 className="size-3.5" strokeWidth={1.7} aria-hidden="true" />
                           {formatFaNumber(post.readMinutes)} دقیقه مطالعه
                         </span>
-                        <time dateTime={post.publishedAt}>{formatFaDate(post.publishedAt)}</time>
+                        <time dateTime={post.publishedAt} itemProp="datePublished">
+                          {formatFaDate(post.publishedAt)}
+                        </time>
+                        {post.updatedAt && post.updatedAt !== post.publishedAt ? (
+                          <time dateTime={post.updatedAt} itemProp="dateModified">
+                            به‌روزرسانی: {formatFaDate(post.updatedAt)}
+                          </time>
+                        ) : null}
                       </div>
 
-                      <h1 className="font-display mt-5 text-3xl leading-[1.3] font-extrabold text-balance text-navy-900 sm:text-4xl lg:text-[2.75rem]">
+                      <h1
+                        itemProp="headline"
+                        className="font-display mt-5 text-3xl leading-[1.3] font-extrabold text-balance text-navy-900 sm:text-4xl lg:text-[2.75rem]"
+                      >
                         {post.title}
                       </h1>
 
-                      <p className="mt-5 text-base leading-8 text-navy-600 lg:text-lg">{post.excerpt}</p>
+                      <p
+                        data-seo-summary
+                        itemProp="description"
+                        className="mt-5 text-base leading-8 text-navy-600 lg:text-lg"
+                      >
+                        {post.excerpt}
+                      </p>
 
-                      <div className="mt-8 flex items-center gap-3 border-t border-navy-100 pt-6">
+                      <div
+                        className="mt-8 flex items-center gap-3 border-t border-navy-100 pt-6"
+                        itemProp="author"
+                        itemScope
+                        itemType="https://schema.org/Person"
+                      >
                         <span className="grid size-11 place-items-center rounded-xl bg-navy-900 text-gold-300">
                           <UserRound className="size-5" strokeWidth={1.6} aria-hidden="true" />
                         </span>
                         <div>
-                          <p className="text-sm font-semibold text-navy-900">{post.authorName}</p>
+                          <p className="text-sm font-semibold text-navy-900" itemProp="name">
+                            {post.authorName}
+                          </p>
                           {post.authorRole ? (
-                            <p className="text-xs text-navy-500">{post.authorRole}</p>
+                            <p className="text-xs text-navy-500" itemProp="jobTitle">
+                              {post.authorRole}
+                            </p>
                           ) : null}
                         </div>
                       </div>
@@ -162,7 +201,8 @@ export default function BlogPostPage() {
                     <div className="overflow-hidden rounded-[1.5rem] border border-navy-200 shadow-soft">
                       <img
                         src={post.coverImage}
-                        alt=""
+                        alt={post.coverImageAlt ?? post.title}
+                        itemProp="image"
                         className="aspect-[16/9] w-full object-cover"
                       />
                     </div>
@@ -173,7 +213,17 @@ export default function BlogPostPage() {
               <Container className="py-12 lg:py-16">
                 <Reveal delay={0.08}>
                   <div className="mx-auto max-w-3xl">
-                    <BlogBody blocks={post.body} bodyHtml={post.bodyHtml} />
+                    {post.keyTakeaways?.length ? (
+                      <div className="mb-10">
+                        <BlogKeyTakeaways items={post.keyTakeaways} />
+                      </div>
+                    ) : null}
+
+                    <div itemProp="articleBody">
+                      <BlogBody blocks={post.body} bodyHtml={post.bodyHtml} />
+                    </div>
+
+                    {post.faq?.length ? <BlogFaqSection items={post.faq} /> : null}
 
                     <div className="mt-12 flex flex-col gap-3 rounded-[1.5rem] border border-navy-200 bg-white p-6 shadow-soft sm:flex-row sm:items-center sm:justify-between sm:p-8">
                       <div>

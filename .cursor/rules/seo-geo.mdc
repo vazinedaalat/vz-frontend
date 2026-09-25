@@ -1,0 +1,25 @@
+---
+description: SEO and GEO requirements for marketing/blog public pages
+globs: src/features/blog/**/*.{ts,tsx},src/lib/seo/**/*.{ts,tsx},src/components/shared/document-head.tsx,public/{robots.txt,sitemap.xml,llms.txt},docs/BLOG_API.md,index.html
+alwaysApply: false
+---
+
+# SEO & GEO
+
+Follow `skills/seo-geo.md` for any blog or public marketing SEO work.
+
+## Must ship with blog/public pages
+
+- Unique `title` + `description` + canonical via `DocumentHead`
+- OG/Twitter tags with **absolute** image URLs
+- JSON-LD: `BlogPosting` + `BreadcrumbList` (+ `FAQPage` if FAQs)
+- Visible GEO blocks: key takeaways + FAQ (not schema-only)
+- `datePublished` / `dateModified`, author, organization entity
+- Keep `public/robots.txt`, `sitemap.xml`, `llms.txt` aligned with routes
+
+## Do not
+
+- Keyword stuffing or multiple H1s
+- Relative `og:image` / schema `image`
+- `noindex` on published blog URLs
+- SEO fields only in head with empty thin body content

@@ -25,3 +25,7 @@ Never implement the same component with two libraries.
 - Keep Radix primitives for dialogs, dropdowns, etc.
 - Always provide visible focus states.
 - Forms must have associated labels.
+
+## SEO / GEO
+- Public marketing & blog pages follow `skills/seo-geo.md` and `.cursor/rules/seo-geo.mdc`.
+- Use `DocumentHead` + JSON-LD helpers in `src/lib/seo/`; never hardcode relative `og:image` URLs.

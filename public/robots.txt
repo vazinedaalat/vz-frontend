@@ -1,0 +1,11 @@
+# https://vazinedalat.ir/robots.txt
+User-agent: *
+Allow: /
+Allow: /blog
+Allow: /blog/
+
+Disallow: /app
+Disallow: /app/
+Disallow: /login
+
+Sitemap: https://vazinedalat.ir/sitemap.xml

@@ -1,8 +1,10 @@
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowUpLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Reveal } from '@/components/animated/reveal'
 import { Container } from '@/components/shared/container'
+import { DocumentHead } from '@/components/shared/document-head'
 import { Button } from '@/components/ui'
 import { SiteFooter } from '@/features/home/components/site-footer'
 import { SiteHeader } from '@/features/home/components/site-header'
@@ -10,6 +12,7 @@ import { SectionHeading } from '@/features/home/components/section-heading'
 import { CTA, LOGIN_PATH } from '@/features/home/constants'
 import { fetchBlogList } from '../api/blog'
 import { BlogPostCard } from '../components/blog-post-card'
+import { buildBlogListSeo } from '../lib/seo'
 
 export default function BlogListPage() {
   const { data: posts = [], isLoading, isError } = useQuery({
@@ -17,10 +20,12 @@ export default function BlogListPage() {
     queryFn: fetchBlogList,
   })
 
+  const seo = useMemo(() => buildBlogListSeo(), [])
   const [featured, ...rest] = posts
 
   return (
     <div className="min-h-screen bg-navy-50 text-navy-900">
+      <DocumentHead {...seo} />
       <SiteHeader />
       <main>
         <section className="relative overflow-hidden border-b border-navy-100 bg-navy-900 text-white">
@@ -60,7 +65,10 @@ export default function BlogListPage() {
           </Container>
         </section>
 
-        <section className="py-14 lg:py-20">
+        <section className="py-14 lg:py-20" aria-labelledby="blog-list-heading">
+          <h2 id="blog-list-heading" className="sr-only">
+            فهرست مطالب بلاگ
+          </h2>
           <Container>
             {isLoading ? (
               <div className="grid gap-5 lg:grid-cols-2 lg:gap-6" aria-busy="true">

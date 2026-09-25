@@ -113,11 +113,19 @@ Envelope موفقیت مطابق بقیهٔ پروژه:
   excerpt: string
   category: string
   readMinutes: number
-  publishedAt: string
+  publishedAt: string            // ISO
+  updatedAt?: string | null      // ISO — SEO dateModified
   coverImage?: string | null
+  coverImageAlt?: string | null
   authorName: string
   authorRole?: string | null
-  body: Array<
+  seoTitle?: string | null       // ≤ ~60 chars
+  seoDescription?: string | null // 120–160 chars
+  keywords?: string[] | null
+  keyTakeaways?: string[] | null // GEO visible bullets
+  faq?: { question: string; answer: string }[] | null
+  bodyHtml?: string              // TipTap HTML (preferred)
+  body?: Array<
     | { type: 'paragraph'; text: string }
     | { type: 'heading'; text: string }
     | { type: 'list'; items: string[] }
@@ -127,43 +135,51 @@ Envelope موفقیت مطابق بقیهٔ پروژه:
 
 Auth: **عمومی** (بدون توکن) — محتوای مارکتینگ.
 
+فرانت از این فیلدها `DocumentHead` + JSON-LD (`BlogPosting`, `BreadcrumbList`, `FAQPage`) می‌سازد. استاندارد: `skills/seo-geo.md`.
+
 ---
 
 ## ۴. نگاشت به UI فرانت
 
-| فیلد API | UI |
-|----------|-----|
+| فیلد API | UI / SEO |
+|----------|----------|
 | `slug` | مسیر `/blog/:slug` و لینک کارت‌های `/app` |
-| `coverImage` | کاور کارت و هیرو مطلب |
-| `category` | بج طلایی |
-| `readMinutes` | «X دقیقه مطالعه» |
-| `publishedAt` | تاریخ جلالی با `formatFaDate` |
-| `body` | بدنهٔ صفحهٔ مطلب |
-| `authorName` / `authorRole` | بلوک نویسنده |
+| `seoTitle` / `seoDescription` | `<title>` و meta description |
+| `keywords` | meta keywords + schema |
+| `coverImage` / `coverImageAlt` | کاور + `og:image` + alt |
+| `updatedAt` | نمایش + `dateModified` |
+| `keyTakeaways` | بلوک «جمع‌بندی سریع» (GEO) |
+| `faq` | آکاردئون FAQ + `FAQPage` |
+| `bodyHtml` / `body` | بدنهٔ صفحهٔ مطلب |
+| `authorName` / `authorRole` | نویسنده + schema Person |
 
 هوم مارکتینگ حداکثر ۳ کارت از لیست را نشان می‌دهد؛ صفحهٔ `/blog` همه را (فعلاً بدون صفحه‌بندی کلاینت).
+
+فایل‌های بات: `public/robots.txt`, `public/sitemap.xml`, `public/llms.txt` — بک‌اند/CMS باید URLهای جدید بلاگ را در sitemap منعکس کند.
 
 ---
 
 ## ۵. محیط و موک
 
-| `VITE_APP_ENV` | رفتار فرانت بلاگ |
-|----------------|------------------|
-| `development` / `staging` | موک داخلی (`MOCK_BLOG_POSTS`) — بدون وابستگی به Nest |
-| `production` | فقط API؛ لیست از `/home/blog`؛ جزئیات از `/blog/:slug` |
+| شرط | رفتار فرانت بلاگ |
+|------|------------------|
+| `VITE_USE_MOCK=true` و غیر production | موک SEO-کامل (`MOCK_BLOG_POSTS`) |
+| در غیر این صورت | API زنده: `GET /blog` و `GET /blog/:slug` |
 
-پرچم جدا از `VITE_USE_MOCK` اپ: `isBlogMockEnabled = VITE_APP_ENV !== 'production'`.
+`VITE_SITE_URL` برای canonical / Open Graph / JSON-LD الزامی در production است.
 
 ---
 
 ## ۶. چک‌لیست تحویل بک‌اند
 
 - [ ] `slug` یکتا روی مدل + ایندکس
-- [ ] `GET /home/blog` شامل `slug` و در صورت امکان `coverImage` / `authorName`
-- [ ] `GET /blog/:slug` با `body` بلوکی
+- [ ] `GET /blog` و `GET /blog/:slug` با فیلدهای SEO بالا
+- [ ] `bodyHtml` یا `body` غنی (نه فقط excerpt)
+- [ ] `faq` و `keyTakeaways` برای GEO
 - [ ] فقط پست‌های `published`
-- [ ] CORS و مسیر زیر همان prefix فعلی API (`/api/v1`)
-- [ ] تصاویر: URL مطلق یا مسیر قابل resolve با `assetUrl` فرانت (`/uploads/...`)
+- [ ] به‌روزرسانی sitemap هنگام publish
+- [ ] تصاویر: URL مطلق یا `/uploads/...`
+- [ ] CORS زیر prefix فعلی API (`/api/v1`)
 
 ---
 
@@ -176,18 +192,29 @@ Auth: **عمومی** (بدون توکن) — محتوای مارکتینگ.
     "id": "clx...",
     "slug": "ezharnameh-vs-dadkhast",
     "title": "تفاوت اظهارنامه و دادخواست چیست؟",
+    "seoTitle": "تفاوت اظهارنامه و دادخواست | راهنمای حقوقی",
+    "seoDescription": "اظهارنامه اخطار رسمی پیش از دعواست و دادخواست شروع رسیدگی در دادگاه.",
     "excerpt": "اظهارنامه ابزار اخطار رسمی قبل از دعواست؛ دادخواست شروع رسیدگی در دادگاه.",
     "category": "آموزش حقوقی",
-    "readMinutes": 5,
+    "keywords": ["اظهارنامه", "دادخواست", "وزین عدالت"],
+    "readMinutes": 6,
     "publishedAt": "2025-09-01T10:00:00.000Z",
+    "updatedAt": "2026-03-01T09:00:00.000Z",
     "coverImage": "/uploads/blog/ezharnameh.jpg",
+    "coverImageAlt": "مقایسه اظهارنامه و دادخواست",
     "authorName": "تیم محتوای وزین عدالت",
     "authorRole": "تحریریه حقوقی",
-    "body": [
-      { "type": "paragraph", "text": "بسیاری از موکلان..." },
-      { "type": "heading", "text": "اظهارنامه چه می‌کند؟" },
-      { "type": "list", "items": ["ثبت رسمی مطالبه", "ایجاد سابقه"] }
-    ]
+    "keyTakeaways": [
+      "اظهارنامه معمولاً پیش از دعوا برای اخطار رسمی است.",
+      "دادخواست شروع رسمی رسیدگی قضایی است."
+    ],
+    "faq": [
+      {
+        "question": "آیا اظهارنامه جایگزین دادخواست است؟",
+        "answer": "خیر. اظهارنامه معمولاً اخطار رسمی است و رسیدگی را آغاز نمی‌کند."
+      }
+    ],
+    "bodyHtml": "<p>تفاوت اظهارنامه و دادخواست این است که...</p>"
   }
 }
 ```
