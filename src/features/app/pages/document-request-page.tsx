@@ -17,6 +17,7 @@ import { AppError } from '@/services/api/errors'
 import {
   appKeys,
   createDocumentRequest,
+  fetchDocumentPricing,
   fetchDocuments,
   payDocumentPrepayment,
   type DocumentRequestDetail,
@@ -59,6 +60,14 @@ export default function DocumentRequestPage() {
     queryFn: fetchDocuments,
     enabled: !isMockEnabled,
   })
+
+  const { data: pricing } = useQuery({
+    queryKey: [...appKeys.documents, 'pricing'] as const,
+    queryFn: fetchDocumentPricing,
+    enabled: !isMockEnabled,
+  })
+
+  const defaultPrepayAmount = pricing?.prepaymentAmount ?? DOCUMENT_PREPAYMENT_AMOUNT
 
   const showDocumentsSkeleton = useLazySkeleton(documentsPending)
   const documentsPagination = usePagination(documents, DOCUMENTS_PAGE_SIZE)
@@ -140,7 +149,8 @@ export default function DocumentRequestPage() {
   })
 
   const payMutation = useMutation({
-    mutationFn: (id: string) => payDocumentPrepayment(id),
+    mutationFn: ({ id, discountCode }: { id: string; discountCode?: string }) =>
+      payDocumentPrepayment(id, discountCode),
     onSuccess: async () => {
       setDone(true)
       setCreatedDoc(null)
@@ -228,7 +238,7 @@ export default function DocumentRequestPage() {
       <PageHeader
         eyebrow="درخواست اسناد قضایی"
         title="دادخواست، اظهارنامه و سایر اوراق"
-        description="پس از تکمیل فرم، پیش‌پرداخت را واریز کنید. ادمین مبلغ کل را با توضیحات اعلام می‌کند و پس از پرداخت نهایی، تنظیم سند آغاز می‌شود."
+        description={`پس از تکمیل فرم، پیش‌پرداخت (${formatFaNumber(defaultPrepayAmount)} تومان) را واریز کنید. ادمین مبلغ کل را با توضیحات اعلام می‌کند و پس از پرداخت نهایی، تنظیم سند آغاز می‌شود.`}
       />
 
       <CaseFormHelpBanner />
@@ -246,7 +256,7 @@ export default function DocumentRequestPage() {
           <div>
             <p className="text-xs font-semibold tracking-wide text-gold-700">مرحله پرداخت</p>
             <h2 id="doc-prepay-heading" className="font-display mt-1 text-lg font-bold text-navy-900">
-              پیش‌پرداخت ({formatFaNumber(createdDoc.payment.prepaymentAmount || DOCUMENT_PREPAYMENT_AMOUNT)} تومان)
+              پیش‌پرداخت ({formatFaNumber(createdDoc.payment.prepaymentAmount || defaultPrepayAmount)} تومان)
             </h2>
           </div>
           <DocumentPaymentPanel
@@ -254,7 +264,7 @@ export default function DocumentRequestPage() {
             payment={createdDoc.payment}
             claimTitle={createdDoc.claimTitle}
             paying={payMutation.isPending}
-            onPay={() => payMutation.mutate(createdDoc.id)}
+            onPay={(discountCode) => payMutation.mutate({ id: createdDoc.id, discountCode })}
           />
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>

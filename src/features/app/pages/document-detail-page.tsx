@@ -35,7 +35,7 @@ export default function DocumentDetailPage() {
   })
 
   const payPre = useMutation({
-    mutationFn: () => payDocumentPrepayment(documentId),
+    mutationFn: (discountCode?: string) => payDocumentPrepayment(documentId, discountCode),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: appKeys.document(documentId) })
       await queryClient.invalidateQueries({ queryKey: appKeys.documents })
@@ -43,7 +43,7 @@ export default function DocumentDetailPage() {
   })
 
   const payFinal = useMutation({
-    mutationFn: () => payDocumentFinal(documentId),
+    mutationFn: (discountCode?: string) => payDocumentFinal(documentId, discountCode),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: appKeys.document(documentId) })
       await queryClient.invalidateQueries({ queryKey: appKeys.documents })
@@ -116,7 +116,7 @@ export default function DocumentDetailPage() {
           payment={payment}
           claimTitle={data.claimTitle}
           paying={payPre.isPending}
-          onPay={() => payPre.mutate()}
+          onPay={(discountCode) => payPre.mutate(discountCode)}
         />
       ) : null}
 
@@ -126,7 +126,7 @@ export default function DocumentDetailPage() {
           payment={payment}
           claimTitle={data.claimTitle}
           paying={payFinal.isPending}
-          onPay={() => payFinal.mutate()}
+          onPay={(discountCode) => payFinal.mutate(discountCode)}
         />
       ) : null}
 

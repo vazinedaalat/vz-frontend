@@ -1,7 +1,11 @@
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, CreditCard, Receipt, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { formatFaNumber } from '@/lib/format'
+import { DiscountCodeField } from './discount-code-field'
+import { useDiscountValidation } from '../hooks/use-discount-validation'
+import { computeDiscountedPrice } from '../lib/discount-preview'
 import type { DocumentPaymentInfo } from '../types'
 
 type PaymentMode = 'prepayment' | 'final'
@@ -11,7 +15,7 @@ interface DocumentPaymentPanelProps {
   payment: DocumentPaymentInfo
   claimTitle: string
   paying?: boolean
-  onPay: () => void
+  onPay: (discountCode?: string) => void
 }
 
 export function DocumentPaymentPanel({
@@ -23,12 +27,28 @@ export function DocumentPaymentPanel({
 }: DocumentPaymentPanelProps) {
   const currency = payment.currencyLabel || 'تومان'
   const isPrepay = mode === 'prepayment'
-  const amount = isPrepay
+  const baseAmount = isPrepay
     ? payment.prepaymentAmount
     : (payment.remainderAmount ?? Math.max(0, (payment.totalAmount ?? 0) - payment.prepaymentAmount))
   const alreadyPaid = isPrepay
     ? payment.prepaymentStatus === 'paid'
     : payment.finalPaymentStatus === 'paid'
+
+  const [discountCode, setDiscountCode] = useState('')
+  const discount = useDiscountValidation({ section: 'documents' })
+
+  // Only reset when payment stage changes — do not depend on clear() identity
+  // (TanStack mutation object changes and would wipe the input on every keystroke).
+  useEffect(() => {
+    setDiscountCode('')
+    discount.clear()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mode only
+  }, [mode])
+
+  const payableAmount =
+    discount.isApplied && discount.preview?.percent != null
+      ? computeDiscountedPrice(baseAmount, discount.preview.percent)
+      : baseAmount
 
   return (
     <div className="rounded-[1.5rem] border border-navy-200 bg-white p-5 shadow-soft sm:p-7">
@@ -93,15 +113,45 @@ export function DocumentPaymentPanel({
             </dl>
           ) : null}
 
+          {!alreadyPaid && baseAmount > 0 ? (
+            <DiscountCodeField
+              id={`document-discount-${mode}`}
+              value={discountCode}
+              onChange={(next) => {
+                setDiscountCode(next)
+                discount.syncWithInput(next)
+              }}
+              validateError={discount.error}
+              isValidating={discount.isValidating}
+              isApplied={discount.isApplied}
+              previewPercent={discount.preview?.percent}
+              previewTitle={discount.preview?.title}
+              basePrice={baseAmount}
+              disabled={paying}
+              onValidate={() => {
+                void discount.validate(discountCode)
+              }}
+              onClear={() => {
+                discount.clear()
+                setDiscountCode('')
+              }}
+            />
+          ) : null}
+
           <div className="flex flex-col gap-3 rounded-2xl border border-gold-300 bg-gold-100/70 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold text-gold-700">
                 {isPrepay ? 'مبلغ پیش‌پرداخت' : 'مبلغ قابل پرداخت (مابه‌التفاوت)'}
               </p>
               <p className="font-display mt-1 text-2xl font-bold text-navy-900">
-                {formatFaNumber(amount)}
+                {formatFaNumber(payableAmount)}
                 <span className="mr-1 text-sm font-medium text-navy-600">{currency}</span>
               </p>
+              {discount.isApplied && payableAmount !== baseAmount ? (
+                <p className="mt-1 text-xs text-navy-500 line-through">
+                  {formatFaNumber(baseAmount)} {currency}
+                </p>
+              ) : null}
             </div>
             {alreadyPaid ? (
               <span className="inline-flex items-center gap-2 rounded-xl bg-navy-900 px-4 py-2.5 text-sm font-semibold text-gold-300">
@@ -114,8 +164,11 @@ export function DocumentPaymentPanel({
                 variant="accent"
                 size="lg"
                 className="w-full sm:w-auto"
-                disabled={paying}
-                onClick={onPay}
+                disabled={paying || discount.isValidating}
+                onClick={() => {
+                  const code = (discount.appliedCode || discountCode).trim() || undefined
+                  onPay(code)
+                }}
               >
                 <CreditCard className="size-4" aria-hidden />
                 {paying ? 'در حال پرداخت…' : isPrepay ? 'پرداخت پیش‌پرداخت' : 'پرداخت مابه‌التفاوت'}

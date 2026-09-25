@@ -41,6 +41,15 @@ function normalizeDocument<T extends DocumentRequestListItem>(item: T): T {
   }
 }
 
+export function fetchDocumentPricing() {
+  return apiRequest<{
+    prepaymentAmount: number
+    currencyLabel: string
+    prepaymentItems?: Array<{ label: string; amount: number }>
+    updatedAt?: string
+  }>({ method: 'GET', url: '/documents/pricing' })
+}
+
 export function fetchDocuments() {
   return apiRequest<DocumentRequestListItem[]>({ method: 'GET', url: '/documents' }).then((rows) =>
     rows.map(normalizeDocument),
@@ -67,16 +76,18 @@ export function createDocumentRequest(payload: DocumentRequestValues, files: Fil
   }).then(normalizeDocument)
 }
 
-export function payDocumentPrepayment(id: string) {
+export function payDocumentPrepayment(id: string, discountCode?: string) {
   return apiRequest<DocumentRequestDetail>({
     method: 'POST',
     url: `/documents/${id}/prepayment/pay`,
+    data: discountCode?.trim() ? { discountCode: discountCode.trim() } : {},
   }).then(normalizeDocument)
 }
 
-export function payDocumentFinal(id: string) {
+export function payDocumentFinal(id: string, discountCode?: string) {
   return apiRequest<DocumentRequestDetail>({
     method: 'POST',
     url: `/documents/${id}/final-payment/pay`,
+    data: discountCode?.trim() ? { discountCode: discountCode.trim() } : {},
   }).then(normalizeDocument)
 }

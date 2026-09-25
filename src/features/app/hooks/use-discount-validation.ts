@@ -47,6 +47,8 @@ export function useDiscountValidation({ section, planId }: UseDiscountValidation
     },
   })
 
+  const { mutateAsync, isPending, reset } = mutation
+
   const validate = useCallback(
     async (code: string) => {
       const normalized = normalizeDiscountCode(code)
@@ -61,17 +63,17 @@ export function useDiscountValidation({ section, planId }: UseDiscountValidation
         return null
       }
       setError(null)
-      return mutation.mutateAsync(normalized)
+      return mutateAsync(normalized)
     },
-    [mutation, planId, section],
+    [mutateAsync, planId, section],
   )
 
   const clear = useCallback(() => {
     setPreview(null)
     setError(null)
     setAppliedCode(null)
-    mutation.reset()
-  }, [mutation])
+    reset()
+  }, [reset])
 
   /** Drop applied preview when the typed code no longer matches the validated one. */
   const syncWithInput = useCallback(
@@ -91,7 +93,7 @@ export function useDiscountValidation({ section, planId }: UseDiscountValidation
     preview,
     error,
     appliedCode,
-    isValidating: mutation.isPending,
+    isValidating: isPending,
     isApplied: Boolean(preview),
     validate,
     clear,
