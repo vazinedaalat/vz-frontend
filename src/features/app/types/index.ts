@@ -29,12 +29,30 @@ export type DocumentRequestType =
 
 /** Aligns with admin / Nest document request status values. */
 export type DocumentRequestStatus =
+  | 'awaiting_prepayment'
   | 'submitted'
+  | 'awaiting_final_payment'
   | 'in_progress'
   | 'review'
   | 'ready'
   | 'delivered'
   | 'rejected'
+
+export type DocumentPaymentStatus = 'pending' | 'paid' | 'failed' | 'waived'
+
+export interface DocumentPaymentInfo {
+  prepaymentAmount: number
+  prepaymentStatus: DocumentPaymentStatus
+  prepaymentPaidAt: string | null
+  prepaymentItems?: Array<{ label: string; amount: number }>
+  totalAmount: number | null
+  priceDescription: string | null
+  quotedAt: string | null
+  remainderAmount: number | null
+  finalPaymentStatus: DocumentPaymentStatus
+  finalPaidAt: string | null
+  currencyLabel: string
+}
 
 export type TicketStatus = 'open' | 'pending' | 'answered' | 'closed'
 

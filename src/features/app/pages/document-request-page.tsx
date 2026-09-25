@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -13,7 +14,13 @@ import { cn } from '@/lib/utils'
 import { toPersianDigits, asciiDigitsField, asciiAmountField, formatFaNumber } from '@/lib/format'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
-import { appKeys, createDocumentRequest, fetchDocuments } from '../api'
+import {
+  appKeys,
+  createDocumentRequest,
+  fetchDocuments,
+  payDocumentPrepayment,
+  type DocumentRequestDetail,
+} from '../api'
 import {
   documentRequestFieldsSchema,
   type DocumentRequestValues,
@@ -23,11 +30,13 @@ import { DOCUMENT_FILE_RULE_SECTIONS } from '../constants/case-intake'
 import { CaseFileUploader } from '../components/case-file-uploader'
 import { CaseFormHelpBanner } from '../components/case-form-help-banner'
 import { CaseRulesDropdowns } from '../components/case-rules-dropdowns'
+import { DocumentPaymentPanel } from '../components/document-payment-panel'
 import { DocumentRequestCard } from '../components/document-request-card'
 import { DocumentStatusChip } from '../components/document-status-chip'
 import { Field } from '../components/field'
 import { PageHeader } from '../components/page-header'
 import {
+  DOCUMENT_PREPAYMENT_AMOUNT,
   DOCUMENT_STATUS_LABEL,
   isDocumentPending,
   normalizeDocumentStatus,
@@ -39,6 +48,7 @@ const DOCUMENTS_PAGE_SIZE = 5
 export default function DocumentRequestPage() {
   const queryClient = useQueryClient()
   const [done, setDone] = useState(false)
+  const [createdDoc, setCreatedDoc] = useState<DocumentRequestDetail | null>(null)
   const [files, setFiles] = useState<CaseFileMeta[]>([])
   const [fileError, setFileError] = useState<string>()
   const [formErrorBanner, setFormErrorBanner] = useState(false)
@@ -100,9 +110,9 @@ export default function DocumentRequestPage() {
       const uploadFiles = files.map((item) => item.file).filter(Boolean) as File[]
       return createDocumentRequest(values, uploadFiles)
     },
-    onSuccess: async () => {
+    onSuccess: async (doc) => {
       setApiError(null)
-      setDone(true)
+      setCreatedDoc(doc)
       setFiles([])
       reset({
         documentType: 'petition',
@@ -126,6 +136,19 @@ export default function DocumentRequestPage() {
     },
     onError: (err) => {
       setApiError(err instanceof AppError ? err.message : 'خطا در ثبت درخواست')
+    },
+  })
+
+  const payMutation = useMutation({
+    mutationFn: (id: string) => payDocumentPrepayment(id),
+    onSuccess: async () => {
+      setDone(true)
+      setCreatedDoc(null)
+      await queryClient.invalidateQueries({ queryKey: appKeys.documents })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+    onError: (err) => {
+      setApiError(err instanceof AppError ? err.message : 'خطا در پرداخت پیش‌پرداخت')
     },
   })
 
@@ -205,18 +228,50 @@ export default function DocumentRequestPage() {
       <PageHeader
         eyebrow="درخواست اسناد قضایی"
         title="دادخواست، اظهارنامه و سایر اوراق"
-        description="فیلدها بر اساس ماده ۵۱ آیین دادرسی مدنی و الزامات عملی اظهارنامه طراحی شده‌اند. پس از تکمیل فرم، قوانین را بپذیرید و مدارک پرونده را بارگذاری کنید."
+        description="پس از تکمیل فرم، پیش‌پرداخت را واریز کنید. ادمین مبلغ کل را با توضیحات اعلام می‌کند و پس از پرداخت نهایی، تنظیم سند آغاز می‌شود."
       />
 
       <CaseFormHelpBanner />
 
       {done ? (
-        <div className="rounded-2xl border border-gold-300 bg-gold-100 px-4 py-3 text-sm text-gold-800">
-          درخواست ثبت شد. پیش‌نویس توسط وکیل بررسی و برای تایید شما ارسال می‌شود.
+        <div className="rounded-2xl border border-gold-300 bg-gold-100 px-4 py-3 text-sm leading-7 text-gold-800">
+          پیش‌پرداخت ثبت شد. درخواست در صف بررسی ادمین است؛ پس از اعلام مبلغ کل می‌توانید از جزئیات سند پرداخت نهایی را انجام دهید.
         </div>
       ) : null}
 
       {apiError ? <ErrorBadge variant="page">{apiError}</ErrorBadge> : null}
+
+      {createdDoc?.payment ? (
+        <section className="space-y-4" aria-labelledby="doc-prepay-heading">
+          <div>
+            <p className="text-xs font-semibold tracking-wide text-gold-700">مرحله پرداخت</p>
+            <h2 id="doc-prepay-heading" className="font-display mt-1 text-lg font-bold text-navy-900">
+              پیش‌پرداخت ({formatFaNumber(createdDoc.payment.prepaymentAmount || DOCUMENT_PREPAYMENT_AMOUNT)} تومان)
+            </h2>
+          </div>
+          <DocumentPaymentPanel
+            mode="prepayment"
+            payment={createdDoc.payment}
+            claimTitle={createdDoc.claimTitle}
+            paying={payMutation.isPending}
+            onPay={() => payMutation.mutate(createdDoc.id)}
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" asChild>
+              <Link to={`/app/documents/${createdDoc.id}`}>مشاهده جزئیات سند</Link>
+            </Button>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => {
+                setCreatedDoc(null)
+              }}
+            >
+              ثبت درخواست دیگر
+            </Button>
+          </div>
+        </section>
+      ) : null}
 
       {!isMockEnabled ? (
         <section className="space-y-4" aria-labelledby="document-requests-heading">
@@ -286,6 +341,7 @@ export default function DocumentRequestPage() {
         </section>
       ) : null}
 
+      {!createdDoc ? (
       <form onSubmit={onSubmit} className="space-y-6" noValidate>
         {formErrorBanner ? (
           <ErrorBadge variant="page">
@@ -467,10 +523,11 @@ export default function DocumentRequestPage() {
 
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <Button type="submit" variant="accent" size="lg" className="w-full sm:w-auto" disabled={submitting}>
-            ارسال درخواست تنظیم سند
+            ثبت و ادامه به پیش‌پرداخت
           </Button>
         </div>
       </form>
+      ) : null}
     </div>
   )
 }

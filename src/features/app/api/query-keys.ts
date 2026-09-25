@@ -20,6 +20,7 @@ export const appKeys = {
     bookings: ['app', 'consultation', 'bookings'] as const,
   },
   documents: ['app', 'documents'] as const,
+  document: (id: string) => ['app', 'documents', id] as const,
   notifications: ['app', 'notifications'] as const,
   discounts: ['app', 'discounts'] as const,
   support: ['app', 'support', 'tickets'] as const,

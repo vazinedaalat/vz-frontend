@@ -1,7 +1,7 @@
 import { apiRequest } from '@/services/api'
 import { normalizeFileName } from '../lib/filename'
 import type { DocumentRequestValues } from '../schemas'
-import type { DocumentRequestType } from '../types'
+import type { DocumentPaymentInfo, DocumentRequestType } from '../types'
 
 export interface DocumentRequestListItem {
   id: string
@@ -10,12 +10,28 @@ export interface DocumentRequestListItem {
   claimTitle: string
   /** Backend status key — display via documentStatusLabel (Persian). */
   status: string
+  payment?: DocumentPaymentInfo
   createdAt: string
   updatedAt: string
   files: Array<{ id: string; name: string; size: number; type: string }>
 }
 
-function normalizeDocument(item: DocumentRequestListItem): DocumentRequestListItem {
+export type DocumentRequestDetail = DocumentRequestListItem & {
+  plaintiffFatherName?: string
+  plaintiffNationalId?: string
+  plaintiffAddress?: string
+  defendantName?: string
+  defendantAddress?: string
+  defendantPhone?: string | null
+  claimAmount?: string | null
+  claimBasis?: string
+  courtRequest?: string
+  evidenceSummary?: string
+  notes?: string | null
+  payment: DocumentPaymentInfo
+}
+
+function normalizeDocument<T extends DocumentRequestListItem>(item: T): T {
   return {
     ...item,
     files: (item.files ?? []).map((file) => ({
@@ -31,6 +47,12 @@ export function fetchDocuments() {
   )
 }
 
+export function fetchDocumentById(id: string) {
+  return apiRequest<DocumentRequestDetail>({ method: 'GET', url: `/documents/${id}` }).then(
+    normalizeDocument,
+  )
+}
+
 export function createDocumentRequest(payload: DocumentRequestValues, files: File[]) {
   const form = new FormData()
   Object.entries(payload).forEach(([key, value]) => {
@@ -38,9 +60,23 @@ export function createDocumentRequest(payload: DocumentRequestValues, files: Fil
     form.append(key, typeof value === 'boolean' ? String(value) : String(value))
   })
   files.forEach((file) => form.append('files', file, file.name))
-  return apiRequest<DocumentRequestListItem>({
+  return apiRequest<DocumentRequestDetail>({
     method: 'POST',
     url: '/documents',
     data: form,
+  }).then(normalizeDocument)
+}
+
+export function payDocumentPrepayment(id: string) {
+  return apiRequest<DocumentRequestDetail>({
+    method: 'POST',
+    url: `/documents/${id}/prepayment/pay`,
+  }).then(normalizeDocument)
+}
+
+export function payDocumentFinal(id: string) {
+  return apiRequest<DocumentRequestDetail>({
+    method: 'POST',
+    url: `/documents/${id}/final-payment/pay`,
   }).then(normalizeDocument)
 }

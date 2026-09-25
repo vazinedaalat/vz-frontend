@@ -2,7 +2,9 @@ import type { DocumentRequestStatus, DocumentRequestType } from '../types'
 import { DOCUMENT_TYPE_OPTIONS } from '../constants/nav'
 
 export const DOCUMENT_STATUS_LABEL: Record<DocumentRequestStatus, string> = {
+  awaiting_prepayment: 'در انتظار پیش‌پرداخت',
   submitted: 'ثبت‌شده',
+  awaiting_final_payment: 'در انتظار پرداخت کل',
   in_progress: 'در حال تنظیم',
   review: 'در بازبینی',
   ready: 'آماده تحویل',
@@ -12,8 +14,10 @@ export const DOCUMENT_STATUS_LABEL: Record<DocumentRequestStatus, string> = {
 
 /** Short UX hint under the status chip. */
 export const DOCUMENT_STATUS_HINT: Record<DocumentRequestStatus, string> = {
-  submitted: 'درخواست شما دریافت شد و در صف بررسی است.',
-  in_progress: 'وکیل در حال تنظیم پیش‌نویس سند است.',
+  awaiting_prepayment: 'برای ارسال درخواست به صف بررسی، پیش‌پرداخت را واریز کنید.',
+  submitted: 'پیش‌پرداخت دریافت شد؛ ادمین در حال بررسی و اعلام مبلغ کل است.',
+  awaiting_final_payment: 'مبلغ کل اعلام شد؛ پس از پرداخت مابه‌التفاوت، تنظیم سند آغاز می‌شود.',
+  in_progress: 'تیم حقوقی در حال تنظیم پیش‌نویس سند است.',
   review: 'پیش‌نویس برای بازبینی نهایی آماده می‌شود.',
   ready: 'سند آماده است؛ از پنل پیگیری کنید.',
   delivered: 'سند به شما تحویل داده شده است.',
@@ -21,7 +25,9 @@ export const DOCUMENT_STATUS_HINT: Record<DocumentRequestStatus, string> = {
 }
 
 const STATUS_ORDER: DocumentRequestStatus[] = [
+  'awaiting_prepayment',
   'submitted',
+  'awaiting_final_payment',
   'in_progress',
   'review',
   'ready',
@@ -31,9 +37,9 @@ const STATUS_ORDER: DocumentRequestStatus[] = [
 export function normalizeDocumentStatus(
   status: string | undefined | null,
 ): DocumentRequestStatus {
-  if (!status) return 'submitted'
+  if (!status) return 'awaiting_prepayment'
   if (status in DOCUMENT_STATUS_LABEL) return status as DocumentRequestStatus
-  return 'submitted'
+  return 'awaiting_prepayment'
 }
 
 export function documentStatusLabel(status: string | undefined | null): string {
@@ -57,6 +63,10 @@ export function documentStatusChipClass(status: string | undefined | null): stri
       return 'bg-navy-50 text-navy-700'
     case 'in_progress':
       return 'bg-gold-100/80 text-gold-700'
+    case 'awaiting_final_payment':
+      return 'bg-gold-100 text-gold-800'
+    case 'awaiting_prepayment':
+      return 'bg-amber-50 text-amber-800'
     case 'submitted':
     default:
       return 'bg-navy-50 text-navy-600'
@@ -78,7 +88,18 @@ export function isDocumentPending(status: string | undefined | null): boolean {
   return key !== 'delivered' && key !== 'rejected'
 }
 
+export function documentNeedsPrepayment(status: string | undefined | null): boolean {
+  return normalizeDocumentStatus(status) === 'awaiting_prepayment'
+}
+
+export function documentNeedsFinalPayment(status: string | undefined | null): boolean {
+  return normalizeDocumentStatus(status) === 'awaiting_final_payment'
+}
+
 export function documentTypeLabel(type: DocumentRequestType | string): string {
   const found = DOCUMENT_TYPE_OPTIONS.find((o) => o.value === type)
   return found?.label ?? type
 }
+
+/** Fixed client-side display amount when API not yet loaded (must match Nest constant). */
+export const DOCUMENT_PREPAYMENT_AMOUNT = 750_000
