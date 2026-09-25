@@ -5,7 +5,9 @@ import { Link } from 'react-router-dom'
 import { Reveal } from '@/components/animated/reveal'
 import { Container } from '@/components/shared/container'
 import { DocumentHead } from '@/components/shared/document-head'
+import { Pagination } from '@/components/shared/pagination'
 import { Button } from '@/components/ui'
+import { usePagination } from '@/hooks/use-pagination'
 import { SiteFooter } from '@/features/home/components/site-footer'
 import { SiteHeader } from '@/features/home/components/site-header'
 import { SectionHeading } from '@/features/home/components/section-heading'
@@ -14,6 +16,8 @@ import { fetchBlogList } from '../api/blog'
 import { BlogPostCard } from '../components/blog-post-card'
 import { buildBlogListSeo } from '../lib/seo'
 
+const PAGE_SIZE = 6
+
 export default function BlogListPage() {
   const { data: posts = [], isLoading, isError } = useQuery({
     queryKey: ['marketing', 'blog', 'list'],
@@ -21,7 +25,7 @@ export default function BlogListPage() {
   })
 
   const seo = useMemo(() => buildBlogListSeo(), [])
-  const [featured, ...rest] = posts
+  const pagination = usePagination(posts, PAGE_SIZE)
 
   return (
     <div className="min-h-screen bg-navy-50 text-navy-900">
@@ -30,7 +34,7 @@ export default function BlogListPage() {
       <main>
         <section className="relative overflow-hidden border-b border-navy-100 bg-navy-900 text-white">
           <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(var(--color-gold-500)/0.18),transparent_55%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgb(var(--color-gold-500)/0.18),transparent_55%)]"
             aria-hidden="true"
           />
           <Container className="relative py-16 lg:py-24">
@@ -91,12 +95,33 @@ export default function BlogListPage() {
               <p className="text-center text-sm text-navy-500">فعلاً مطلبی منتشر نشده است.</p>
             ) : null}
 
-            {!isLoading && featured ? (
-              <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
-                <BlogPostCard post={featured} featured />
-                {rest.map((post, index) => (
-                  <BlogPostCard key={post.id} post={post} delay={0.06 + index * 0.05} />
-                ))}
+            {!isLoading && pagination.pageItems.length > 0 ? (
+              <div className="space-y-8">
+                <div id="blog-list" className="grid gap-5 lg:grid-cols-2 lg:gap-6">
+                  {pagination.pageItems.map((post, index) => (
+                    <BlogPostCard
+                      key={post.id}
+                      post={post}
+                      featured={pagination.page === 1 && index === 0}
+                      delay={0.06 + index * 0.05}
+                    />
+                  ))}
+                </div>
+                <Pagination
+                  page={pagination.page}
+                  totalPages={pagination.totalPages}
+                  totalItems={pagination.totalItems}
+                  from={pagination.from}
+                  to={pagination.to}
+                  onPageChange={(next) => {
+                    pagination.setPage(next)
+                    document.getElementById('blog-list-heading')?.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'start',
+                    })
+                  }}
+                  listId="blog-list"
+                />
               </div>
             ) : null}
           </Container>

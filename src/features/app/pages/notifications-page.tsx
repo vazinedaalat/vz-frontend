@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui'
 import { ErrorBadge } from '@/components/shared/error-badge'
+import { Pagination } from '@/components/shared/pagination'
+import { usePagination } from '@/hooks/use-pagination'
 import { isMockEnabled } from '@/config/env'
 import { formatFaDateTime } from '@/lib/jalali'
 import { AppError } from '@/services/api/errors'
@@ -12,6 +14,8 @@ import { AppEmptyState } from '../components/app-empty-state'
 import { PageHeader } from '../components/page-header'
 import { cn } from '@/lib/utils'
 
+const PAGE_SIZE = 8
+
 export default function NotificationsPage() {
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
@@ -20,6 +24,8 @@ export default function NotificationsPage() {
     queryKey: appKeys.notifications,
     queryFn: isMockEnabled ? async () => getNotifications() : fetchNotifications,
   })
+
+  const pagination = usePagination(items, PAGE_SIZE)
 
   const markAll = useMutation({
     mutationFn: markAllNotificationsRead,
@@ -71,36 +77,47 @@ export default function NotificationsPage() {
       {isLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
 
       {items.length > 0 ? (
-        <ul className="space-y-3">
-          {items.map((item) => (
-            <li key={item.id}>
-              <Link
-                to={item.caseId ? `/app/cases/${item.caseId}` : '/app/notifications'}
-                onClick={() => void onOpen(item.id, item.read)}
-                className={cn(
-                  'block rounded-[1.25rem] border p-5 transition-all hover:shadow-lift',
-                  item.read
-                    ? 'border-navy-200 bg-white'
-                    : 'border-gold-300 bg-gold-100/40 shadow-soft',
-                )}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-medium text-navy-500">{item.caseTitle}</p>
-                    <h3 className="mt-1 font-semibold text-navy-900">{item.title}</h3>
+        <div className="space-y-5">
+          <ul id="notifications-list" className="space-y-3">
+            {pagination.pageItems.map((item) => (
+              <li key={item.id}>
+                <Link
+                  to={item.caseId ? `/app/cases/${item.caseId}` : '/app/notifications'}
+                  onClick={() => void onOpen(item.id, item.read)}
+                  className={cn(
+                    'block rounded-[1.25rem] border p-5 transition-all hover:shadow-lift',
+                    item.read
+                      ? 'border-navy-200 bg-white'
+                      : 'border-gold-300 bg-gold-100/40 shadow-soft',
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-navy-500">{item.caseTitle}</p>
+                      <h3 className="mt-1 font-semibold text-navy-900">{item.title}</h3>
+                    </div>
+                    {!item.read ? (
+                      <span className="rounded-full bg-gold-500 px-2 py-0.5 text-[0.65rem] font-bold text-navy-900">
+                        جدید
+                      </span>
+                    ) : null}
                   </div>
-                  {!item.read ? (
-                    <span className="rounded-full bg-gold-500 px-2 py-0.5 text-[0.65rem] font-bold text-navy-900">
-                      جدید
-                    </span>
-                  ) : null}
-                </div>
-                <p className="mt-2 text-sm leading-7 text-navy-600">{item.body}</p>
-                <p className="mt-3 text-xs text-navy-400">{formatFaDateTime(item.createdAt)}</p>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                  <p className="mt-2 text-sm leading-7 text-navy-600">{item.body}</p>
+                  <p className="mt-3 text-xs text-navy-400">{formatFaDateTime(item.createdAt)}</p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Pagination
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalItems}
+            from={pagination.from}
+            to={pagination.to}
+            onPageChange={pagination.setPage}
+            listId="notifications-list"
+          />
+        </div>
       ) : !isLoading ? (
         <AppEmptyState title="اطلاعیه‌ای نیست" description="اعلان‌ها از سرویس پیام‌رسانی دریافت می‌شوند." />
       ) : null}

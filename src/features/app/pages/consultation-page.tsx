@@ -6,6 +6,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { CreditCard, CalendarDays, Clock3 } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { ErrorBadge } from '@/components/shared/error-badge'
+import { Pagination } from '@/components/shared/pagination'
+import { usePagination } from '@/hooks/use-pagination'
 import { formatFaNumber, toPersianDigits } from '@/lib/format'
 import { formatJalaliLabel, formatFaDateTime, jalaliFromDate, startOfLocalDay } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
@@ -43,6 +45,8 @@ const EMPTY_AVAILABILITY: ConsultationAvailability = {
   bookedSlots: [],
   timeSlots: [],
 }
+
+const BOOKINGS_PAGE_SIZE = 6
 
 export default function ConsultationPage() {
   const queryClient = useQueryClient()
@@ -100,6 +104,7 @@ export default function ConsultationPage() {
     queryFn: isMockEnabled ? async () => getConsultations() : fetchConsultationBookings,
   })
 
+  const bookingsPagination = usePagination(existing, BOOKINGS_PAGE_SIZE)
   const selectedPlan = planId ? (plans.find((plan) => plan.id === planId) ?? null) : null
 
   const bookMutation = useMutation({
@@ -388,39 +393,50 @@ export default function ConsultationPage() {
         <h2 className="font-display text-lg font-bold text-navy-900">رزروهای شما</h2>
         {bookingsLoading ? <p className="text-sm text-navy-500">در حال بارگذاری…</p> : null}
         {existing.length > 0 ? (
-          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {existing.map((slot) => (
-              <article
-                key={slot.id}
-                className="flex h-full min-w-0 flex-col gap-3 rounded-2xl border border-navy-200 bg-white p-4 shadow-soft sm:gap-4 sm:p-5"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="font-semibold break-words text-navy-900">{slot.topic}</h3>
-                    <p className="mt-1 text-xs break-words text-navy-500">
-                      {slot.lawyerName} · {slot.modeLabel}
-                    </p>
+          <div className="space-y-4">
+            <div id="bookings-list" className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {bookingsPagination.pageItems.map((slot) => (
+                <article
+                  key={slot.id}
+                  className="flex h-full min-w-0 flex-col gap-3 rounded-2xl border border-navy-200 bg-white p-4 shadow-soft sm:gap-4 sm:p-5"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="font-semibold break-words text-navy-900">{slot.topic}</h3>
+                      <p className="mt-1 text-xs break-words text-navy-500">
+                        {slot.lawyerName} · {slot.modeLabel}
+                      </p>
+                    </div>
+                    <BookingStatusChip status={slot.status} />
                   </div>
-                  <BookingStatusChip status={slot.status} />
-                </div>
-                <p className="text-sm break-words text-navy-600">{formatFaDateTime(slot.startsAt)}</p>
-                {slot.bookingCode ? <BookingCodeDisplay code={slot.bookingCode} /> : null}
-                <p className="mt-auto text-sm font-semibold text-navy-900">
-                  {slot.price === 0 ? (
-                    <span className="text-gold-700">رایگان</span>
-                  ) : slot.discountedPrice ? (
-                    <>
-                      <span className="text-gold-700">{formatFaNumber(slot.discountedPrice)} تومان</span>
-                      <span className="mr-2 text-xs text-navy-400 line-through">
-                        {formatFaNumber(slot.price)}
-                      </span>
-                    </>
-                  ) : (
-                    <>{formatFaNumber(slot.price)} تومان</>
-                  )}
-                </p>
-              </article>
-            ))}
+                  <p className="text-sm break-words text-navy-600">{formatFaDateTime(slot.startsAt)}</p>
+                  {slot.bookingCode ? <BookingCodeDisplay code={slot.bookingCode} /> : null}
+                  <p className="mt-auto text-sm font-semibold text-navy-900">
+                    {slot.price === 0 ? (
+                      <span className="text-gold-700">رایگان</span>
+                    ) : slot.discountedPrice ? (
+                      <>
+                        <span className="text-gold-700">{formatFaNumber(slot.discountedPrice)} تومان</span>
+                        <span className="mr-2 text-xs text-navy-400 line-through">
+                          {formatFaNumber(slot.price)}
+                        </span>
+                      </>
+                    ) : (
+                      <>{formatFaNumber(slot.price)} تومان</>
+                    )}
+                  </p>
+                </article>
+              ))}
+            </div>
+            <Pagination
+              page={bookingsPagination.page}
+              totalPages={bookingsPagination.totalPages}
+              totalItems={bookingsPagination.totalItems}
+              from={bookingsPagination.from}
+              to={bookingsPagination.to}
+              onPageChange={bookingsPagination.setPage}
+              listId="bookings-list"
+            />
           </div>
         ) : !bookingsLoading ? (
           <AppEmptyState

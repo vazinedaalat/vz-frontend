@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FileStack, ScrollText } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { ErrorBadge } from '@/components/shared/error-badge'
+import { Pagination } from '@/components/shared/pagination'
+import { usePagination } from '@/hooks/use-pagination'
 import { cn } from '@/lib/utils'
 import { toPersianDigits, asciiDigitsField, asciiAmountField, formatFaNumber } from '@/lib/format'
 import { isMockEnabled } from '@/config/env'
@@ -30,6 +32,8 @@ import {
 } from '../lib/document-status'
 import type { CaseFileMeta, DocumentRequestStatus } from '../types'
 
+const DOCUMENTS_PAGE_SIZE = 5
+
 export default function DocumentRequestPage() {
   const queryClient = useQueryClient()
   const [done, setDone] = useState(false)
@@ -44,6 +48,7 @@ export default function DocumentRequestPage() {
     enabled: !isMockEnabled,
   })
 
+  const documentsPagination = usePagination(documents, DOCUMENTS_PAGE_SIZE)
   const pendingDocuments = documents.filter((doc) => isDocumentPending(doc.status))
   const statusCounts = documents.reduce(
     (acc, doc) => {
@@ -251,13 +256,24 @@ export default function DocumentRequestPage() {
           {documentsLoading ? (
             <p className="text-sm text-navy-500">در حال بارگذاری درخواست‌ها…</p>
           ) : documents.length > 0 ? (
-            <ul className="grid gap-3 sm:gap-4">
-              {documents.map((doc) => (
-                <li key={doc.id}>
-                  <DocumentRequestCard item={doc} />
-                </li>
-              ))}
-            </ul>
+            <div className="space-y-4">
+              <ul id="documents-list" className="grid gap-3 sm:gap-4">
+                {documentsPagination.pageItems.map((doc) => (
+                  <li key={doc.id}>
+                    <DocumentRequestCard item={doc} />
+                  </li>
+                ))}
+              </ul>
+              <Pagination
+                page={documentsPagination.page}
+                totalPages={documentsPagination.totalPages}
+                totalItems={documentsPagination.totalItems}
+                from={documentsPagination.from}
+                to={documentsPagination.to}
+                onPageChange={documentsPagination.setPage}
+                listId="documents-list"
+              />
+            </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-navy-200 bg-navy-50/40 px-5 py-8 text-center">
               <p className="font-medium text-navy-800">هنوز درخواستی ثبت نشده</p>
