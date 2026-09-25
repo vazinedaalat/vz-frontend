@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import { formatFaNumber, normalizeNumericInput, toAsciiDigits, toPersianDigits } from '@/lib/format'
+import {
+  formatAmountInput,
+  formatFaAmount,
+  formatFaNumber,
+  normalizeNumericInput,
+  parseAmountDigits,
+  parseAmountNumber,
+  toAsciiDigits,
+  toPersianDigits,
+} from '@/lib/format'
 import { iranianMobileSchema, nationalIdSchema, otpSchema } from '@/features/app/schemas'
 
 describe('toPersianDigits', () => {
@@ -21,6 +30,27 @@ describe('normalizeNumericInput', () => {
   it('strips separators after digit normalization', () => {
     expect(normalizeNumericInput('۱٬۲۵۰٬۰۰۰')).toBe('1250000')
     expect(normalizeNumericInput('1,250,000')).toBe('1250000')
+  })
+})
+
+describe('amount input grouping', () => {
+  it('formats live typing with Persian digits and thousands', () => {
+    expect(formatAmountInput('')).toBe('')
+    expect(formatAmountInput('12')).toBe('۱۲')
+    expect(formatAmountInput('1234')).toBe('۱٬۲۳۴')
+    expect(formatAmountInput('1250000')).toBe('۱٬۲۵۰٬۰۰۰')
+    expect(formatAmountInput(750000)).toBe('۷۵۰٬۰۰۰')
+  })
+
+  it('parses display back to ASCII digits / number for API', () => {
+    expect(parseAmountDigits('۱٬۲۵۰٬۰۰۰')).toBe('1250000')
+    expect(parseAmountNumber('۲٬۵۰۰٬۰۰۰')).toBe(2500000)
+    expect(Number.isNaN(parseAmountNumber(''))).toBe(true)
+  })
+
+  it('formats optional API amounts for display', () => {
+    expect(formatFaAmount(null)).toBe('—')
+    expect(formatFaAmount('1250000')).toBe(formatFaNumber(1250000))
   })
 })
 

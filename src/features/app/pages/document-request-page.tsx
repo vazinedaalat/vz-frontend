@@ -1,17 +1,18 @@
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FileStack, ScrollText } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/ui'
+import { AmountInput } from '@/components/shared/amount-input'
 import { ErrorBadge } from '@/components/shared/error-badge'
 import { Pagination } from '@/components/shared/pagination'
 import { DocumentCardSkeletonStack } from '@/components/shared/skeletons'
 import { useLazySkeleton } from '@/hooks/use-lazy-skeleton'
 import { usePagination } from '@/hooks/use-pagination'
 import { cn } from '@/lib/utils'
-import { toPersianDigits, asciiDigitsField, asciiAmountField, formatFaNumber } from '@/lib/format'
+import { toPersianDigits, asciiDigitsField, formatFaNumber } from '@/lib/format'
 import { isMockEnabled } from '@/config/env'
 import { AppError } from '@/services/api/errors'
 import {
@@ -83,6 +84,7 @@ export default function DocumentRequestPage() {
 
   const {
     register,
+    control,
     handleSubmit,
     watch,
     getValues,
@@ -470,7 +472,21 @@ export default function DocumentRequestPage() {
             error={errors.claimAmount?.message}
             hint="اگر خواسته غیرمالی است خالی بگذارید"
           >
-            <Input id="claimAmount" placeholder="مبلغ به ریال" dir="ltr" className="text-left" {...register('claimAmount', asciiAmountField)} />
+            <Controller
+              name="claimAmount"
+              control={control}
+              render={({ field }) => (
+                <AmountInput
+                  id="claimAmount"
+                  placeholder="مثلاً ۱٬۲۵۰٬۰۰۰"
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                />
+              )}
+            />
           </Field>
           <Field
             label="تعهدات و جهات استحقاق"
