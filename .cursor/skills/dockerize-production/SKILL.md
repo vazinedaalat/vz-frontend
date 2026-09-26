@@ -1,124 +1,72 @@
 ---
 name: dockerize-production
-description: Builds secure, verified, production-ready Docker setups for the Vazin Edalat stack — NestJS backend (nestjs-vz), Vite React frontend (frontend-vz) and Admin panel (Admin) — with multi-stage Dockerfiles, nginx SPA serving, compose orchestration, migrations, healthchecks, TLS edge, and an automated verification script. Use when the user asks to dockerize, containerize, write a Dockerfile / docker-compose / nginx config, deploy with Docker, or mentions داکر / داکرایز / دیپلوی / کانتینر.
+description: Creates a simple per-app Docker setup (Dockerfile + docker-compose) for NestJS backend, Vite frontend, or Admin — each app runs alone with docker compose up. Use when dockerizing, writing Dockerfile/compose, or mentions داکر / داکرایز / دیپلوی.
 ---
 
-# Dockerize Production
+# Dockerize (per app)
 
-Every Docker artifact must pass **all five filters** from rule `docker-production`:
-**1 Secure · 2 Bug-free & verified · 3 Simplest deploy · 4 Professional · 5 Complete for prod.**
+**One folder = one stack.** Do not create a monorepo compose that starts api + web + admin together. Do not require Caddy/TLS for the default path.
 
-## Workflow
+## Decide target
+
+| If editing… | Write files in… | Up |
+|-------------|-----------------|-----|
+| Backend API | `nestjs-vz/` | `cd nestjs-vz && docker compose up -d --build` |
+| Client SPA | `frontend-vz/` | `cd frontend-vz && docker compose up -d --build` |
+| Admin SPA | `Admin/` | `cd Admin && docker compose up -d --build` |
+
+Copy from `templates/` then adjust ports/names only.
+
+## Backend (`nestjs-vz`)
+
+Files: `Dockerfile`, `.dockerignore`, `docker-compose.yml`, ensure `.env.example` has DB + JWT.
+
+Compose services (only these):
+
+1. `db` — `postgres:16-alpine`, publish `5432` for local simplicity (or omit if user prefers internal-only)
+2. `migrate` — build `target: build`, `npx prisma migrate deploy`, then exit
+3. `api` — build `target: runtime`, depends on migrate success, port `3000`, volume for uploads
+
+Smoke: `curl -fsS http://localhost:3000/api/v1/health`
+
+## Frontend / Admin (SPA)
+
+Files: `Dockerfile`, `nginx.conf`, `.dockerignore`, `docker-compose.yml`.
+
+Compose: single service `web` (or `admin`) — build image, port `8080:8080`.
+
+Pass `VITE_API_URL` / `VITE_ASSET_BASE_URL` as compose `build.args` from `.env`.
+
+Smoke: `curl -fsSI http://localhost:8080/healthz` (admin may use `8081:8080`).
+
+Admin nginx: `X-Frame-Options DENY`. Frontend: `SAMEORIGIN`.
+
+## Checklist (enough)
 
 ```
-Docker Progress:
-- [ ] 1. Inspect app (ports, build cmd, env vars, health route, runtime files)
-- [ ] 2. Write .dockerignore
-- [ ] 3. Write Dockerfile from template (multi-stage, non-root, HEALTHCHECK)
-- [ ] 4. Frontend/Admin: write nginx.conf (SPA fallback, headers, cache)
-- [ ] 5. Compose: services, healthchecks, migrate job, volumes, limits, TLS edge
-- [ ] 6. Update .env.example (+ never commit .env)
-- [ ] 7. Run scripts/verify-docker.sh → fix → re-run until green
-- [ ] 8. Live smoke: compose up, curl health, compose down
-- [ ] 9. Update README Docker section + report
+- [ ] Dockerfile multi-stage, pinned base, non-root, HEALTHCHECK, npm ci
+- [ ] .dockerignore blocks .env and node_modules
+- [ ] docker-compose.yml lives in the same app folder
+- [ ] `docker compose up -d --build` works from that folder alone
+- [ ] Health URL returns 200
+- [ ] README Docker section = that one command
 ```
 
-## Step 1 — Inspect
-
-| App | Build | Runtime | Port | Health | Env source |
-|-----|-------|---------|------|--------|------------|
-| `nestjs-vz` | `npm ci && npx prisma generate && npm run build` | `node dist/main.js` | `3000` | `GET /api/v1/health` | runtime `.env` |
-| `frontend-vz` | `npm ci && npm run build` (Vite) | nginx static | `8080` | `GET /healthz` | **build-time** `VITE_*` ARGs |
-| `Admin` | same as frontend | nginx static | `8080` | `GET /healthz` | **build-time** `VITE_*` ARGs |
-
-Vite inlines `VITE_*` at build → pass as `ARG`, never expect runtime env. Backend reads env at runtime → pass via compose `env_file`.
-
-## Step 2–4 — Files (copy from `templates/`)
-
-| Target | Template |
-|--------|----------|
-| `nestjs-vz/Dockerfile` | `templates/backend.Dockerfile` |
-| `nestjs-vz/.dockerignore` | `templates/backend.dockerignore` |
-| `frontend-vz/Dockerfile`, `Admin/Dockerfile` | `templates/spa.Dockerfile` |
-| `frontend-vz/nginx.conf`, `Admin/nginx.conf` | `templates/spa.nginx.conf` |
-| `frontend-vz/.dockerignore`, `Admin/.dockerignore` | `templates/spa.dockerignore` |
-| `vazinedalat/docker-compose.yml` (monorepo root) | `templates/docker-compose.yml` |
-| `vazinedalat/Caddyfile` | `templates/Caddyfile` |
-| `vazinedalat/.env.example` | `templates/root.env.example` |
-
-Adjust only: `ARG` defaults, ports, domain names, `X-Frame-Options` (`DENY` for Admin, `SAMEORIGIN` for frontend).
-
-## Hard requirements per Dockerfile
-
-- Base pinned: `node:24-alpine`, `nginxinc/nginx-unprivileged:1.27-alpine` (never `latest`)
-- Stages: `deps` → `build` → `runtime`; runtime copies **only** artifacts
-- `npm ci` (lockfile) — `npm install` forbidden
-- `USER` non-root (uid ≥ 1000) before `CMD`
-- `HEALTHCHECK` present (node `fetch` for backend, `wget -qO-` for nginx)
-- `ENV NODE_ENV=production`; no secrets in `ARG`/`ENV`/layers
-- PID 1: `docker run --init` / compose `init: true` (no `npm start` as PID 1)
-- OCI labels: `org.opencontainers.image.{title,source,revision}`
-
-## Hard requirements per compose
-
-- `env_file: .env` (git-ignored) — secrets never inline
-- `migrate` one-off service (`target: build`, `npx prisma migrate deploy`) and `app` `depends_on: migrate: condition: service_completed_successfully`
-- `healthcheck` on `db`, `api`, `web`, `admin`; `depends_on … condition: service_healthy`
-- `read_only: true` + `tmpfs: [/tmp]` + `cap_drop: [ALL]` + `security_opt: [no-new-privileges:true]` + `init: true`
-- `deploy.resources.limits` (cpu/mem), `logging` json-file with `max-size`/`max-file`
-- Named volumes: `postgres_data`, `uploads_data`, `caddy_data`
-- DB **no `ports:`** in prod; internal network only
-- TLS via `caddy` service under profile `edge` (`docker compose --profile edge up -d`)
-
-## Step 7 — Verify (mandatory)
+## Verify (optional, same folder)
 
 ```bash
-bash .cursor/skills/dockerize-production/scripts/verify-docker.sh            # all apps
-bash .cursor/skills/dockerize-production/scripts/verify-docker.sh backend    # one app
+bash .cursor/skills/dockerize-production/scripts/verify-docker.sh
 ```
 
-Checks: build succeeds → hadolint (if docker available) → runtime user ≠ root → HEALTHCHECK exists → no `.env`/secret strings in layers → `docker compose config -q` → image size report. Fix every ❌ and re-run; do not finish with warnings you can fix.
+Script detects app type from cwd (`nestjs-vz` / `frontend-vz` / `Admin`) and checks only that app.
 
-## Step 8 — Smoke
+## Do not
 
-```bash
-cd /path/to/vazinedalat
-cp .env.example .env   # fill real values
-docker compose up -d --build
-docker compose ps                                  # all healthy
-curl -fsS http://localhost:3000/api/v1/health      # {"status":"ok",...}
-curl -fsSI http://localhost:8080/healthz           # 200 (frontend)
-curl -fsSI http://localhost:8081/healthz           # 200 (admin)
-docker compose logs --tail=50 api
-docker compose down
-```
+- Add root `vazinedalat/docker-compose.yml` coupling all apps
+- Force Caddy, internal-only networks, or profiles for basic deploy
+- Document “must start all three”
 
-## Deploy (simplest path — filter 3)
+## Templates
 
-```bash
-git pull
-cp -n .env.example .env && $EDITOR .env           # first time only
-docker compose --profile edge up -d --build       # HTTPS via Caddy
-docker compose ps
-```
-
-Rollback: `docker compose up -d --no-build` with previous image tag, or `git checkout <tag> && docker compose up -d --build`.
-
-## Report format
-
-```markdown
-### Docker delivery
-- Files: …
-- Images: api 210 MB · web 45 MB · admin 46 MB
-- verify-docker.sh: ✅ 18/18
-- Smoke: /api/v1/health ok · /healthz 200 · migrate exit 0
-- Security: non-root, read-only fs, cap_drop ALL, no secrets in layers, DB internal
-- Deploy: `docker compose --profile edge up -d --build`
-- Residual: …
-```
-
-## Additional resources
-
-- Security hardening details, CSP guidance, and troubleshooting: [reference.md](reference.md)
-- Templates: `templates/`
-- Verification script: `scripts/verify-docker.sh`
+- `templates/backend.Dockerfile` + `backend.dockerignore` + `backend.compose.yml`
+- `templates/spa.Dockerfile` + `spa.dockerignore` + `spa.nginx.conf` + `spa.compose.yml`

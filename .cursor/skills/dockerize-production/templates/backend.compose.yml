@@ -1,0 +1,66 @@
+# Backend only — from nestjs-vz/
+#   cp .env.example .env   # set JWT_* and DB password if needed
+#   docker compose up -d --build
+#   curl http://localhost:3000/api/v1/health
+
+name: nestjs-vz
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vazin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vazin}
+      POSTGRES_DB: ${POSTGRES_DB:-vazinedalat}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  migrate:
+    build:
+      context: .
+      target: build
+    command: ["npx", "prisma", "migrate", "deploy"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-vazin}:${POSTGRES_PASSWORD:-vazin}@db:5432/${POSTGRES_DB:-vazinedalat}?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      target: runtime
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-vazin}:${POSTGRES_PASSWORD:-vazin}@db:5432/${POSTGRES_DB:-vazinedalat}?schema=public
+      UPLOAD_DIR: /data/uploads
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-false}
+    ports:
+      - "${API_PORT:-3000}:3000"
+    volumes:
+      - uploads_data:/data/uploads
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/v1/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  uploads_data:

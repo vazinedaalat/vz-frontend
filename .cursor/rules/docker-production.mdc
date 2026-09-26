@@ -1,38 +1,49 @@
 ---
-description: Mandatory standards for every Dockerfile, compose file, nginx/Caddy config, or deploy script (backend, frontend, admin)
+description: Per-app Docker — each project (backend / frontend / admin) has its own Dockerfile + compose and runs alone
 alwaysApply: true
 ---
 
-# Docker Production Standard (Always)
+# Docker (per app)
 
-Whenever you create or edit `Dockerfile*`, `docker-compose*.yml`, `.dockerignore`, `nginx*.conf`, `Caddyfile`, or deploy scripts, follow skill `.cursor/skills/dockerize-production/SKILL.md` and enforce **all five filters**. Never ship a Docker artifact that fails one.
+Each repo is **independent**. Never require a monorepo root compose or bringing api+web+admin up together.
 
-## The five filters (non-negotiable)
+| App | Folder | Up command |
+|-----|--------|------------|
+| Backend | `nestjs-vz` | `docker compose up -d --build` |
+| Frontend | `frontend-vz` | `docker compose up -d --build` |
+| Admin | `Admin` | `docker compose up -d --build` |
 
-| # | Filter | Enforce by |
-|---|--------|-----------|
-| 1 | **Secure** | non-root `USER`, pinned base tag, `npm ci`, no secrets in image/ARG/ENV, `.dockerignore` excludes `.env*`, `read_only` + `cap_drop: [ALL]` + `no-new-privileges`, DB never published in prod |
-| 2 | **Bug-free & verified** | run `scripts/verify-docker.sh` (build → hadolint → non-root → HEALTHCHECK → secret scan → `compose config`) and a live smoke on `/api/v1/health` / `/healthz` before finishing |
-| 3 | **Simplest deploy** | one `docker compose up -d --build` from repo root; single `.env`; migrations via one-off `migrate` service; no hand steps |
-| 4 | **Professional** | multi-stage, layer-cached deps, `HEALTHCHECK`, `--init`/`dumb-init`, log rotation, `restart: unless-stopped`, resource limits, named volumes, OCI labels |
-| 5 | **Complete for prod** | `NODE_ENV=production`, `SWAGGER_ENABLED=false`, strong JWT secrets required, uploads volume, TLS edge (Caddy profile), nginx SPA fallback + security headers + immutable asset cache |
+## Required per app (keep simple)
 
-## Per-app rules
+- Multi-stage `Dockerfile`, pinned tags (no `latest`)
+- Non-root `USER`, `HEALTHCHECK`, `npm ci`
+- `.dockerignore` excludes `.env*`, `node_modules`, `.git`
+- Own `docker-compose.yml` + `.env.example` in that folder
+- Secrets only via `.env` / `env_file` — never baked into image
 
-- **Backend (`nestjs-vz`)**: `node:24-alpine` builder → runtime with only `dist/`, prod `node_modules`, `prisma/`; `npx prisma migrate deploy` only in `migrate` service (builder target), never at container start of `app`.
-- **Frontend (`frontend-vz`) / Admin (`Admin`)**: Vite build in node stage → serve with `nginxinc/nginx-unprivileged:alpine` on `8080`; all `VITE_*` passed as `ARG` at build; `VITE_USE_MOCK=false` in prod; `try_files … /index.html`.
-- **Compose**: healthchecks on every service; `depends_on` with `condition`; `env_file: .env` (git-ignored); `.env.example` updated alongside.
+## Frontend / Admin
+
+- Vite build → `nginxinc/nginx-unprivileged` on `8080`
+- `VITE_*` as build `ARG` only; `VITE_USE_MOCK=false`
+- `nginx.conf` with SPA `try_files` + `/healthz`
+- Admin: `X-Frame-Options DENY`
+
+## Backend
+
+- `node:24-alpine`, migrate one-off then `api`
+- Postgres in the **same** compose (that app only)
+- `SWAGGER_ENABLED=false` in compose for prod profile/default
 
 ## Forbidden
 
-- `latest` tags, `COPY . .` into runtime stage, `npm install` in builder, `RUN chmod 777`, `privileged: true`, secrets in `ARG`/`ENV`/compose `environment`, DB `ports:` in prod compose, `sudo`, running as `root`, `curl | sh`.
+- Root `vazinedalat/docker-compose.yml` that couples all apps
+- Mandatory Caddy / edge / multi-network setup for local or simple deploy
+- `npm install`, secrets in `ARG`/`ENV`, run as root
 
-## Delivery
-
-Report: images built + sizes, verify-script output, smoke result, and update `README.md` Docker section if commands changed.
+Follow skill `.cursor/skills/dockerize-production/SKILL.md` when writing/editing Docker files.
 
 ---
 
-# Persian intent (do not dilute)
+# Persian
 
-داکر باید امن باشد و فایل امن بنویسد؛ بدون باگ و بررسی‌شده؛ ساده‌ترین مسیر دیپلوی بدون پیچیدگی؛ حرفه‌ای؛ و همهٔ نیازهای پروداکشن روی آن باشد — برای بک‌اند، فرانت و ادمین.
+هر بخش جدا داکرایز و جدا `up` می‌شود؛ بک‌اند، فرانت و ادمین لازم نیست با هم بالا بیایند.

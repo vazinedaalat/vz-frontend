@@ -1,4 +1,3 @@
-# VCS / IDE / OS
 .git
 .gitignore
 .idea
@@ -6,13 +5,11 @@
 .DS_Store
 .cursor
 
-# Dependencies & build output (rebuilt inside image)
 node_modules
 dist
 coverage
 *.tsbuildinfo
 
-# Secrets — never in build context
 .env
 .env.*
 !.env.example
@@ -20,14 +17,12 @@ secrets/
 *.pem
 *.key
 
-# Runtime data
 uploads
 logs
 *.log
 tmp
 temp
 
-# Docs / tests / tooling not needed at runtime
 docs
 skills
 test

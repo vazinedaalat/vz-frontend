@@ -1,4 +1,3 @@
-# Note: avoid `# syntax=docker/dockerfile:…` — Docker Hub 403 breaks local builds.
 ARG NODE_IMAGE=node:24-alpine
 ARG NGINX_IMAGE=nginxinc/nginx-unprivileged:1.27-alpine
 

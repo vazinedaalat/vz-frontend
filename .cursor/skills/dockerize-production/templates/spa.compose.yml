@@ -1,0 +1,20 @@
+# Frontend only — from frontend-vz/
+#   cp .env.example .env
+#   docker compose up -d --build
+#   open http://localhost:8080
+
+name: frontend-vz
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api/v1}
+        VITE_ASSET_BASE_URL: ${VITE_ASSET_BASE_URL:-http://localhost:3000}
+        VITE_APP_ENV: ${VITE_APP_ENV:-production}
+        VITE_APP_NAME: ${VITE_APP_NAME:-وزین عدالت}
+        VITE_SITE_URL: ${VITE_SITE_URL:-http://localhost:8080}
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    restart: unless-stopped

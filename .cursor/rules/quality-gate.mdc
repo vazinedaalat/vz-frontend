@@ -24,7 +24,19 @@ npm run build
 
 ## Docker
 
-If you create or edit `Dockerfile*`, `docker-compose*.yml`, `.dockerignore`, `nginx*.conf`, or `Caddyfile`, follow skill `.cursor/skills/dockerize-production/SKILL.md` and rule `docker-production` (five filters). Run `bash .cursor/skills/dockerize-production/scripts/verify-docker.sh frontend` before finishing.
+This app runs **alone**. Do not couple with backend/admin compose.
+
+```bash
+cp -n .env.example .env
+docker compose up -d --build
+# http://localhost:8080  ·  curl -I http://localhost:8080/healthz
+```
+
+If you edit Docker files, follow `.cursor/skills/dockerize-production/SKILL.md` and rule `docker-production`, then:
+
+```bash
+bash .cursor/skills/dockerize-production/scripts/verify-docker.sh
+```
 
 ## Definition of Done
 
@@ -32,6 +44,6 @@ If you create or edit `Dockerfile*`, `docker-compose*.yml`, `.dockerignore`, `ng
 2. Gate commands above are green
 3. For UI work: responsive checklist in `responsive-ui-qa` is satisfied
 4. No unused imports, dead props, or leftover console noise
-5. Docker artifacts (if touched) pass `verify-docker.sh`
+5. Docker artifacts (if touched) pass `verify-docker.sh` from this folder
 
 Canonical testing notes: `skills/testing.md`
