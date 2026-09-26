@@ -1,0 +1,39 @@
+# VCS / IDE / OS
+.git
+.gitignore
+.idea
+.vscode
+.DS_Store
+.cursor
+
+# Dependencies & build output (rebuilt inside image)
+node_modules
+dist
+coverage
+*.tsbuildinfo
+
+# Secrets — never in build context
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+
+# Runtime data
+uploads
+logs
+*.log
+tmp
+temp
+
+# Docs / tests / tooling not needed at runtime
+docs
+skills
+test
+scripts
+*.md
+!README.md
+docker-compose*.yml
+Dockerfile*
+.dockerignore

@@ -1,0 +1,38 @@
+---
+description: Mandatory standards for every Dockerfile, compose file, nginx/Caddy config, or deploy script (backend, frontend, admin)
+alwaysApply: true
+---
+
+# Docker Production Standard (Always)
+
+Whenever you create or edit `Dockerfile*`, `docker-compose*.yml`, `.dockerignore`, `nginx*.conf`, `Caddyfile`, or deploy scripts, follow skill `.cursor/skills/dockerize-production/SKILL.md` and enforce **all five filters**. Never ship a Docker artifact that fails one.
+
+## The five filters (non-negotiable)
+
+| # | Filter | Enforce by |
+|---|--------|-----------|
+| 1 | **Secure** | non-root `USER`, pinned base tag, `npm ci`, no secrets in image/ARG/ENV, `.dockerignore` excludes `.env*`, `read_only` + `cap_drop: [ALL]` + `no-new-privileges`, DB never published in prod |
+| 2 | **Bug-free & verified** | run `scripts/verify-docker.sh` (build → hadolint → non-root → HEALTHCHECK → secret scan → `compose config`) and a live smoke on `/api/v1/health` / `/healthz` before finishing |
+| 3 | **Simplest deploy** | one `docker compose up -d --build` from repo root; single `.env`; migrations via one-off `migrate` service; no hand steps |
+| 4 | **Professional** | multi-stage, layer-cached deps, `HEALTHCHECK`, `--init`/`dumb-init`, log rotation, `restart: unless-stopped`, resource limits, named volumes, OCI labels |
+| 5 | **Complete for prod** | `NODE_ENV=production`, `SWAGGER_ENABLED=false`, strong JWT secrets required, uploads volume, TLS edge (Caddy profile), nginx SPA fallback + security headers + immutable asset cache |
+
+## Per-app rules
+
+- **Backend (`nestjs-vz`)**: `node:24-alpine` builder → runtime with only `dist/`, prod `node_modules`, `prisma/`; `npx prisma migrate deploy` only in `migrate` service (builder target), never at container start of `app`.
+- **Frontend (`frontend-vz`) / Admin (`Admin`)**: Vite build in node stage → serve with `nginxinc/nginx-unprivileged:alpine` on `8080`; all `VITE_*` passed as `ARG` at build; `VITE_USE_MOCK=false` in prod; `try_files … /index.html`.
+- **Compose**: healthchecks on every service; `depends_on` with `condition`; `env_file: .env` (git-ignored); `.env.example` updated alongside.
+
+## Forbidden
+
+- `latest` tags, `COPY . .` into runtime stage, `npm install` in builder, `RUN chmod 777`, `privileged: true`, secrets in `ARG`/`ENV`/compose `environment`, DB `ports:` in prod compose, `sudo`, running as `root`, `curl | sh`.
+
+## Delivery
+
+Report: images built + sizes, verify-script output, smoke result, and update `README.md` Docker section if commands changed.
+
+---
+
+# Persian intent (do not dilute)
+
+داکر باید امن باشد و فایل امن بنویسد؛ بدون باگ و بررسی‌شده؛ ساده‌ترین مسیر دیپلوی بدون پیچیدگی؛ حرفه‌ای؛ و همهٔ نیازهای پروداکشن روی آن باشد — برای بک‌اند، فرانت و ادمین.

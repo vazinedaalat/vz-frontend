@@ -1,0 +1,200 @@
+# Vazin Edalat — production stack (place at monorepo root: vazinedalat/docker-compose.yml)
+# Usage:
+#   cp .env.example .env && edit
+#   docker compose up -d --build                 # api + web + admin + db (ports 3000/8080/8081)
+#   docker compose --profile edge up -d --build  # + Caddy HTTPS on 80/443
+name: vazinedalat
+
+x-hardening: &hardening
+  init: true
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+x-spa-build-args: &spa-build-args
+  VITE_API_URL: ${PUBLIC_API_URL:?set PUBLIC_API_URL}
+  VITE_ASSET_BASE_URL: ${PUBLIC_ASSET_URL:?set PUBLIC_ASSET_URL}
+  VITE_APP_ENV: production
+  GIT_SHA: ${GIT_SHA:-unknown}
+  APP_VERSION: ${APP_VERSION:-dev}
+
+services:
+  # ---------------- Database ----------------
+  db:
+    image: postgres:16-alpine
+    <<: *hardening
+    read_only: false                  # postgres needs writable data dir
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-vazinedalat}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [internal]
+    # NO ports: in production — DB reachable only from the internal network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 1g }
+
+  # ---------------- One-off: Prisma migrations ----------------
+  migrate:
+    build:
+      context: ./nestjs-vz
+      target: build                   # has prisma CLI (dev deps)
+    command: ["npx", "prisma", "migrate", "deploy"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-vazinedalat}?schema=public
+    networks: [internal]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    init: true
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+
+  # ---------------- Backend API ----------------
+  api:
+    build:
+      context: ./nestjs-vz
+      target: runtime
+      args:
+        GIT_SHA: ${GIT_SHA:-unknown}
+        APP_VERSION: ${APP_VERSION:-dev}
+    <<: *hardening
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-vazinedalat}?schema=public
+      UPLOAD_DIR: /data/uploads
+      SWAGGER_ENABLED: "false"
+      CORS_ORIGINS: ${CORS_ORIGINS:?set CORS_ORIGINS}
+    volumes:
+      - uploads_data:/data/uploads
+    tmpfs:
+      - /tmp
+    ports:
+      - "${API_PORT:-3000}:3000"      # remove when using the edge profile only
+    networks: [internal, edge]
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/v1/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 768m }
+
+  # ---------------- Client frontend ----------------
+  web:
+    build:
+      context: ./frontend-vz
+      args:
+        <<: *spa-build-args
+        VITE_APP_NAME: "وزین عدالت"
+        VITE_SITE_URL: ${PUBLIC_SITE_URL:-https://vazinedalat.ir}
+    <<: *hardening
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    networks: [edge]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 128m }
+
+  # ---------------- Admin panel ----------------
+  admin:
+    build:
+      context: ./Admin
+      args:
+        <<: *spa-build-args
+        VITE_APP_NAME: "پنل ادمین وزین عدالت"
+        VITE_FRONTEND_URL: ${PUBLIC_SITE_URL:-https://vazinedalat.ir}
+    <<: *hardening
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    ports:
+      - "${ADMIN_PORT:-8081}:8080"
+    networks: [edge]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 128m }
+
+  # ---------------- TLS edge (optional): docker compose --profile edge up -d ----------------
+  caddy:
+    image: caddy:2-alpine
+    profiles: [edge]
+    restart: unless-stopped
+    init: true
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?set SITE_DOMAIN}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN:?set ADMIN_DOMAIN}
+      API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [edge]
+    depends_on:
+      api: { condition: service_healthy }
+      web: { condition: service_healthy }
+      admin: { condition: service_healthy }
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+networks:
+  internal:
+    internal: true                    # no egress; db + migrate + api only
+  edge:
+
+volumes:
+  postgres_data:
+  uploads_data:
+  caddy_data:
+  caddy_config:

@@ -22,11 +22,16 @@ npm run build
 - Do not weaken ESLint (`max-warnings 0`) or skip TypeScript to “make it pass”.
 - Do not commit secrets, `.env`, or generated emit files (`*.js` next to `vite.config.ts`).
 
+## Docker
+
+If you create or edit `Dockerfile*`, `docker-compose*.yml`, `.dockerignore`, `nginx*.conf`, or `Caddyfile`, follow skill `.cursor/skills/dockerize-production/SKILL.md` and rule `docker-production` (five filters). Run `bash .cursor/skills/dockerize-production/scripts/verify-docker.sh frontend` before finishing.
+
 ## Definition of Done
 
 1. Feature works in `npm run dev`
 2. Gate commands above are green
 3. For UI work: responsive checklist in `responsive-ui-qa` is satisfied
 4. No unused imports, dead props, or leftover console noise
+5. Docker artifacts (if touched) pass `verify-docker.sh`
 
 Canonical testing notes: `skills/testing.md`
