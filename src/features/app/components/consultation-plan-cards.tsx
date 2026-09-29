@@ -1,15 +1,39 @@
-import { Check, Gift, MapPin, Sparkles, Video } from 'lucide-react'
+import { Check, Gift, MapPin, Sparkles, Video, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatFaNumber, toPersianDigits } from '@/lib/format'
+import { Skeleton } from '@/components/shared/skeleton'
+import { SkeletonRegion } from '@/components/shared/skeleton-region'
 import type { ConsultationPlan, ConsultationPlanId } from '../types'
 import { CONSULTATION_PLANS } from '../constants/consultation-plans'
 
-const PLAN_ICON = {
+const PLAN_ICON: Partial<Record<string, LucideIcon>> = {
   'free-online': Gift,
   'specialist-online': Video,
   'in-person': MapPin,
   'dargahi-premium': Sparkles,
-} as const
+}
+
+export function ConsultationPlanCardsSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <SkeletonRegion label="در حال بارگذاری طرح‌های مشاوره" className="grid gap-3 sm:grid-cols-2">
+      {Array.from({ length: count }, (_, index) => (
+        <div
+          key={index}
+          className="flex min-h-56 flex-col gap-3 rounded-2xl border border-navy-100 bg-white p-4 shadow-soft sm:p-5"
+        >
+          <Skeleton className="size-10 rounded-xl" />
+          <Skeleton className="h-5 w-2/3" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-3 w-3/4" />
+          <div className="mt-auto flex items-end justify-between gap-3">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-5 w-24" />
+          </div>
+        </div>
+      ))}
+    </SkeletonRegion>
+  )
+}
 
 interface ConsultationPlanCardsProps {
   value?: ConsultationPlanId
@@ -45,7 +69,7 @@ function PlanCard({
   selected: boolean
   onSelect: () => void
 }) {
-  const Icon = PLAN_ICON[plan.id]
+  const Icon = PLAN_ICON[plan.id] ?? Video
 
   return (
     <button

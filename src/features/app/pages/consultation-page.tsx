@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -19,16 +19,20 @@ import {
   createConsultationBooking,
   fetchConsultationAvailability,
   fetchConsultationBookings,
+  fetchConsultationPlans,
   payConsultationBooking,
 } from '../api'
-import { getConsultationPlan } from '../constants/consultation-plans'
+import { CONSULTATION_PLANS } from '../constants/consultation-plans'
 import { consultationRequestSchema, type ConsultationRequestValues } from '../schemas'
 import { getConsultationAvailability, getConsultations } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
 import { BookingCalendar } from '../components/booking-calendar'
 import { BookingCodeDisplay } from '../components/booking-code-display'
 import { BookingStatusChip } from '../components/booking-status-chip'
-import { ConsultationPlanCards } from '../components/consultation-plan-cards'
+import {
+  ConsultationPlanCards,
+  ConsultationPlanCardsSkeleton,
+} from '../components/consultation-plan-cards'
 import { DiscountCodeField } from '../components/discount-code-field'
 import { Field } from '../components/field'
 import { PageHeader } from '../components/page-header'
@@ -63,6 +67,7 @@ export default function ConsultationPage() {
     watch,
     setValue,
     reset,
+    resetField,
     formState: { errors, isSubmitting },
   } = useForm<ConsultationRequestValues>({
     resolver: zodResolver(consultationRequestSchema),
@@ -86,6 +91,16 @@ export default function ConsultationPage() {
     planId,
   })
 
+  const {
+    data: plans = [],
+    isPending: plansPending,
+    isError: plansError,
+    refetch: refetchPlans,
+  } = useQuery({
+    queryKey: appKeys.consultation.plans,
+    queryFn: isMockEnabled ? async () => [...CONSULTATION_PLANS] : fetchConsultationPlans,
+  })
+
   const { data: availability = EMPTY_AVAILABILITY } = useQuery({
     queryKey: appKeys.consultation.availability(planId),
     queryFn: () =>
@@ -102,7 +117,16 @@ export default function ConsultationPage() {
 
   const showBookingsSkeleton = useLazySkeleton(bookingsPending)
   const bookingsPagination = usePagination(existing, BOOKINGS_PAGE_SIZE)
-  const selectedPlan = planId ? getConsultationPlan(planId) : null
+  const showPlansSkeleton = useLazySkeleton(plansPending)
+  const selectedPlan = (planId && plans.find((plan) => plan.id === planId)) || null
+
+  useEffect(() => {
+    if (planId && !plansPending && !selectedPlan) {
+      resetField('planId')
+      setValue('dateKey', '')
+      setValue('time', '')
+    }
+  }, [planId, plansPending, selectedPlan, resetField, setValue])
 
   const bookMutation = useMutation({
     mutationFn: async (values: ConsultationRequestValues) => {
@@ -131,6 +155,7 @@ export default function ConsultationPage() {
     },
     onError: (err) => {
       setApiError(err instanceof AppError ? err.message : 'خطا در ثبت رزرو')
+      void queryClient.invalidateQueries({ queryKey: appKeys.consultation.plans })
     },
   })
 
@@ -179,7 +204,7 @@ export default function ConsultationPage() {
       <PageHeader
         eyebrow="مشاوره حقوقی"
         title="رزرو مشاوره"
-        description="یکی از چهار طرح را انتخاب کنید، روز مناسب را از تقویم مشخص کنید و در طرح‌های حضوری ساعت جلسه را نیز رزرو کنید."
+        description="یکی از طرح‌های مشاوره را انتخاب کنید، روز مناسب را از تقویم مشخص کنید و در طرح‌های حضوری ساعت جلسه را نیز رزرو کنید."
       />
 
       {submitted ? (
@@ -199,11 +224,27 @@ export default function ConsultationPage() {
       <form onSubmit={onSubmit} className="min-w-0 space-y-8">
         <section className="min-w-0 space-y-4">
           <SectionTitle step="۱" title="انتخاب طرح مشاوره" />
+          {showPlansSkeleton ? <ConsultationPlanCardsSkeleton /> : null}
+          {!plansPending && plansError ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
+              <ErrorBadge>دریافت طرح‌های مشاوره ناموفق بود.</ErrorBadge>
+              <Button type="button" variant="outline" size="sm" onClick={() => void refetchPlans()}>
+                تلاش مجدد
+              </Button>
+            </div>
+          ) : null}
+          {!plansPending && !plansError && plans.length === 0 ? (
+            <AppEmptyState
+              title="طرح مشاوره‌ای فعال نیست"
+              description="در حال حاضر امکان رزرو مشاوره وجود ندارد؛ کمی بعد دوباره سر بزنید."
+            />
+          ) : null}
           <Controller
             name="planId"
             control={control}
             render={({ field }) => (
               <ConsultationPlanCards
+                plans={plans}
                 value={field.value}
                 onChange={(next) => {
                   field.onChange(next)

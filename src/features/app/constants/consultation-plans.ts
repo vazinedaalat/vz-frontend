@@ -65,5 +65,5 @@ export function getConsultationPlan(id: ConsultationPlanId): ConsultationPlan {
 }
 
 export function planRequiresTime(id: ConsultationPlanId): boolean {
-  return getConsultationPlan(id).requiresTime
+  return CONSULTATION_PLANS.find((item) => item.id === id)?.requiresTime ?? false
 }
