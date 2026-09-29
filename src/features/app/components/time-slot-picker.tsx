@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/lib/format'
 import { ErrorBadge } from '@/components/shared/error-badge'
-import { getAvailableTimeSlots, isTimeSlotBooked } from '../lib/consultation-availability'
+import { getAvailableTimeSlots, isTimeSlotBooked, isTimeSlotPast } from '../lib/consultation-availability'
 import type { ConsultationAvailability } from '../types'
 
 interface TimeSlotPickerProps {
@@ -28,20 +28,24 @@ export function TimeSlotPicker({ dateKey, availability, value, onChange, error }
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {availability.timeSlots.map((time) => {
           const booked = isTimeSlotBooked(dateKey, time, availability)
+          const past = isTimeSlotPast(dateKey, time)
+          const unavailable = booked || past
           const selected = value === time
           return (
             <button
               key={time}
               type="button"
-              disabled={booked}
+              disabled={unavailable}
+              title={past ? 'این ساعت گذشته است' : booked ? 'رزرو شده' : undefined}
               aria-pressed={selected}
               onClick={() => onChange(time)}
               className={cn(
                 'h-11 min-w-0 rounded-xl border text-xs font-semibold transition-all duration-200 sm:text-sm',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/40',
                 selected && 'border-gold-400 bg-navy-900 text-white shadow-soft',
-                !selected && !booked && 'border-navy-200 bg-white text-navy-800 hover:border-gold-300 hover:bg-gold-100/50',
+                !selected && !unavailable && 'border-navy-200 bg-white text-navy-800 hover:border-gold-300 hover:bg-gold-100/50',
                 booked && 'cursor-not-allowed border-navy-100 bg-navy-50 text-navy-300 line-through',
+                past && !booked && 'cursor-not-allowed border-navy-100 bg-navy-50 text-navy-300',
               )}
             >
               {toPersianDigits(time)}

@@ -29,22 +29,33 @@ export function isTimeSlotBooked(
   return availability.bookedSlots.includes(slotKey(dateKey, time))
 }
 
+/** Slot on today's date whose start time is now or earlier (backend rejects these too). */
+export function isTimeSlotPast(dateKey: string, time: string, now = new Date()): boolean {
+  if (dateKey !== toDateKey(startOfLocalDay(now))) return false
+  const hh = String(now.getHours()).padStart(2, '0')
+  const mm = String(now.getMinutes()).padStart(2, '0')
+  return time <= `${hh}:${mm}`
+}
+
 export function getAvailableTimeSlots(
   dateKey: string,
   availability: ConsultationAvailability,
-  today = startOfLocalDay(),
+  now = new Date(),
 ): string[] {
-  if (!isDateSelectable(dateKey, availability, today)) return []
-  return availability.timeSlots.filter((time) => !isTimeSlotBooked(dateKey, time, availability))
+  if (!isDateSelectable(dateKey, availability, startOfLocalDay(now))) return []
+  return availability.timeSlots.filter(
+    (time) => !isTimeSlotBooked(dateKey, time, availability) && !isTimeSlotPast(dateKey, time, now),
+  )
 }
 
-/** If every clock slot is taken, treat the day as unbookable for timed plans. */
+/** If every clock slot is taken or already past, treat the day as unbookable for timed plans. */
 export function isDayExhaustedForTimedPlan(
   dateKey: string,
   availability: ConsultationAvailability,
+  now = new Date(),
 ): boolean {
   if (availability.timeSlots.length === 0) return false
-  return getAvailableTimeSlots(dateKey, availability).length === 0
+  return getAvailableTimeSlots(dateKey, availability, now).length === 0
 }
 
 export function isDateSelectableForPlan(
