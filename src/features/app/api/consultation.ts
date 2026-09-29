@@ -2,7 +2,6 @@ import { apiRequest } from '@/services/api'
 import type {
   ConsultationAvailability,
   ConsultationBookingStatus,
-  ConsultationPlan,
   ConsultationPlanId,
   ConsultationSlot,
 } from '../types'
@@ -29,10 +28,6 @@ function normalizeBooking(item: BookingSlot): BookingSlot {
     bookingCode: item.bookingCode?.trim() || item.id,
     status,
   }
-}
-
-export function fetchConsultationPlans() {
-  return apiRequest<ConsultationPlan[]>({ method: 'GET', url: '/consultation/plans' })
 }
 
 export function fetchConsultationAvailability(params?: {

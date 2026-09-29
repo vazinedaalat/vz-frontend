@@ -19,10 +19,9 @@ import {
   createConsultationBooking,
   fetchConsultationAvailability,
   fetchConsultationBookings,
-  fetchConsultationPlans,
   payConsultationBooking,
 } from '../api'
-import { CONSULTATION_PLANS } from '../constants/consultation-plans'
+import { getConsultationPlan } from '../constants/consultation-plans'
 import { consultationRequestSchema, type ConsultationRequestValues } from '../schemas'
 import { getConsultationAvailability, getConsultations } from '../mocks/data'
 import { AppEmptyState } from '../components/app-empty-state'
@@ -87,11 +86,6 @@ export default function ConsultationPage() {
     planId,
   })
 
-  const { data: plans = CONSULTATION_PLANS } = useQuery({
-    queryKey: appKeys.consultation.plans,
-    queryFn: isMockEnabled ? async () => [...CONSULTATION_PLANS] : fetchConsultationPlans,
-  })
-
   const { data: availability = EMPTY_AVAILABILITY } = useQuery({
     queryKey: appKeys.consultation.availability(planId),
     queryFn: () =>
@@ -108,7 +102,7 @@ export default function ConsultationPage() {
 
   const showBookingsSkeleton = useLazySkeleton(bookingsPending)
   const bookingsPagination = usePagination(existing, BOOKINGS_PAGE_SIZE)
-  const selectedPlan = planId ? (plans.find((plan) => plan.id === planId) ?? null) : null
+  const selectedPlan = planId ? getConsultationPlan(planId) : null
 
   const bookMutation = useMutation({
     mutationFn: async (values: ConsultationRequestValues) => {
@@ -210,7 +204,6 @@ export default function ConsultationPage() {
             control={control}
             render={({ field }) => (
               <ConsultationPlanCards
-                plans={plans}
                 value={field.value}
                 onChange={(next) => {
                   field.onChange(next)

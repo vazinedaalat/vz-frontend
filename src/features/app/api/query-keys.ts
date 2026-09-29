@@ -15,7 +15,6 @@ export const appKeys = {
     byCase: (caseId: string) => ['app', 'chats', 'case', caseId] as const,
   },
   consultation: {
-    plans: ['app', 'consultation', 'plans'] as const,
     availability: (planId?: string) => ['app', 'consultation', 'availability', planId ?? 'all'] as const,
     bookings: ['app', 'consultation', 'bookings'] as const,
   },
