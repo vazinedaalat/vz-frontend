@@ -63,7 +63,11 @@ export function useDiscountValidation({ section, planId }: UseDiscountValidation
         return null
       }
       setError(null)
-      return mutateAsync(normalized)
+      try {
+        return await mutateAsync(normalized)
+      } catch {
+        return null
+      }
     },
     [mutateAsync, planId, section],
   )

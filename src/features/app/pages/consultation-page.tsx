@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -13,7 +13,7 @@ import { usePagination } from '@/hooks/use-pagination'
 import { formatFaNumber, toPersianDigits } from '@/lib/format'
 import { formatJalaliLabel, formatFaDateTime, jalaliFromDate, startOfLocalDay } from '@/lib/jalali'
 import { isMockEnabled } from '@/config/env'
-import { AppError } from '@/services/api/errors'
+import { AppError, NetworkError } from '@/services/api/errors'
 import {
   appKeys,
   createConsultationBooking,
@@ -41,6 +41,7 @@ import { useDiscountValidation } from '../hooks/use-discount-validation'
 import {
   computeDiscountAmount,
   computeDiscountedPrice,
+  normalizeDiscountCode,
 } from '../lib/discount-preview'
 import type { BookingSlot } from '../api/consultation'
 import type { ConsultationAvailability, ConsultationPlanId } from '../types'
@@ -59,6 +60,8 @@ export default function ConsultationPage() {
   const [lastBooking, setLastBooking] = useState<BookingSlot | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
   const [viewMonth, setViewMonth] = useState(() => jalaliFromDate(startOfLocalDay()))
+  const pendingPaymentRef = useRef<string | null>(null)
+  const [hasPendingPayment, setHasPendingPayment] = useState(false)
 
   const {
     register,
@@ -128,15 +131,27 @@ export default function ConsultationPage() {
     }
   }, [planId, plansPending, selectedPlan, resetField, setValue])
 
+  const clearPendingPayment = () => {
+    pendingPaymentRef.current = null
+    setHasPendingPayment(false)
+  }
+
   const bookMutation = useMutation({
     mutationFn: async (values: ConsultationRequestValues) => {
-      const booking = await createConsultationBooking(values)
-      if (selectedPlan?.requiresPayment) {
-        return payConsultationBooking(booking.id)
+      let bookingId = pendingPaymentRef.current
+      if (!bookingId) {
+        const booking = await createConsultationBooking(values)
+        if (!selectedPlan?.requiresPayment) return booking
+        bookingId = booking.id
+        pendingPaymentRef.current = bookingId
+        setHasPendingPayment(true)
       }
-      return booking
+      const paid = await payConsultationBooking(bookingId)
+      clearPendingPayment()
+      return paid
     },
     onSuccess: async (booking) => {
+      clearPendingPayment()
       setApiError(null)
       setLastBooking(booking)
       setSubmitted(true)
@@ -154,13 +169,44 @@ export default function ConsultationPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     },
     onError: (err) => {
-      setApiError(err instanceof AppError ? err.message : 'خطا در ثبت رزرو')
+      if (pendingPaymentRef.current) {
+        setApiError(
+          'رزرو ثبت شد اما پرداخت کامل نشد؛ دوباره روی دکمه پرداخت بزنید (رزرو و کد تخفیف دوباره ثبت نمی‌شوند).',
+        )
+        void queryClient.invalidateQueries({ queryKey: appKeys.consultation.bookings })
+        return
+      }
+      if (err instanceof NetworkError) {
+        setApiError(
+          'ثبت رزرو ناموفق بود. اگر اینترنت وصل است، روز/ساعت و کد تخفیف را بررسی و دوباره تلاش کنید.',
+        )
+      } else {
+        setApiError(err instanceof AppError ? err.message : 'خطا در ثبت رزرو')
+      }
       void queryClient.invalidateQueries({ queryKey: appKeys.consultation.plans })
+      void queryClient.invalidateQueries({ queryKey: appKeys.consultation.availability(planId) })
     },
   })
 
-  const onSubmit = handleSubmit(async (values) => {
+  /** Code to send with the booking: '' for none, the validated code, or `false` to abort. */
+  const resolveDiscountCode = async (): Promise<string | false> => {
+    if (!selectedPlan || selectedPlan.isFree) return ''
+    const typed = normalizeDiscountCode(discountCode)
+    if (!typed) return ''
+    if (discount.isApplied && discount.appliedCode === typed) return typed
+    try {
+      const result = await discount.validate(typed)
+      return result ? normalizeDiscountCode(result.code) : false
+    } catch {
+      return false
+    }
+  }
+
+  const onSubmit = handleSubmit(async (formValues) => {
     setApiError(null)
+    const code = pendingPaymentRef.current ? '' : await resolveDiscountCode()
+    if (code === false) return
+    const values = { ...formValues, discountCode: code }
     if (isMockEnabled) {
       const mockCode = `VZB-DEMO-${String(Math.floor(100000 + Math.random() * 900000))}`
       const percent = discount.preview?.percent
@@ -194,7 +240,11 @@ export default function ConsultationPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
-    await bookMutation.mutateAsync(values)
+    try {
+      await bookMutation.mutateAsync(values)
+    } catch {
+      // surfaced via onError
+    }
   })
 
   const submitting = isSubmitting || bookMutation.isPending
@@ -248,6 +298,7 @@ export default function ConsultationPage() {
                 value={field.value}
                 onChange={(next) => {
                   field.onChange(next)
+                  clearPendingPayment()
                   setValue('dateKey', '')
                   setValue('time', '')
                   setValue('discountCode', '')
@@ -394,9 +445,11 @@ export default function ConsultationPage() {
                     {selectedPlan.requiresPayment ? (
                       <>
                         <CreditCard className="size-4" aria-hidden />
-                        {discount.isApplied
-                          ? 'پرداخت با تخفیف و ثبت رزرو'
-                          : 'پرداخت و ثبت رزرو'}
+                        {hasPendingPayment
+                          ? 'تکمیل پرداخت رزرو ثبت‌شده'
+                          : discount.isApplied
+                            ? 'پرداخت با تخفیف و ثبت رزرو'
+                            : 'پرداخت و ثبت رزرو'}
                       </>
                     ) : (
                       <>

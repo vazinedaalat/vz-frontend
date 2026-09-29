@@ -5,7 +5,7 @@ import { Button } from '@/components/ui'
 import { formatFaNumber } from '@/lib/format'
 import { DiscountCodeField } from './discount-code-field'
 import { useDiscountValidation } from '../hooks/use-discount-validation'
-import { computeDiscountedPrice } from '../lib/discount-preview'
+import { computeDiscountedPrice, normalizeDiscountCode } from '../lib/discount-preview'
 import type { DocumentPaymentInfo } from '../types'
 
 type PaymentMode = 'prepayment' | 'final'
@@ -165,9 +165,16 @@ export function DocumentPaymentPanel({
                 size="lg"
                 className="w-full sm:w-auto"
                 disabled={paying || discount.isValidating}
-                onClick={() => {
-                  const code = (discount.appliedCode || discountCode).trim() || undefined
-                  onPay(code)
+                onClick={async () => {
+                  const typed = normalizeDiscountCode(discountCode)
+                  if (!typed) return onPay(undefined)
+                  if (discount.isApplied && discount.appliedCode === typed) return onPay(typed)
+                  try {
+                    const result = await discount.validate(typed)
+                    if (result) onPay(normalizeDiscountCode(result.code))
+                  } catch {
+                    // error shown under the discount field
+                  }
                 }}
               >
                 <CreditCard className="size-4" aria-hidden />

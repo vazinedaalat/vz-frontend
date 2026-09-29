@@ -12,7 +12,11 @@ export function computeDiscountAmount(price: number, percent: number): number {
   return Math.max(0, Math.round(price) - computeDiscountedPrice(price, percent))
 }
 
-/** Normalize user-entered discount codes for compare / API. */
+/** Normalize user-entered discount codes for compare / API (mirrors backend `normalizeDiscountCode`). */
 export function normalizeDiscountCode(code: string): string {
-  return code.trim().toUpperCase()
+  return code
+    .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/\s+/g, '')
+    .toUpperCase()
 }
