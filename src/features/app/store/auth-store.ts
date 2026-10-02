@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { isMockEnabled } from '@/config/env'
-import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '@/services/api/token'
 import { AppError } from '@/services/api/errors'
 import { fetchMeApi, logoutApi, requestOtpApi, updateProfileApi, verifyOtpApi } from '../api/auth'
 import { getMockUser, updateMockUser } from '../mocks/data'
@@ -79,7 +78,6 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           const session = await verifyOtpApi(phone, code)
-          setTokens(session.accessToken, session.refreshToken)
           set({ user: session.user, isAuthenticated: true, phonePending: null })
           return { ok: true }
         } catch (error) {
@@ -127,19 +125,13 @@ export const useAuthStore = create<AuthState>()(
       hydrateSession: async () => {
         if (isMockEnabled) return
 
-        const token = getAccessToken()
-        if (!token) {
-          if (get().isAuthenticated) {
-            set({ user: null, isAuthenticated: false, phonePending: null })
-          }
-          return
-        }
+        // The HttpOnly session is invisible to JS; the persisted flag only avoids a 401 probe for guests.
+        if (!get().isAuthenticated) return
 
         try {
           const user = await fetchMeApi()
           set({ user, isAuthenticated: true })
         } catch {
-          clearTokens()
           set({ user: null, isAuthenticated: false, phonePending: null })
         }
       },
@@ -147,11 +139,10 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         if (!isMockEnabled) {
           try {
-            await logoutApi(getRefreshToken())
+            await logoutApi()
           } catch {
             // ignore network errors on logout
           }
-          clearTokens()
         }
         set({ user: null, isAuthenticated: false, phonePending: null })
       },

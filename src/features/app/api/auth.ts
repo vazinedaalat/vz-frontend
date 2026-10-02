@@ -6,9 +6,8 @@ export interface OtpRequestResult {
   demoCode?: string
 }
 
+/** Tokens are delivered as HttpOnly cookies, never in the response body. */
 export interface AuthSession {
-  accessToken: string
-  refreshToken: string
   user: AppUser
 }
 
@@ -45,10 +44,6 @@ export function updateProfileApi(payload: UpdateProfilePayload) {
   return apiRequest<AppUser>({ method: 'PATCH', url: '/auth/me', data: body })
 }
 
-export function logoutApi(refreshToken?: string | null) {
-  return apiRequest<{ ok: true }>({
-    method: 'POST',
-    url: '/auth/logout',
-    data: refreshToken ? { refreshToken } : {},
-  })
+export function logoutApi() {
+  return apiRequest<{ ok: true }>({ method: 'POST', url: '/auth/logout', data: {} })
 }

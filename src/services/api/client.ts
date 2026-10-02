@@ -3,28 +3,28 @@ import { env } from '@/config'
 import { logger } from '@/lib/logger'
 import { AuthenticationError, normalizeApiError } from './errors'
 import {
-  clearTokens,
-  getAccessToken,
-  getRefreshToken,
-  setTokens,
+  AUTH_CLIENT,
+  AUTH_CLIENT_HEADER,
+  clearLegacyTokens,
+  shouldAttemptRefresh,
+  withCrossTabLock,
 } from './token'
 import type { ApiSuccessEnvelope } from './types'
+
+clearLegacyTokens()
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: env.VITE_API_URL,
   timeout: 30000,
+  withCredentials: true,
   headers: {
     Accept: 'application/json',
+    [AUTH_CLIENT_HEADER]: AUTH_CLIENT,
   },
 })
 
 apiClient.interceptors.request.use(
   (config) => {
-    const token = getAccessToken()
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-
     config.headers['X-Request-Id'] = crypto.randomUUID()
 
     if (config.data instanceof FormData) {
@@ -48,25 +48,20 @@ apiClient.interceptors.request.use(
   },
 )
 
-let refreshPromise: Promise<string | null> | null = null
+let refreshPromise: Promise<boolean> | null = null
 
-async function refreshAccessToken(): Promise<string | null> {
-  const refreshToken = getRefreshToken()
-  if (!refreshToken) return null
-
+/** Rotates the HttpOnly session cookies; the API clears them itself when refresh fails. */
+async function refreshSession(): Promise<boolean> {
   try {
-    const { data } = await axios.post<
-      ApiSuccessEnvelope<{ accessToken: string; refreshToken: string }>
-    >(
-      `${env.VITE_API_URL}/auth/refresh`,
-      { refreshToken },
-      { headers: { 'Content-Type': 'application/json', Accept: 'application/json' } },
+    await withCrossTabLock('vz-web-auth-refresh', () =>
+      axios.post(`${env.VITE_API_URL}/auth/refresh`, undefined, {
+        withCredentials: true,
+        headers: { Accept: 'application/json', [AUTH_CLIENT_HEADER]: AUTH_CLIENT },
+      }),
     )
-    setTokens(data.data.accessToken, data.data.refreshToken)
-    return data.data.accessToken
+    return true
   } catch {
-    clearTokens()
-    return null
+    return false
   }
 }
 
@@ -76,14 +71,12 @@ apiClient.interceptors.response.use(
     const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
     const status = error.response?.status
 
-    if (status === 401 && original && !original._retry && !original.url?.includes('/auth/')) {
+    if (original && shouldAttemptRefresh(status, original.url, Boolean(original._retry))) {
       original._retry = true
-      refreshPromise ??= refreshAccessToken().finally(() => {
+      refreshPromise ??= refreshSession().finally(() => {
         refreshPromise = null
       })
-      const nextToken = await refreshPromise
-      if (nextToken) {
-        original.headers.Authorization = `Bearer ${nextToken}`
+      if (await refreshPromise) {
         return apiClient.request(original)
       }
       return Promise.reject(new AuthenticationError('نشست منقضی شده است. دوباره وارد شوید.'))

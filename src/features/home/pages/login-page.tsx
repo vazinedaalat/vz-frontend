@@ -12,7 +12,6 @@ import { smsLoginOtpSchema, smsLoginPhoneSchema } from '@/features/app/schemas'
 import { useAuthStore } from '@/features/app/store/auth-store'
 import { Field } from '@/features/app/components/field'
 import { asciiDigitsField } from '@/lib/format'
-import { getAccessToken } from '@/services/api/token'
 import { z } from 'zod'
 
 type PhoneForm = z.infer<typeof smsLoginPhoneSchema>
@@ -29,9 +28,7 @@ export default function LoginPage() {
   const [phone, setPhone] = useState('')
   const [info, setInfo] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [checkingSession, setCheckingSession] = useState(
-    () => Boolean(getAccessToken()) || isAuthenticated,
-  )
+  const [checkingSession, setCheckingSession] = useState(() => isAuthenticated)
 
   const phoneForm = useForm<PhoneForm>({
     resolver: zodResolver(smsLoginPhoneSchema),
@@ -52,7 +49,7 @@ export default function LoginPage() {
         return
       }
 
-      // Token present → validate; stale persist without token → clear.
+      // Remembered session → validate the cookie with /auth/me (refreshing once if needed).
       await hydrateSession()
 
       if (!cancelled) setCheckingSession(false)
