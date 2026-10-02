@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { isMockEnabled } from '@/config/env'
+import { resetUserScopedCache } from '@/lib/query-client'
 import { AppError } from '@/services/api/errors'
 import { fetchMeApi, logoutApi, requestOtpApi, updateProfileApi, verifyOtpApi } from '../api/auth'
 import { getMockUser, updateMockUser } from '../mocks/data'
@@ -72,12 +73,14 @@ export const useAuthStore = create<AuthState>()(
                 nationalIdMasked: '۰۰۰******۰۰',
                 hasNationalId: false,
               }
+          await resetUserScopedCache()
           set({ user, isAuthenticated: true, phonePending: null })
           return { ok: true }
         }
 
         try {
           const session = await verifyOtpApi(phone, code)
+          await resetUserScopedCache()
           set({ user: session.user, isAuthenticated: true, phonePending: null })
           return { ok: true }
         } catch (error) {
@@ -130,9 +133,12 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           const user = await fetchMeApi()
+          // Another tab may have signed in as someone else since this cache was filled.
+          if (get().user?.id !== user.id) await resetUserScopedCache()
           set({ user, isAuthenticated: true })
         } catch {
           set({ user: null, isAuthenticated: false, phonePending: null })
+          await resetUserScopedCache()
         }
       },
 
@@ -144,7 +150,9 @@ export const useAuthStore = create<AuthState>()(
             // ignore network errors on logout
           }
         }
+        // Flip auth first so protected pages unmount instead of refetching into the cleared cache.
         set({ user: null, isAuthenticated: false, phonePending: null })
+        await resetUserScopedCache()
       },
     }),
     {
