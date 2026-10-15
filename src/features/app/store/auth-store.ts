@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { isMockEnabled } from '@/config/env'
 import { resetUserScopedCache } from '@/lib/query-client'
-import { AppError } from '@/services/api/errors'
+import { AppError, isSessionRejected } from '@/services/api/errors'
 import { fetchMeApi, logoutApi, requestOtpApi, updateProfileApi, verifyOtpApi } from '../api/auth'
 import { getMockUser, updateMockUser } from '../mocks/data'
 import type { AppUser } from '../types'
@@ -136,7 +136,9 @@ export const useAuthStore = create<AuthState>()(
           // Another tab may have signed in as someone else since this cache was filled.
           if (get().user?.id !== user.id) await resetUserScopedCache()
           set({ user, isAuthenticated: true })
-        } catch {
+        } catch (error) {
+          // Offline / flaky mobile network: keep the session and retry on the next load.
+          if (!isSessionRejected(error)) return
           set({ user: null, isAuthenticated: false, phonePending: null })
           await resetUserScopedCache()
         }

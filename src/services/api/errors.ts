@@ -52,6 +52,14 @@ export class UnexpectedError extends AppError {
   }
 }
 
+/**
+ * Only an explicit 401/403 from the API ends a session. Network drops, timeouts and proxy/CDN
+ * error pages (which arrive without CORS headers and look like network errors) must not log users out.
+ */
+export function isSessionRejected(error: unknown): boolean {
+  return error instanceof AppError && (error.status === 401 || error.status === 403)
+}
+
 export function normalizeApiError(error: unknown): AppError {
   if (error instanceof AppError) return error
 
