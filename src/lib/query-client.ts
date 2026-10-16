@@ -1,10 +1,12 @@
 import { QueryClient } from '@tanstack/react-query'
+import { AuthenticationError } from '@/services/api/errors'
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60 * 1000,
-      retry: 1,
+      // Session death already redirects to login — don't retry into an empty shell.
+      retry: (count, error) => !(error instanceof AuthenticationError) && count < 1,
       refetchOnWindowFocus: false,
     },
     mutations: {

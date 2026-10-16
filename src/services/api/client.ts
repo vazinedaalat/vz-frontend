@@ -2,6 +2,7 @@ import axios, { type AxiosInstance, type AxiosRequestConfig, type InternalAxiosR
 import { env } from '@/config'
 import { logger } from '@/lib/logger'
 import { AuthenticationError, normalizeApiError } from './errors'
+import { notifySessionExpired } from './session-expired'
 import {
   AUTH_CLIENT,
   AUTH_CLIENT_HEADER,
@@ -79,6 +80,8 @@ apiClient.interceptors.response.use(
       if (await refreshPromise) {
         return apiClient.request(original)
       }
+      // Access + refresh both rejected — end the UX session so ProtectedRoute sends them to login.
+      notifySessionExpired()
       return Promise.reject(new AuthenticationError('نشست منقضی شده است. دوباره وارد شوید.'))
     }
 

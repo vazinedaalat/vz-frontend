@@ -22,6 +22,8 @@ interface AuthState {
     values: { fullName: string; nationalId?: string },
   ) => Promise<{ ok: true; user: AppUser } | { ok: false; message: string }>
   hydrateSession: () => Promise<void>
+  /** Clear local auth/cache only (cookies already gone). Used when refresh fails mid-session. */
+  clearLocalSession: () => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -139,9 +141,15 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           // Offline / flaky mobile network: keep the session and retry on the next load.
           if (!isSessionRejected(error)) return
-          set({ user: null, isAuthenticated: false, phonePending: null })
-          await resetUserScopedCache()
+          await get().clearLocalSession()
         }
+      },
+
+      clearLocalSession: async () => {
+        if (!get().isAuthenticated && !get().user) return
+        // Flip auth first so protected pages unmount instead of refetching into the cleared cache.
+        set({ user: null, isAuthenticated: false, phonePending: null })
+        await resetUserScopedCache()
       },
 
       logout: async () => {
@@ -152,9 +160,7 @@ export const useAuthStore = create<AuthState>()(
             // ignore network errors on logout
           }
         }
-        // Flip auth first so protected pages unmount instead of refetching into the cleared cache.
-        set({ user: null, isAuthenticated: false, phonePending: null })
-        await resetUserScopedCache()
+        await get().clearLocalSession()
       },
     }),
     {

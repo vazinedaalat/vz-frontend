@@ -3,12 +3,17 @@ import { ThemeProvider } from './theme-provider'
 import { QueryProvider } from './query-provider'
 import { Toaster } from '@/components/ui/toaster'
 import { useAuthStore } from '@/features/app/store/auth-store'
+import { onSessionExpired } from '@/services/api/session-expired'
 
 function SessionHydrator({ children }: { children: React.ReactNode }) {
   const hydrateSession = useAuthStore((s) => s.hydrateSession)
 
   useEffect(() => {
+    onSessionExpired(() => {
+      void useAuthStore.getState().clearLocalSession()
+    })
     void hydrateSession()
+    return () => onSessionExpired(null)
   }, [hydrateSession])
 
   return children
