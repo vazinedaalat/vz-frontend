@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { DocumentHead } from '@/components/shared/document-head'
 import { BlogSection } from '@/features/blog'
 import {
@@ -17,19 +17,8 @@ import { WhyUsSection } from '../components/why-us-section'
 import { TeamSection } from '../components/team-section'
 import { CtaSection } from '../components/cta-section'
 import { SiteFooter } from '../components/site-footer'
-import { scrollToSection } from '@/utils/scroll'
-import type { ServiceId } from '../types'
 
 export default function HomePage() {
-  const [activeServiceId, setActiveServiceId] = useState<ServiceId | null>(null)
-
-  const handleSelectService = (id: ServiceId) => {
-    setActiveServiceId(id)
-    requestAnimationFrame(() => {
-      scrollToSection(`service-${id}`)
-    })
-  }
-
   const seo = useMemo(
     () => ({
       title: SITE_SEO.defaultTitle,
@@ -61,9 +50,9 @@ export default function HomePage() {
       <DocumentHead {...seo} />
       <SiteHeader />
       <main>
-        <HeroSection activeServiceId={activeServiceId} onSelectService={handleSelectService} />
+        <HeroSection />
         <AboutSection />
-        <PracticeAreas activeServiceId={activeServiceId} />
+        <PracticeAreas />
         <ProcessSection />
         <WhyUsSection />
         <TeamSection />

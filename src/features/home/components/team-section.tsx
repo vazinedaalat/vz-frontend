@@ -6,7 +6,7 @@ import { SectionHeading } from './section-heading'
 
 export function TeamSection() {
   return (
-    <section id={SECTION_IDS.team} className="bg-white py-20 lg:py-28">
+    <section id={SECTION_IDS.team} className="bg-white py-14 sm:py-16 lg:py-24">
       <Container>
         <Reveal>
           <SectionHeading
@@ -16,11 +16,11 @@ export function TeamSection() {
           />
         </Reveal>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4 lg:gap-6">
+        <div className="mt-10 grid gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-5 lg:mt-14 lg:grid-cols-4 lg:gap-6">
           {TEAM.map((member, index) => (
             <Reveal key={member.id} delay={index * 0.06}>
-              <article className="group flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-navy-200 bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lift">
-                <div className="relative flex aspect-[4/5] items-end bg-linear-to-b from-navy-100 via-navy-200 to-navy-800 p-6">
+              <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-navy-200 bg-white shadow-soft transition-all duration-300 sm:rounded-[1.5rem] sm:hover:-translate-y-1 hover:shadow-lift">
+                <div className="relative flex aspect-[5/4] items-end bg-linear-to-b from-navy-100 via-navy-200 to-navy-800 p-5 sm:aspect-[4/5] sm:p-6">
                   <div
                     className="absolute inset-0 opacity-40"
                     style={{

@@ -110,11 +110,11 @@ export function HeroBackdrop() {
         />
       ) : null}
 
-      {/* Constellation particles */}
+      {/* Constellation particles — desktop only; mobile stays calmer */}
       {PARTICLES.map((particle, index) => (
         <motion.span
           key={index}
-          className="absolute rounded-full bg-navy-400/70"
+          className="absolute hidden rounded-full bg-navy-400/70 md:block"
           style={{
             top: particle.top,
             left: particle.left,

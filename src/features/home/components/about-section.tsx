@@ -14,9 +14,9 @@ const HIGHLIGHTS = [
 
 export function AboutSection() {
   return (
-    <section id={SECTION_IDS.about} className="py-20 lg:py-28">
+    <section id={SECTION_IDS.about} className="py-14 sm:py-16 lg:py-24">
       <Container>
-        <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-20">
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-20">
           <Reveal from="right">
             <SectionHeading
               align="start"
@@ -31,9 +31,12 @@ export function AboutSection() {
               description="شعار ما ساده است: لذت خدمات قضایی سریع و دقیق — آنلاین و بدون حضور. همان اعتبار وکالت پایه یک، بدون صف دفتر و بدون اتلاف وقت."
             />
 
-            <ul className="mt-10 grid gap-4">
+            <ul className="mt-8 grid gap-3.5 sm:mt-10 sm:gap-4">
               {HIGHLIGHTS.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm leading-7 text-navy-800 lg:text-base">
+                <li
+                  key={item}
+                  className="flex items-start gap-3 rounded-2xl border border-navy-100 bg-white/70 px-4 py-3.5 text-sm leading-7 text-navy-800 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 lg:text-base"
+                >
                   <CircleCheck className="mt-0.5 size-5 shrink-0 text-gold-600" strokeWidth={1.7} />
                   <span>{item}</span>
                 </li>
@@ -42,14 +45,17 @@ export function AboutSection() {
           </Reveal>
 
           <Reveal from="left" delay={0.1}>
-            <div className="relative overflow-hidden rounded-[2rem] border border-navy-800 bg-navy-900 p-8 text-white shadow-lift lg:p-12">
-              <div className="bg-gold-500/20 absolute -top-16 -left-10 size-48 rounded-full blur-3xl" />
-              <p className="font-display text-sm font-semibold text-gold-300">بیانیه {BRAND.name}</p>
-              <blockquote className="font-display mt-6 text-2xl leading-relaxed font-bold text-balance text-white lg:text-[1.85rem]">
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-navy-800 bg-navy-900 p-7 text-white shadow-lift sm:rounded-[2rem] sm:p-8 lg:p-12">
+              <div className="bg-gold-500/20 pointer-events-none absolute -top-16 -left-10 size-48 rounded-full blur-3xl" />
+              <p className="font-display relative text-sm font-semibold text-gold-300">
+                بیانیه {BRAND.name}
+              </p>
+              <blockquote className="font-display relative mt-5 text-xl leading-relaxed font-bold text-balance text-white sm:mt-6 sm:text-2xl lg:text-[1.85rem]">
                 «عدالت را حرفه‌ای پیگیری کنید؛ این‌بار سریع، دقیق و بدون حضور.»
               </blockquote>
-              <p className="mt-8 text-sm leading-7 text-white/80">
-                فعالیت مستمر از سال {toPersianDigits(BRAND.establishedYear)}؛ امروز همان تخصص، به‌صورت آنلاین و بدون حضور.
+              <p className="relative mt-6 text-sm leading-7 text-white/80 sm:mt-8">
+                فعالیت مستمر از سال {toPersianDigits(BRAND.establishedYear)}؛ امروز همان تخصص، به‌صورت
+                آنلاین و بدون حضور.
               </p>
             </div>
           </Reveal>

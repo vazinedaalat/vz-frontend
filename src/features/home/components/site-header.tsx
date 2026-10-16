@@ -127,94 +127,100 @@ export function SiteHeader() {
           </Button>
         </div>
 
-        <Dialog.Root open={menuOpen} onOpenChange={setMenuOpen}>
-          <Dialog.Trigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="lg:hidden"
-              aria-label={menuOpen ? 'بستن منو' : 'باز کردن منو'}
-            >
-              {menuOpen ? <X /> : <Menu />}
-            </Button>
-          </Dialog.Trigger>
+        {/* Mobile: primary CTA stays visible — don't bury login only inside the drawer */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <Button variant="accent" size="sm" className="min-h-11 px-3.5" asChild>
+            <Link to={LOGIN_PATH}>{CTA.login}</Link>
+          </Button>
+          <Dialog.Root open={menuOpen} onOpenChange={setMenuOpen}>
+            <Dialog.Trigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="min-h-11 min-w-11"
+                aria-label={menuOpen ? 'بستن منو' : 'باز کردن منو'}
+              >
+                {menuOpen ? <X /> : <Menu />}
+              </Button>
+            </Dialog.Trigger>
 
-          <Dialog.Portal>
-            <Dialog.Overlay className="data-[state=open]:animate-fade-in fixed inset-0 z-50 bg-navy-950/50 backdrop-blur-sm" />
-            <Dialog.Content
-              className="fixed inset-y-0 right-0 z-50 flex w-[min(100%,22rem)] flex-col gap-8 bg-white p-6 text-navy-900 shadow-lift focus:outline-none"
-              aria-describedby={undefined}
-            >
-              <div className="flex items-center justify-between">
-                <Dialog.Title className="sr-only">منوی اصلی</Dialog.Title>
-                <BrandMark href={onHome ? `#${SECTION_IDS.home}` : '/'} onClick={goHomeBrand} />
-                <Dialog.Close asChild>
-                  <Button variant="ghost" size="icon" aria-label="بستن منو">
-                    <X />
-                  </Button>
-                </Dialog.Close>
-              </div>
+            <Dialog.Portal>
+              <Dialog.Overlay className="data-[state=open]:animate-fade-in fixed inset-0 z-50 bg-navy-950/50 backdrop-blur-sm" />
+              <Dialog.Content
+                className="fixed inset-y-0 right-0 z-50 flex w-[min(100%,22rem)] flex-col gap-8 bg-white p-6 text-navy-900 shadow-lift focus:outline-none"
+                aria-describedby={undefined}
+              >
+                <div className="flex items-center justify-between">
+                  <Dialog.Title className="sr-only">منوی اصلی</Dialog.Title>
+                  <BrandMark href={onHome ? `#${SECTION_IDS.home}` : '/'} onClick={goHomeBrand} />
+                  <Dialog.Close asChild>
+                    <Button variant="ghost" size="icon" aria-label="بستن منو">
+                      <X />
+                    </Button>
+                  </Dialog.Close>
+                </div>
 
-              <nav className="flex flex-col gap-1" aria-label="منوی موبایل">
-                {NAV_LINKS.map((link) => {
-                  const sectionId = marketingNavSectionId(link.href)
-                  const resolved = resolveMarketingNavHref(link.href, pathname)
-                  const isActive = sectionId
-                    ? onHome && activeSection === sectionId
-                    : link.href === BLOG_PATH
-                      ? onBlog
-                      : pathname === link.href
+                <nav className="flex flex-col gap-1" aria-label="منوی موبایل">
+                  {NAV_LINKS.map((link) => {
+                    const sectionId = marketingNavSectionId(link.href)
+                    const resolved = resolveMarketingNavHref(link.href, pathname)
+                    const isActive = sectionId
+                      ? onHome && activeSection === sectionId
+                      : link.href === BLOG_PATH
+                        ? onBlog
+                        : pathname === link.href
 
-                  return isHashNavHref(link.href) ? (
-                    <a
-                      key={link.href}
-                      href={resolved}
-                      onClick={(event) => {
-                        event.preventDefault()
-                        closeAndNavigate(link.href)
-                      }}
-                      className={cn(
-                        'rounded-2xl px-4 py-3 text-base font-medium transition-colors',
-                        isActive
-                          ? 'bg-navy-900 text-white'
-                          : 'text-navy-600 hover:bg-navy-50 hover:text-navy-900'
-                      )}
-                    >
-                      {link.label}
-                    </a>
-                  ) : (
-                    <Link
-                      key={link.href}
-                      to={link.href}
-                      onClick={() => setMenuOpen(false)}
-                      className={cn(
-                        'rounded-2xl px-4 py-3 text-base font-medium transition-colors',
-                        isActive
-                          ? 'bg-navy-900 text-white'
-                          : 'text-navy-600 hover:bg-navy-50 hover:text-navy-900'
-                      )}
-                    >
-                      {link.label}
+                    return isHashNavHref(link.href) ? (
+                      <a
+                        key={link.href}
+                        href={resolved}
+                        onClick={(event) => {
+                          event.preventDefault()
+                          closeAndNavigate(link.href)
+                        }}
+                        className={cn(
+                          'rounded-2xl px-4 py-3 text-base font-medium transition-colors',
+                          isActive
+                            ? 'bg-navy-900 text-white'
+                            : 'text-navy-600 hover:bg-navy-50 hover:text-navy-900'
+                        )}
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        key={link.href}
+                        to={link.href}
+                        onClick={() => setMenuOpen(false)}
+                        className={cn(
+                          'rounded-2xl px-4 py-3 text-base font-medium transition-colors',
+                          isActive
+                            ? 'bg-navy-900 text-white'
+                            : 'text-navy-600 hover:bg-navy-50 hover:text-navy-900'
+                        )}
+                      >
+                        {link.label}
+                      </Link>
+                    )
+                  })}
+                </nav>
+
+                <div className="mt-auto flex flex-col gap-3">
+                  <Button variant="outline" size="lg" className="w-full" asChild>
+                    <Link to={LOGIN_PATH} onClick={() => setMenuOpen(false)}>
+                      {CTA.login}
                     </Link>
-                  )
-                })}
-              </nav>
-
-              <div className="mt-auto flex flex-col gap-3">
-                <Button variant="outline" size="lg" className="w-full" asChild>
-                  <Link to={LOGIN_PATH} onClick={() => setMenuOpen(false)}>
-                    {CTA.login}
-                  </Link>
-                </Button>
-                <Button variant="accent" size="lg" className="w-full" asChild>
-                  <a href={CONTACT_INFO.phoneHref} onClick={() => setMenuOpen(false)}>
-                    {CTA.contact}
-                  </a>
-                </Button>
-              </div>
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog.Root>
+                  </Button>
+                  <Button variant="accent" size="lg" className="w-full" asChild>
+                    <a href={CONTACT_INFO.phoneHref} onClick={() => setMenuOpen(false)}>
+                      {CTA.contact}
+                    </a>
+                  </Button>
+                </div>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
+        </div>
       </Container>
     </header>
   )

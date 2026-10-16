@@ -7,12 +7,12 @@ interface ServiceSelectorProps {
   onSelect: (id: ServiceId) => void
 }
 
-/** Horizontal quick-selector for the six core legal services. */
+/** Quick service chips — snap scroll on mobile, grid on desktop. */
 export function ServiceSelector({ activeId, onSelect }: ServiceSelectorProps) {
   return (
     <div className="relative">
       <div
-        className="no-scrollbar flex gap-3 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:overflow-visible lg:grid-cols-6"
+        className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-5 pb-1 sm:mx-0 sm:gap-3 sm:px-0 md:grid md:snap-none md:grid-cols-3 md:overflow-visible lg:grid-cols-6"
         role="tablist"
         aria-label="انتخاب سریع خدمات"
       >
@@ -28,23 +28,23 @@ export function ServiceSelector({ activeId, onSelect }: ServiceSelectorProps) {
               aria-selected={isActive}
               onClick={() => onSelect(service.id)}
               className={cn(
-                'group flex min-w-40 flex-col items-start gap-3 rounded-2xl border px-4 py-4 text-start transition-all duration-300 md:min-w-0',
+                'group flex min-h-11 min-w-[8.5rem] shrink-0 snap-start cursor-pointer flex-col items-start gap-2.5 rounded-2xl border px-3.5 py-3.5 text-start transition-all duration-200 md:min-w-0',
                 isActive
                   ? 'border-gold-400 bg-navy-900 text-white shadow-lift'
-                  : 'border-navy-200 bg-white text-navy-900 shadow-soft hover:-translate-y-0.5 hover:border-gold-400 hover:shadow-lift'
+                  : 'border-navy-200 bg-navy-50/80 text-navy-900 hover:border-gold-400 hover:bg-white hover:shadow-soft'
               )}
             >
               <span
                 className={cn(
-                  'grid size-10 place-items-center rounded-xl transition-colors',
+                  'grid size-9 place-items-center rounded-xl transition-colors',
                   isActive
                     ? 'bg-gold-500/20 text-gold-300'
-                    : 'bg-navy-50 text-navy-800 group-hover:bg-gold-100 group-hover:text-gold-700'
+                    : 'bg-white text-navy-800 group-hover:bg-gold-100 group-hover:text-gold-700'
                 )}
               >
-                <Icon className="size-5" strokeWidth={1.6} />
+                <Icon className="size-4" strokeWidth={1.6} />
               </span>
-              <span className="text-sm font-semibold">{service.label}</span>
+              <span className="text-sm font-semibold leading-6">{service.label}</span>
             </button>
           )
         })}
