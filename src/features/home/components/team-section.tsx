@@ -14,7 +14,7 @@ export function TeamSection() {
       <Container>
         <Reveal>
           <SectionHeading
-            eyebrow="تیم وکلا"
+            eyebrow="بنیانگذاران"
             title="وکیل متخصص، کنار شما — حتی از راه دور"
             description="پرونده آنلاین به وکیلی می‌رسد که تمرکز حرفه‌ای‌اش دقیقاً با موضوع دعوا منطبق است."
           />

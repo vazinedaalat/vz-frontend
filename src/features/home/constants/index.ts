@@ -51,7 +51,7 @@ export const SECTION_IDS = {
   services: 'services',
   process: 'process',
   whyUs: 'why-us',
-  team: 'team',
+  team: 'founders',
   blog: 'blog',
   contact: 'contact',
 } as const
