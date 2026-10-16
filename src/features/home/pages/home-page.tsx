@@ -46,7 +46,7 @@ export default function HomePage() {
   )
 
   return (
-    <div className="min-h-screen bg-navy-50 text-navy-900">
+    <div className="min-h-dvh bg-navy-50 text-navy-900 antialiased">
       <DocumentHead {...seo} />
       <SiteHeader />
       <main>

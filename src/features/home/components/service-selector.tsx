@@ -28,10 +28,10 @@ export function ServiceSelector({ activeId, onSelect }: ServiceSelectorProps) {
               aria-selected={isActive}
               onClick={() => onSelect(service.id)}
               className={cn(
-                'group flex min-h-11 min-w-[8.5rem] shrink-0 snap-start cursor-pointer flex-col items-start gap-2.5 rounded-2xl border px-3.5 py-3.5 text-start transition-all duration-200 md:min-w-0',
+                'group flex min-h-11 min-w-[8.75rem] shrink-0 cursor-pointer snap-start flex-col items-start gap-2.5 rounded-2xl border px-3.5 py-3.5 text-start transition-all duration-200 md:min-w-0',
                 isActive
                   ? 'border-gold-400 bg-navy-900 text-white shadow-lift'
-                  : 'border-navy-200 bg-navy-50/80 text-navy-900 hover:border-gold-400 hover:bg-white hover:shadow-soft'
+                  : 'border-navy-200/90 bg-white/80 text-navy-900 shadow-soft backdrop-blur-sm hover:border-gold-400/70 hover:bg-white hover:shadow-lift'
               )}
             >
               <span
@@ -39,7 +39,7 @@ export function ServiceSelector({ activeId, onSelect }: ServiceSelectorProps) {
                   'grid size-9 place-items-center rounded-xl transition-colors',
                   isActive
                     ? 'bg-gold-500/20 text-gold-300'
-                    : 'bg-white text-navy-800 group-hover:bg-gold-100 group-hover:text-gold-700'
+                    : 'bg-navy-50 text-navy-800 group-hover:bg-gold-100 group-hover:text-gold-700'
                 )}
               >
                 <Icon className="size-4" strokeWidth={1.6} />

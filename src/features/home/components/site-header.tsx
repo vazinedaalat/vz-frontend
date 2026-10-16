@@ -58,8 +58,8 @@ export function SiteHeader() {
       className={cn(
         'sticky top-0 z-50 border-b transition-all duration-300',
         scrolled
-          ? 'border-navy-200/80 bg-white/95 shadow-soft backdrop-blur-xl'
-          : 'border-transparent bg-white/80 backdrop-blur-md'
+          ? 'border-navy-200/70 bg-white/92 shadow-soft backdrop-blur-xl'
+          : 'border-transparent bg-white/75 backdrop-blur-md'
       )}
     >
       <a

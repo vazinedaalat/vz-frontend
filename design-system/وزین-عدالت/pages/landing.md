@@ -1,34 +1,30 @@
 # Landing page overrides — `/`
 
-**Priority:** mobile redesign heavy · desktop light polish  
-**Pattern:** Hero + trust line → About → Services (selector + cards) → Process → Why us → Team → Blog → CTA
+**Visual direction (UI/UX Pro Max):** Trust & Authority + Editorial Minimal  
+**Rule:** Keep all marketing copy unchanged; redesign surfaces, type hierarchy, spacing, depth only.
+
+## Atmosphere
+
+- Alternating calm surfaces (`navy-50` / white) with hairline section dividers
+- Gold tracking eyebrows + thin gold rules (not pill clusters)
+- Soft elevation (`shadow-soft` / `shadow-lift`), thin borders, `rounded-2xl`–`2rem`
+- Max 2–3 intentional motions per viewport; respect reduced-motion
 
 ## Hero
 
-- First viewport = one composition: brand + one headline + one support line + CTA pair
-- Mobile: show brand emblem in-hero (side visual is `md+` only)
-- No service selector inside hero; no floating badges; no pill clusters
-- Trust as a quiet ` · ` line under CTAs
+- One composition: brand + headline + support + CTA pair + quiet trust dots
+- Mobile brand card; desktop scale visual without floating stickers
+- Clamp display type; gold hairline under title
 
-## Header
+## Sections
 
-- Mobile: keep «ورود به اپ» visible next to hamburger (not drawer-only)
+- Services: snap chips + cards with top gold accent on hover/active
+- Process: mobile timeline · desktop 3-col cards
+- Why us: compact 2×2 stats on mobile · trust navy cards
+- CTA: framed navy panel + dual CTAs
 
-## Services
+## Avoid
 
-- Quick selector (snap scroll on mobile) lives at top of services section
-- Cards: tighter padding on mobile
-
-## Process
-
-- Mobile: vertical timeline with connector
-- Desktop: existing 3-col cards
-
-## Why us
-
-- Mobile: 2×2 compact stats (hide long descriptions under `sm`)
-- Trust points stacked full-width on small screens
-
-## CTA
-
-- Full-width primary buttons on mobile; centered row from `sm`
+- Purple/indigo, neon, heavy glassmorphism
+- Overcrowded first viewport
+- Changing BRAND / SERVICES / PROCESS / STATS copy strings
